@@ -2,7 +2,7 @@
 	"texts": {
 		"error.bad_boot": "„%1” nem olyan módja a Next indításának, amelyet ez a mag ismer.",
 		"error.no_reason": "nem adott meg okot",
-		"error.no_sd": "A Next NextZXOS-szel való indításához a projektnek SD-kártya-képfájl kell. Adjon hozzá egyet, vagy állítsa az Indítást „fast” értékre.",
+		"error.no_sd": "A Next gép NextZXOS rendszerrel való indításához a projektnek SD-kártya-képfájl kell. Adjon hozzá egyet, vagy állítsa az Indítást „fast” értékre.",
 		"error.not_on_sd": "A programot nem sikerült az SD-kártyára tenni: %1",
 		"error.not_started": "A ZEsarUX nem indult el: %1",
 		"error.sd_not_fat": "az SD-kártya képfájlján nincs olyan FAT fájlrendszer, amelyet a ZEsarUX olvasni tud.",
@@ -11,14 +11,14 @@
 		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
 		"firmware.tbblue_loader_rom.about": "A Next indító ROM-ja (8 KB), a program, amelyet az FPGA-ja elsőként indít: beolvassa a Next rendszerét az SD-kártyáról. A ZEsarUX tartalmazza, tbblue_loader.rom néven.",
 		"setting.boot": "Indítás",
-		"setting.boot.about": "Hogyan indul a Next. A „nextzxos” úgy indítja, ahogy egy Next indul: az indító ROM beolvassa a rendszert az SD-kártyáról, amely megjeleníti a menüit, a projekt programja pedig a kártyára kerül, ahol a Browser megtalálja. SD-kártya-képfájl és az indító ROM kell hozzá. A „fast” azonnal elindítja a Next hardverét a Spectrum 48K ROM-jával, SD-kártya nélkül, és a projekt programját egyenesen a gépbe tölti; a NextZXOS-t vagy kártyán lévő fájlokat igénylő program így nem fut. A gép része, ezért egy felvételnek ugyanaz az érték kell.",
+		"setting.boot.about": "Hogyan indul a Next gép. A „nextzxos” úgy indítja, ahogy egy igazi Next gép indul: az indító ROM beolvassa a rendszert az SD-kártyáról, amely megjeleníti a menüit, a projekt programja pedig a kártyára kerül, ahol a Browser program megtalálja. SD-kártya-képfájl és az indító ROM kell hozzá. A „fast” azonnal elindítja a Next gép hardverét a 48K Spectrum ROM-jával, SD-kártya nélkül, és a projekt programját egyenesen a gépbe tölti; a NextZXOS rendszert vagy kártyán lévő fájlokat igénylő program így nem fut. A gép része, ezért egy felvételnek ugyanaz az érték kell.",
 		"setting.limit_rom_turbo": "NextZXOS tartása 7 MHz-en",
-		"setting.limit_rom_turbo.about": "A NextZXOS maga állítja be a processzor sebességét, legfeljebb 28 MHz-re, ahogy egy Nexten. Bekapcsolva a processzor nem fut 7 MHz-nél gyorsabban, amíg a NextZXOS saját kódja fut, ami kíméli a lassú számítógépet (a ZEsarUX alapbeállítása); a NextZXOS-ből indított programok a maguk választotta sebességgel futnak. Hagyja kikapcsolva, ha a Nextet olyannak akarja, amilyen. A gép része, ezért egy felvételnek ugyanaz az érték kell.",
+		"setting.limit_rom_turbo.about": "A NextZXOS rendszer maga állítja be a processzor sebességét, legfeljebb 28 MHz-re, ahogy egy igazi Next gépen. Bekapcsolva a processzor nem fut 7 MHz-nél gyorsabban, amíg a NextZXOS rendszer saját kódja fut, ami kíméli a lassú számítógépet (a ZEsarUX alapbeállítása); a NextZXOS rendszerből indított programok a maguk választotta sebességgel futnak. Hagyja kikapcsolva, ha a Next gépet olyannak akarja, amilyen. A gép része, ezért egy felvételnek ugyanaz az érték kell.",
 		"slot.program": "Program",
-		"slot.program.help": "Program a Nexthez vagy a Spectrumhoz: .nex fájl (a Next saját formátuma), pillanatkép (.snx, .sna, .z80, .zsf), kazetta (.tap, .tzx, .pzx) vagy olyan fájl, amelyet a NextZXOS megnyit (.bas, .dot, .scr, .sl2). Ha a Next NextZXOS-szel indul, a fájl az SD-kártya legfelső mappájába kerül, és a Browserből indítja, ahogy egy Nexten. Ha gyorsan indul, a program egyenesen a gépbe töltődik.",
+		"slot.program.help": "Program a Next vagy a Spectrum géphez: .nex fájl (a Next gép saját formátuma), pillanatkép (.snx, .sna, .z80, .zsf), kazetta (.tap, .tzx, .pzx) vagy olyan fájl, amelyet a NextZXOS megnyit (.bas, .dot, .scr, .sl2). Ha a Next a NextZXOS rendszerrel indul, a fájl az SD-kártya legfelső mappájába kerül, és a Browser programból indítja, ahogy egy igazi Next gépen. Ha gyorsan indul, a program egyenesen a gépbe töltődik.",
 		"slot.sd": "SD-kártya",
-		"slot.sd.help": "A Next SD-kártyájának képfájlja (.mmc vagy .img), rajta a Next rendszerével (NextZXOS). A ZEsarUX tartalmaz egyet, tbblue.mmc néven. Amit a gép a kártyára ír, az a gépben marad (és a mentett állapotaiban); a fájl sosem változik. A Nextnek kártya kell ahhoz, hogy NextZXOS-szel induljon; „fast” Indításnál egyik sem kell.",
-		"suggest.fast": "A projektben nincs SD-kártya, ezért a Next gyorsan indul a 48K ROM-jával, a program pedig egyenesen a gépbe töltődik. Adjon hozzá egy NextZXOS-t tartalmazó SD-kártyát, ha a Nextet úgy akarja indítani, ahogy egy Next indul.",
-		"suggest.nextzxos": "A projektben van SD-kártya, ezért a Next arról indul NextZXOS-szel, ahogy egy Next."
+		"slot.sd.help": "A Next gép SD-kártyájának képfájlja (.mmc vagy .img), rajta a Next gép rendszerével (NextZXOS). A ZEsarUX tartalmaz egyet, tbblue.mmc néven. Amit a gép a kártyára ír, az a gépben marad (és a mentett állapotaiban); a fájl sosem változik. A Next gépnek kártya kell ahhoz, hogy a NextZXOS rendszerrel induljon; „fast” Indításnál egyik sem kell.",
+		"suggest.fast": "A projektben nincs SD-kártya, ezért a Next gyorsan indul a 48K ROM-mal, a program pedig egyenesen a gépbe töltődik. Adjon hozzá egy NextZXOS rendszert tartalmazó SD-kártyát, ha a Next gépet úgy akarja indítani, ahogy egy igazi Next gép indul.",
+		"suggest.nextzxos": "A projektben van SD-kártya, ezért a Next gép arról indul a NextZXOS rendszerrel, ahogy egy igazi Next gép."
 	}
 }

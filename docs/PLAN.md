@@ -203,6 +203,46 @@ The owner accepted every recommendation of the first round:
   no such text); `package-licenses.json` lists it and the package carries
   it.
 
+## Names are never translated or bent (owner's rule, 2026-10-31)
+
+Proper nouns stay as they are in every language: this core's name
+(ZEsarUX), the machine's (Next, Spectrum), its system's (NextZXOS), its
+file browser's (the Browser, as NextZXOS's menu calls it) and Chimera's. A
+language whose grammar puts endings on names says the sentence with a
+common noun beside the name ("pocitac Next" in Czech, "komputer Next" in
+Polish, "Next-tietokoneen" and "NextZXOS-jarjestelmalla" in Finnish,
+"Next gep" and "NextZXOS rendszerrel" in Hungarian, "calculatorul Next" in
+Romanian, "Next bilgisayarinin" in Turkish, "Next-datorns" in Swedish,
+"Next-maskinen" in Norwegian and Danish). (Written here without their
+accents, as this file is ASCII.)
+
+- Found by the new check, before the fix: 130 names bent or missing in 13
+  of the 25 translated tables, in 66 texts: Turkish (22, "Next'in",
+  "NextZXOS'un"), Finnish (25, "Nextin", "NextZXOS:lla", "ZEsarUX:n"),
+  Hungarian and Romanian (15 each, "Nexthez", "NextZXOS-szel",
+  "Next-ul"), Polish and Czech (12 each, "Nexta", "Nextu", "Spectra"),
+  Swedish, Norwegian and Danish (7 each, the genitive "Nexts",
+  "Spectrums"), and Spanish, Catalan, French and Portuguese (2 each,
+  where the Browser had been translated as "Navegador" or "Navigateur").
+  All 66 texts were rewritten by hand.
+- `waterbox/tests/check-names.py` is the check, and the test script runs
+  it first (texts:names). It asks that every name an English text holds is
+  in the same text in every language as it is written, and that no letter
+  is glued to a name: no case ending, no genitive "s", no ending after an
+  apostrophe or a colon ("Next'in", "ZEsarUX:n"), and no ending after a
+  hyphen (a word of five letters or fewer after the hyphen, "Next-ul",
+  "NextZXOS-szel"; a longer one is a compound noun, "Next-tietokone").
+  Letters of the Latin, Cyrillic and Greek alphabets count; Chinese,
+  Japanese and Korean characters do not (a particle in another script
+  leaves the name whole). English is not checked ("the Next's" is its own
+  grammar, as Chimera's own check also allows). File names (tbblue.mmc,
+  .nex) are not names in a sentence and are skipped.
+- Seen to fail: with every text fixed but one (Turkish suggest.fast,
+  "Next'i"), check-names.py printed that one text and exited 1, and the
+  test script reported texts:names FAIL (18 ok, 1 failed); with it fixed,
+  0. Chimera's own `tools/check-proper-nouns.py`, pointed at `waterbox/`,
+  finds nothing either (it knows only Chimera's names).
+
 ## Decisions (2026-10-31)
 
 - **Two ways to start** (setting "Start"): `nextzxos` (the default, as a

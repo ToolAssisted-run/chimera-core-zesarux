@@ -84,6 +84,16 @@ joy_up=$(hex $((1 << 42))); joy_fire=$(hex $((1 << 46))); joy_fire2=$(hex $((1 <
 # leaves them); the menu is up by frame 1100.
 to_menu="--press 200:5:$key_enter --press 700:5:$key_space"
 
+# Names are never translated or bent (owner, 2026-10-31): ZEsarUX, Next,
+# NextZXOS, Spectrum, Browser and Chimera are written as they are in every
+# one of the 26 language tables, with no ending glued to them
+# (tests/check-names.py says each one that is not).
+if python3 "$here/tests/check-names.py" > "$work/names.out" 2> "$work/names.err"; then
+	report "texts:names" PASS "every name in the 26 language tables as it is written, with nothing glued to it"
+else
+	report "texts:names" FAIL "$(grep -c . "$work/names.out") names bent or missing, the first: $(head -1 "$work/names.out" | cut -c1-120) $(tail -1 "$work/names.err")"
+fi
+
 # The Next started fast (its hardware with the 48K ROM, no card), switched on
 # with nothing in it and buttons pressed by a fixed pattern: the sandbox
 # prints the native build's line every 60 frames - where the processor is,

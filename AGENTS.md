@@ -86,6 +86,12 @@ the core.
   the owner's to decide.
 - **A new test is broken on purpose once and seen to fail.** docs/PLAN.md
   says how each was.
+- **Names are never translated or bent** in the 26 language tables
+  (owner, 2026-10-31): ZEsarUX, Next, NextZXOS, Spectrum, Browser, Chimera
+  and any other program, chip, machine, game or company name. A language
+  that puts endings on names puts a common noun beside the name instead.
+  `waterbox/tests/check-names.py` (run by the test script) holds it; a new
+  name goes into its list.
 - **Write in plain language**, ASCII in every `.md`.
 - **Commits.** Subject: `type(zesarux): what changed`. Body: what changed,
   why, and how it was tested, with the numbers. Stage explicit paths. No
