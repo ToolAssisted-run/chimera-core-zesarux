@@ -64,7 +64,7 @@ struct harness_core {
 	int (*load)(const uint8_t *buf, size_t len);
 };
 
-#define HARNESS_MAX_EVENTS 64
+#define HARNESS_MAX_EVENTS 1024
 #define HARNESS_MAX_FIRMWARE 8
 struct harness_event { uint64_t from, count, mask; };
 struct harness_opts {

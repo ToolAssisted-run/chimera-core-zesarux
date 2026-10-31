@@ -219,8 +219,8 @@ program, so neither is used:
 On this machine (Linux, GCC 14), against Chimera at 3f8ea7e2
 (~/chimera-scratch-bump), miniBox of that checkout.
 
-`CHIMERA_ROOT=<chimera> waterbox/run-gate.sh`: 13 passed, 0 failed, 0
-skipped, in 2.5 minutes.
+`CHIMERA_ROOT=<chimera> waterbox/run-gate.sh`: 15 passed, 0 failed, 0
+skipped, in 4 minutes.
 
 - boot:fast: 600 frames with buttons by a pattern, native and sandbox the
   same lines every 60 frames; 50 frames a second, 312 samples a frame,
@@ -242,6 +242,17 @@ skipped, in 2.5 minutes.
 - input:reset: Hard Reset gives the 48K ROM's first screen; Reset (soft)
   starts the ROM again and keeps the Next's settings (the program's Layer 2
   stays on), which is how ZEsarUX does it.
+- next:hardware: the test program's hardware sprite, copper list (Layer 2
+  shifted sideways for lines 140 to 170), zxnDMA copy and AY tone each
+  change the run when left out (make-nex.py --without); the whole is the
+  same natively, in the sandbox and with a state every frame.
+- game:warhawk: Warhawk (Rusty Pixels, 2019), a Next game on the card
+  ZEsarUX comes with (the Next's own system distribution): from switching
+  on through NextZXOS's Browser (GAMES, Next, Warhawk, Warhawk.nex), its
+  title at about frame 4000, started with SPACE and played (the ship moved
+  right and fired, the score 40) to frame 5000. Native and sandbox the same
+  lines every 500 frames, the same with a state every frame, and not the
+  run left alone after the start.
 - program:sd-card: the program copied to the card is listed by the Browser
   and run by NextZXOS (the processor in its code at frame 1800), native and
   sandbox the same; the card file is unchanged.
@@ -278,7 +289,11 @@ Seen to fail:
   ROM's absence was printed before ZEsarUX's display was up and so was not
   kept as the reason; the debug_printf wrap fixed it;
 - the window test, with the native build run one frame short (on purpose,
-  taken out): window:memory and window:setting failed.
+  taken out): window:memory and window:setting failed;
+- next:hardware, with make-nex.py's --without made to do nothing (on
+  purpose, taken out): all four parts failed;
+- the sandbox's clock one second ahead again, after game:warhawk was added:
+  game:warhawk failed with boot:nextzxos, time:virtual and program:sd-card.
 
 Speed, in the sandbox: about 200 frames a second at NextZXOS's menu
 (28 MHz), 193 frames a second for the test program at 28 MHz; 4 times a
@@ -286,14 +301,12 @@ real Next.
 
 ## What is not done
 
-- No game has been tried: none was at hand, and the tests need none. A
-  real Next game (a .nex from the Next's own distribution or a homebrew
-  site) is the next thing to try: it is asked for in the report.
-- Not tried: the Next's tilemaps, hardware sprites, copper and DMA with a
-  program that uses them (the test program uses Layer 2 and the Spectrum
-  screen); the three AY chips' and the DACs' sound with a program that
-  plays them; programs that load more files from the card; a card bigger
-  than 64 MiB; .snx, .tap and the other program formats.
+- One game has been tried, Warhawk, from the card ZEsarUX comes with; no
+  commercial game, and none of the card's other games.
+- Not tried: the tilemap; the second and third AY chips, the DACs and the
+  sound of a real game listened to; programs that load more files from the
+  card; a card bigger than 64 MiB; .snx, .tap and the other program formats
+  in the program slot.
 - The 60 Hz mode: not looked into.
 - The Kempston mouse (the Next's PS/2 mouse) has no input here.
 - The Next's extended keyboard registers (Next registers 0xB0 and 0xB1)
@@ -307,20 +320,21 @@ real Next.
 ## Where this stands (2026-10-31)
 
 Built and tested locally, not published. What works: NextZXOS boots from an
-SD card image to its menu and runs a program from its Browser; the fast
-start runs a .nex directly; picture, sound, keys, joystick, resets,
-savestates (same process and another process), the project's clock, the
-package in chimera-run and in Chimera's Qt window. Native and sandbox agree
-on every test.
+SD card image to its menu and runs a program from its Browser; Warhawk, a
+Next game from that card, runs from boot to play; the fast start runs a
+.nex directly; picture (Layer 2, sprites, copper), sound, keys, joystick,
+resets, DMA, savestates (same process and another process), the project's
+clock, the package in chimera-run and in Chimera's Qt window. Native and
+sandbox agree on every test.
 
 Next, in order:
 1. The owner's answers (the questions above): may the boot ROM, the 48K ROM
    and the card be read from the submodule in tests and CI, and may any of
    them be packaged.
-2. A real Next game from boot to play, native and sandbox the same, and
-   named here (needs a game from the owner).
-3. A test program that uses sprites, the tilemap, the copper and DMA, so
-   the tests cover the Next's own hardware beyond Layer 2.
+2. More games: the card's others (Nextoid, Lords of Midnight, Night-Knight
+   ...) and commercial Next games from the owner; a movie recorded by hand
+   in Chimera's window and played back.
+3. The tilemap in the test program.
 4. CI (the workflow is written), and the Windows run of the frontend gate.
 
 Traps met:

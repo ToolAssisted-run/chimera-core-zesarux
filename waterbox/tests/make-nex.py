@@ -3,11 +3,11 @@
 .nex file (the Next's own format for a program), made here byte by byte so
 that the repository needs no assembler and holds no program of anybody's.
 
-usage: make-nex.py <out.nex>
+usage: make-nex.py <out.nex> [--without sprite,copper,dma,sound]
 
 What it does, so that a test can see each part:
  - a Layer 2 picture (the Next's 256x192 screen of 256 colours) is part of
-   the file: the bottom 120 lines are stripes of colour, the top 72 lines are
+   the file: the bottom 96 lines are stripes of colour, the top 96 lines are
    the transparent colour, so the ordinary Spectrum screen shows through
    there. The picture is then two of the Next's layers mixed.
  - the program waits for each frame's interrupt (interrupt mode 2, its own
@@ -18,6 +18,15 @@ What it does, so that a test can see each part:
    the next three as that of its right half. So every key and every
    joystick button changes the picture, each its own way, and only every
    second frame looks at the controls: half the frames are lag frames.
+ - the Next's own hardware, each part of which a test can leave out
+   (--without) to see that it makes a difference:
+   - sprite: hardware sprite 0, a 16x16 square of one colour, in the top
+     part of the screen;
+   - copper: the copper (the Next's raster coprocessor) shifts the Layer 2
+     picture sideways from line 140 to line 170 of each frame;
+   - dma: the zxnDMA copies 32 bytes of colours into row 10 of the Spectrum
+     screen's colours;
+   - sound: the first AY sound chip plays a tone on its channel A.
  - a counter of frames at 0x9200 (in the "RAM" domain, bank 2 at 0x8000,
    at 0x9200 - 0x8000 + 0x8000 = 0x9200); its interrupt routine is at
    0x9191, where the processor waits between frames.
@@ -27,7 +36,7 @@ import sys
 ORG = 0x8000
 
 
-def assemble():
+def assemble(features):
     code = bytearray()
     labels = {}
     fixups = []  # (offset in code, label) for absolute 16-bit addresses
@@ -57,6 +66,51 @@ def assemble():
     emit(0x3E, 0x90)                # ld a,0x90
     emit(0xED, 0x47)                # ld i,a
     emit(0xED, 0x5E)                # im 2
+    def nextreg(reg, val):
+        emit(0xED, 0x91, reg, val)  # nextreg reg,val (the Next's own Z80 instruction)
+
+    def out(port, val):
+        emit(0x01); word(port)      # ld bc,port
+        emit(0x3E, val)             # ld a,val
+        emit(0xED, 0x79)            # out (c),a
+
+    if "sprite" in features:
+        # pattern 0: 256 bytes of colour 0x1C (green in the default palette)
+        out(0x303B, 0)              # sprite and pattern slot 0
+        emit(0x01); word(0x005B)    # ld bc,0x005B (pattern upload port)
+        emit(0x3E, 0x1C)            # ld a,0x1C
+        emit(0x16, 0x00)            # ld d,0 (256 times)
+        emit(0xED, 0x79)            # out (c),a
+        emit(0x15)                  # dec d
+        emit(0x20, 0xFB)            # jr nz,-5
+        # sprite 0: x 96, y 64, no mirror, visible, pattern 0
+        out(0x303B, 0)
+        for v in (96, 64, 0, 0x80):
+            out(0x0057, v)
+        nextreg(0x15, 0x01)         # sprites on
+    if "copper" in features:
+        nextreg(0x62, 0x00)         # copper stopped, writing from 0
+        nextreg(0x61, 0x00)
+        # WAIT line 140, MOVE layer 2 x offset 64, WAIT line 170, MOVE 0, HALT
+        for b in (0x80, 140, 0x16, 0x40, 0x80, 170, 0x16, 0x00, 0xFF, 0xFF):
+            nextreg(0x60, b)
+        nextreg(0x62, 0xC0)         # run, from the start again each frame
+    if "dma" in features:
+        # copy 32 bytes from 0x9300 to 0x5940 (row 10 of the colours)
+        for v in (0x83,                         # disable
+                  0x7D, 0x00, 0x93, 0x20, 0x00, # WR0: A to B, A = 0x9300, 32 bytes
+                  0x54, 0x02,                   # WR1: A is memory, incrementing
+                  0x50, 0x02,                   # WR2: B is memory, incrementing
+                  0xAD, 0x40, 0x59,             # WR4: continuous, B = 0x5940
+                  0x82,                         # WR5: stop at the end
+                  0xCF,                         # load
+                  0x87):                        # enable
+            out(0x006B, v)
+    if "sound" in features:
+        # AY: channel A tone period 0x0100, only tone A on, volume 15
+        for reg, val in ((0, 0x00), (1, 0x01), (7, 0x3E), (8, 0x0F)):
+            out(0xFFFD, reg)
+            out(0xBFFD, val)
     emit(0xAF)                      # xor a
     emit(0x32); word(0x9200)        # ld (0x9200),a
     labels["loop"] = here()
@@ -109,7 +163,11 @@ def assemble():
 
 
 def main():
-    code = assemble()
+    features = {"sprite", "copper", "dma", "sound"}
+    if "--without" in sys.argv:
+        for f in sys.argv[sys.argv.index("--without") + 1].split(","):
+            features.discard(f)
+    code = assemble(features)
     # bank 2 is 0x8000-0xBFFF: the code, the interrupt table (0x9000), the
     # interrupt routine (0x9191: ei, reti) and the frame counter (0x9200)
     bank2 = bytearray(0x4000)
@@ -117,6 +175,9 @@ def main():
     for i in range(0x1000, 0x1101):
         bank2[i] = 0x91
     bank2[0x1191:0x1194] = bytes((0xFB, 0xED, 0x4D))
+    # the colours the DMA copies (0x9300): paper colours 1 to 7, again and again
+    for i in range(32):
+        bank2[0x1300 + i] = ((i % 7) + 1) << 3
     # bank 5 is the Spectrum screen (0x4000): pixels off, colours white
     bank5 = bytearray(0x4000)
     for i in range(0x1800, 0x1B00):
@@ -125,8 +186,8 @@ def main():
     layer2 = bytearray(256 * 192)
     for y in range(192):
         for x in range(256):
-            layer2[y * 256 + x] = 0xE3 if y < 72 else ((x // 16) * 16 + (y - 72) // 8) & 0xFF
-            if layer2[y * 256 + x] == 0xE3 and y >= 72:
+            layer2[y * 256 + x] = 0xE3 if y < 96 else ((x // 16) * 16 + (y - 96) // 6) & 0xFF
+            if layer2[y * 256 + x] == 0xE3 and y >= 96:
                 layer2[y * 256 + x] = 0xE2
     header = bytearray(512)
     header[0:4] = b"Next"

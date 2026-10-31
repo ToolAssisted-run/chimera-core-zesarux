@@ -223,6 +223,35 @@ else
 	report "input:reset" FAIL "$why"
 fi
 
+# The Next's own hardware. The test program sets up a hardware sprite, a
+# copper list that shifts Layer 2 sideways part way down the screen, a DMA
+# copy into the screen's colours and a tone on the first AY chip. Each,
+# left out of the program (make-nex.py --without), changes the run: the
+# picture for the first three, the sound for the tone. The whole program
+# runs the same natively, in the sandbox and with a state saved and loaded
+# before every frame.
+hw_bad=""
+box hw-all $fast --program "$prog" --frames 100 --every 50
+nat hw-all-n $fast --program "$prog" --frames 100 --every 50
+box hw-all-r $fast --program "$prog" --frames 100 --every 50 --rerecord
+for f in sprite copper dma sound; do
+	python3 "$here/tests/make-nex.py" "$work/no-$f.nex" --without "$f" || exit 2
+	box "hw-no-$f" $fast --program "$work/no-$f.nex" --frames 100 --every 50
+	if [ "$f" = sound ]; then
+		[ "$(field "$work/hw-no-$f.out" audioHash)" != "$(field "$work/hw-all.out" audioHash)" ] || hw_bad="$hw_bad without the tone the sound is the same;"
+		[ "$(vh "hw-no-$f")" = "$(vh hw-all)" ] || hw_bad="$hw_bad without the tone the picture changed;"
+	else
+		[ -n "$(vh "hw-no-$f")" ] && [ "$(vh "hw-no-$f")" != "$(vh hw-all)" ] || hw_bad="$hw_bad without the $f the picture is the same;"
+	fi
+done
+same hw-all hw-all-n || hw_bad="$hw_bad native and sandbox differ;"
+same hw-all hw-all-r || hw_bad="$hw_bad a state every frame changed the run;"
+if [ -z "$hw_bad" ]; then
+	report "next:hardware" PASS "a hardware sprite, the copper, the DMA and an AY tone each change the run when the program leaves them out; the whole is the same natively, in the sandbox and with a state every frame"
+else
+	report "next:hardware" FAIL "$hw_bad"
+fi
+
 # A program goes on the SD card. With NextZXOS the test program is copied
 # into the card's top folder; the Browser lists it last, sixteen lines down,
 # and ENTER runs it with NextZXOS's own loader. The processor ends in the
@@ -245,6 +274,48 @@ if [ -z "$why" ]; then
 	report "program:sd-card" PASS "the program put on the card is found by the Browser and run by NextZXOS (the processor in its code at frame 1800), the same in the sandbox; the card file is unchanged"
 else
 	report "program:sd-card" FAIL "$why"
+fi
+
+# A game. The SD card ZEsarUX comes with is the Next's own system
+# distribution, which has free Next games on it; Warhawk (Rusty Pixels,
+# 2019) is one. From switching on: NextZXOS's menu, the Browser, the folders
+# GAMES, Next and Warhawk, ENTER on Warhawk.nex; its title at about frame
+# 4000; SPACE starts it, and the ship flies right and fires (P and SPACE,
+# again and again) to frame 5000. The sandbox prints the native build's
+# lines, a state saved and loaded before every frame changes nothing, and
+# the game was played (the run is not the run with nothing pressed after
+# the game was started).
+warhawk=""
+add() { warhawk="$warhawk --press $2:4:$1"; }
+key_p=$(hex $((1 << 19)))
+add "$key_enter" 1100
+i=0; while [ $i -lt 8 ]; do add "$key_down" $((1200 + i * 10)); i=$((i + 1)); done
+add "$key_enter" 1300
+i=0; while [ $i -lt 4 ]; do add "$key_down" $((1350 + i * 10)); i=$((i + 1)); done
+add "$key_enter" 1400
+i=0; while [ $i -lt 15 ]; do add "$key_down" $((1450 + i * 10)); i=$((i + 1)); done
+add "$key_enter" 1620
+i=0; while [ $i -lt 2 ]; do add "$key_down" $((1670 + i * 10)); i=$((i + 1)); done
+add "$key_enter" 1720
+add "$key_space" 4100
+started="$warhawk"
+i=0; while [ $i -lt 21 ]; do add "$key_space" $((4300 + i * 30)); add "$key_p" $((4310 + i * 30)); i=$((i + 1)); done
+# shellcheck disable=SC2086
+nat g-n $nextzxos --frames 5000 --every 500 $to_menu $warhawk
+# shellcheck disable=SC2086
+box g-s $nextzxos --frames 5000 --every 500 $to_menu $warhawk
+# shellcheck disable=SC2086
+box g-r $nextzxos --frames 5000 --every 500 $to_menu $warhawk --rerecord
+# shellcheck disable=SC2086
+box g-idle $nextzxos --frames 5000 --every 500 $to_menu $started
+why=""
+same g-n g-s || why="$why native and sandbox differ [$(last "$work/g-s.out" | cut -c1-60)] $(tail -1 "$work/g-s.err" | cut -c1-80);"
+same g-s g-r || why="$why a state every frame changed the run [$(last "$work/g-r.out" | cut -c1-60)];"
+[ -n "$(vh g-idle)" ] && [ "$(vh g-s)" != "$(vh g-idle)" ] || why="$why the game played and the game left alone end alike;"
+if [ -z "$why" ]; then
+	report "game:warhawk" PASS "Warhawk from the SD card through NextZXOS's Browser, started and played to frame 5000: the sandbox prints the native build's lines, a state every frame changes nothing, and it is not the run left alone"
+else
+	report "game:warhawk" FAIL "$why"
 fi
 
 # What cannot be run is refused with a reason: a way of starting there is
