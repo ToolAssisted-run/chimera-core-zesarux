@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "「%1」は、このコアが持つ Next の起動方法ではありません。",
+		"error.no_reason": "理由は示されませんでした",
+		"error.no_sd": "Next を NextZXOS で起動するには、プロジェクトに SD カードのイメージが必要です。追加するか、「起動」を「fast」にしてください。",
+		"error.not_on_sd": "プログラムを SD カードに置けませんでした: %1",
+		"error.not_started": "ZEsarUX が起動しませんでした: %1",
+		"error.sd_not_fat": "SD カードのイメージに、ZEsarUX が読める FAT ファイルシステムがありません。",
+		"error.sd_not_raw": "SD カードのイメージが、カードの単純なイメージ (.mmc または .img) ではありません。",
+		"error.sd_size": "プログラムのコピー中に SD カードのイメージの大きさが変わりました。",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ZX Spectrum 48K の ROM (16 KB)。NextZXOS を使わずに Next を高速起動するときに実行されます。Amstrad のもので、エミュレーターとともに配布することが認められています。ZEsarUX に 48.rom として付属しています。",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "Next の起動 ROM (8 KB)。FPGA が最初に動かすプログラムで、Next のシステムを SD カードから読み込みます。ZEsarUX に tbblue_loader.rom として付属しています。",
+		"setting.boot": "起動",
+		"setting.boot.about": "Next の起動のしかたです。「nextzxos」は実機の Next と同じように起動します。起動 ROM が SD カードからシステムを読み込み、システムがメニューを表示します。プロジェクトのプログラムはカードに置かれ、Browser から見つけられます。SD カードのイメージと起動 ROM が必要です。「fast」は Spectrum 48K の ROM で SD カードなしにすぐ Next のハードウェアを起動し、プロジェクトのプログラムを直接マシンに読み込みます。NextZXOS やカード上のファイルを必要とするプログラムは、この方法では動きません。マシンの一部なので、ムービーには同じ値が必要です。",
+		"setting.limit_rom_turbo": "NextZXOS を 7 MHz に抑える",
+		"setting.limit_rom_turbo.about": "NextZXOS は実機と同じく、プロセッサーの速度を最大 28 MHz まで自分で設定します。オンにすると、NextZXOS 自身のコードが動いている間はプロセッサーが 7 MHz を超えず、遅いコンピューターの負担が軽くなります (ZEsarUX の既定)。NextZXOS から起動したプログラムは、自分で選んだ速度で動きます。Next をそのままの姿にするにはオフのままにしてください。マシンの一部なので、ムービーには同じ値が必要です。",
+		"slot.program": "プログラム",
+		"slot.program.help": "Next または Spectrum 用のプログラム: .nex ファイル (Next 独自の形式)、スナップショット (.snx、.sna、.z80、.zsf)、テープ (.tap、.tzx、.pzx)、または NextZXOS が開くファイル (.bas、.dot、.scr、.sl2)。Next が NextZXOS で起動するときは、ファイルは SD カードの最上位のフォルダーに置かれ、実機と同じく Browser から実行します。高速起動のときは、プログラムが直接マシンに読み込まれます。",
+		"slot.sd": "SD カード",
+		"slot.sd.help": "Next の SD カードのイメージ (.mmc または .img) で、Next のシステム (NextZXOS) が入っているもの。ZEsarUX に tbblue.mmc が付属しています。マシンがカードに書いた内容はマシンの中 (とそのセーブステート) に残り、ファイルが変更されることはありません。Next を NextZXOS で起動するにはカードが必要です。「起動」が「fast」なら不要です。"
+	}
+}

@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "«%1» non è un modo di avviare il Next che questo core conosce.",
+		"error.no_reason": "non ha dato alcun motivo",
+		"error.no_sd": "Per avviare il Next con NextZXOS il progetto ha bisogno di un'immagine di scheda SD. Aggiungetene una, o impostate Avvio su «fast».",
+		"error.not_on_sd": "Non è stato possibile mettere il programma sulla scheda SD: %1",
+		"error.not_started": "ZEsarUX non si è avviato: %1",
+		"error.sd_not_fat": "l'immagine della scheda SD non ha un file system FAT che ZEsarUX sappia leggere.",
+		"error.sd_not_raw": "l'immagine della scheda SD non è una semplice immagine di una scheda (.mmc o .img).",
+		"error.sd_size": "l'immagine della scheda SD ha cambiato dimensione mentre il programma veniva copiato.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "La ROM dello ZX Spectrum 48K (16 KB), che il Next esegue quando viene avviato rapidamente, senza NextZXOS. Appartiene ad Amstrad, che ne permette la distribuzione con gli emulatori. ZEsarUX la include, come 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "La ROM di avvio del Next (8 KB), il programma che il suo FPGA avvia per primo: legge il sistema del Next dalla scheda SD. ZEsarUX la include, come tbblue_loader.rom.",
+		"setting.boot": "Avvio",
+		"setting.boot.about": "Come si avvia il Next. «nextzxos» lo avvia come si avvia un Next: la ROM di avvio legge il sistema dalla scheda SD, che mostra i suoi menu, e un programma del progetto viene messo sulla scheda, dove il Browser lo trova. Servono un'immagine di scheda SD e la ROM di avvio. «fast» avvia subito l'hardware del Next con la ROM dello Spectrum 48K e senza scheda SD, e carica il programma del progetto direttamente nella macchina; un programma che ha bisogno di NextZXOS o di file da una scheda non funziona così. Fa parte della macchina, quindi un filmato ha bisogno dello stesso valore.",
+		"setting.limit_rom_turbo": "Tenere NextZXOS a 7 MHz",
+		"setting.limit_rom_turbo.about": "NextZXOS imposta da sé la velocità del processore, fino a 28 MHz, come su un Next. Se attivo, il processore non va oltre 7 MHz finché gira il codice di NextZXOS stesso, il che risparmia un computer lento (l'impostazione predefinita di ZEsarUX); i programmi avviati da NextZXOS mantengono la velocità che scelgono. Lasciatelo disattivato per avere il Next così com'è. Fa parte della macchina, quindi un filmato ha bisogno dello stesso valore.",
+		"slot.program": "Programma",
+		"slot.program.help": "Un programma per il Next o lo Spectrum: un file .nex (il formato del Next), uno snapshot (.snx, .sna, .z80, .zsf), un nastro (.tap, .tzx, .pzx) o un file che NextZXOS apre (.bas, .dot, .scr, .sl2). Quando il Next si avvia con NextZXOS, il file viene messo nella cartella principale della scheda SD e lo avviate dal Browser, come su un Next. Quando si avvia rapidamente, il programma viene caricato direttamente nella macchina.",
+		"slot.sd": "Scheda SD",
+		"slot.sd.help": "L'immagine della scheda SD del Next (.mmc o .img), con il sistema del Next (NextZXOS). ZEsarUX ne include una, tbblue.mmc. Ciò che la macchina scrive sulla scheda resta nella macchina (e nei suoi salvataggi di stato); il file non viene mai modificato. Un Next ha bisogno di una scheda per avviarsi con NextZXOS; con Avvio su «fast» non ne serve nessuna."
+	}
+}

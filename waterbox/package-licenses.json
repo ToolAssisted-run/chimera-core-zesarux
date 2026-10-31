@@ -1,0 +1,127 @@
+{
+  "package": "zesarux",
+  "effectiveTerms": "GPL-3.0-or-later",
+  "commercialUse": "allowed under the GPL",
+  "note": "The core is ZEsarUX (GPL-3.0-or-later) by Cesar Hernandez Bano and its contributors, built with this repository's patches (GPL-3.0-or-later) and integration (MIT). ZEsarUX includes modules by others under their own terms, each listed here with its text: SimCoupe's ATOM Lite code, Fuse's disassembler, ungac (GPL-2.0-or-later); mdvtool, undaad (GPL-3.0-or-later); Musashi, scl2trd, unPAWs (MIT); the SC/MP emulation and grackle (BSD-3-Clause); FatFs (BSD-1-Clause); zip and miniz (Unlicense); UnrealSpeccy's SPG loader (freeware without restrictions); two fonts (CC-BY-SA-3.0 and CC-BY-3.0); and the HiLow Data Drive's material (permission to emulate). PlayTZX, whose licence ZEsarUX says is unknown, is left out of the core. The package contains no ROM, no firmware, no SD card image and no game: the Next's boot ROM, the 48K ROM and the SD card are supplied by the user.",
+  "components": [
+    {
+      "name": "chimera-core-zesarux (integration)",
+      "license": "MIT, and GPL-3.0-or-later for patches/",
+      "url": "https://github.com/ToolAssisted-run/chimera-core-zesarux",
+      "commit": "{selfCommit}",
+      "file": "LICENSE",
+      "sourceUrl": "https://github.com/ToolAssisted-run/chimera-core-zesarux/archive/{commit}.tar.gz"
+    },
+    {
+      "name": "ZEsarUX",
+      "license": "GPL-3.0-or-later",
+      "url": "https://github.com/chernandezba/zesarux",
+      "commit": "{submodule:extern/zesarux}",
+      "file": "extern/zesarux/src/LICENSE",
+      "sourceUrl": "https://github.com/chernandezba/zesarux/archive/{commit}.tar.gz"
+    },
+    {
+      "name": "ZEsarUX: its list of the modules it includes",
+      "license": "as each module says",
+      "url": "https://github.com/chernandezba/zesarux",
+      "commit": "{submodule:extern/zesarux}",
+      "file": "extern/zesarux/src/LICENSES_info"
+    },
+    {
+      "name": "SimCoupe's ATOM Lite emulation (in ZEsarUX)",
+      "license": "GPL-2.0-or-later",
+      "url": "http://www.simcoupe.org",
+      "file": "extern/zesarux/src/licenses/LICENSE_simcoupe"
+    },
+    {
+      "name": "DOS 8x8 font by Neil Roy (in ZEsarUX)",
+      "license": "CC-BY-SA-3.0",
+      "url": "https://opengameart.org/content/dos-8x8-font",
+      "file": "extern/zesarux/src/licenses/LICENSE_DOS_font"
+    },
+    {
+      "name": "FatFs by ChaN (in ZEsarUX)",
+      "license": "BSD-1-Clause (FatFs licence)",
+      "url": "http://elm-chan.org/fsw/ff/00index_e.html",
+      "file": "extern/zesarux/src/licenses/LICENSE_FatFs"
+    },
+    {
+      "name": "Fuse's disassembler (in ZEsarUX)",
+      "license": "GPL-2.0-or-later",
+      "url": "http://fuse-emulator.sourceforge.net",
+      "file": "extern/zesarux/src/licenses/LICENSE_fuse"
+    },
+    {
+      "name": "grackle by David Lodge (in ZEsarUX)",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/tautology0/grackle",
+      "file": "extern/zesarux/src/licenses/LICENSE_grackle"
+    },
+    {
+      "name": "HiLow Data Drive (in ZEsarUX)",
+      "license": "permission to emulate (see the text)",
+      "url": "https://github.com/chernandezba/zesarux",
+      "file": "extern/zesarux/src/licenses/LICENSE_hilow"
+    },
+    {
+      "name": "mdvtool by Till Harbaum (in ZEsarUX)",
+      "license": "GPL-3.0-or-later",
+      "url": "https://github.com/mist-devel/mist-binaries/tree/master/cores/ql/tools/mdvtool",
+      "file": "extern/zesarux/src/licenses/LICENSE_mdvtool"
+    },
+    {
+      "name": "Musashi by Karl Stenerud (in ZEsarUX)",
+      "license": "MIT",
+      "url": "https://github.com/kstenerud/Musashi",
+      "file": "extern/zesarux/src/licenses/LICENSE_MOTOROLA_CORE"
+    },
+    {
+      "name": "SC/MP emulation by Miodrag Milanovic (in ZEsarUX)",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/mamedev/mame",
+      "file": "extern/zesarux/src/licenses/LICENSE_SCMP_CORE"
+    },
+    {
+      "name": "scl2trd by Alexander Sharikhin (in ZEsarUX)",
+      "license": "MIT",
+      "url": "https://github.com/nihirash/esxdos-scl2trd",
+      "file": "extern/zesarux/src/licenses/LICENSE_scl2trd"
+    },
+    {
+      "name": "UnrealSpeccy's SPG loader (in ZEsarUX)",
+      "license": "freeware, use without restrictions (see the text)",
+      "url": "https://github.com/tslabs/zx-evo/tree/master/pentevo/unreal",
+      "file": "extern/zesarux/src/licenses/LICENSE_unrealspeccy"
+    },
+    {
+      "name": "Tom Thumb charset by Robey Pointer (in ZEsarUX)",
+      "license": "CC-BY-3.0",
+      "url": "https://robey.lag.net/2010/01/23/tiny-monospace-font.html",
+      "file": "extern/zesarux/src/licenses/LICENSE_tom_thumb_charset"
+    },
+    {
+      "name": "undaad by Morgul and Uto (in ZEsarUX)",
+      "license": "GPL-3.0-or-later",
+      "url": "https://github.com/Utodev/undaad",
+      "file": "extern/zesarux/src/licenses/LICENSE_undaad"
+    },
+    {
+      "name": "ungac by John Elliott (in ZEsarUX)",
+      "license": "GPL-2.0-or-later",
+      "url": "https://www.seasip.info/Unix/UnQuill/",
+      "file": "extern/zesarux/src/licenses/LICENSE_ungac"
+    },
+    {
+      "name": "unPAWs (in ZEsarUX)",
+      "license": "MIT",
+      "url": "https://github.com/Utodev/unPAWs",
+      "file": "extern/zesarux/src/licenses/LICENSE_unpaws"
+    },
+    {
+      "name": "zip by Kuba Podgorski, with miniz (in ZEsarUX)",
+      "license": "Unlicense",
+      "url": "https://github.com/kuba--/zip",
+      "file": "extern/zesarux/src/licenses/LICENSE_zip"
+    }
+  ]
+}

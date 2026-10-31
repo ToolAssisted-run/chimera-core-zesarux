@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "„%1” nu este un mod de a porni Next-ul pe care acest nucleu îl are.",
+		"error.no_reason": "nu a dat niciun motiv",
+		"error.no_sd": "Pentru a porni Next-ul cu NextZXOS, proiectul are nevoie de o imagine de card SD. Adăugați una sau setați Pornire la „fast”.",
+		"error.not_on_sd": "Programul nu a putut fi pus pe cardul SD: %1",
+		"error.not_started": "ZEsarUX nu a pornit: %1",
+		"error.sd_not_fat": "imaginea cardului SD nu are un sistem de fișiere FAT pe care ZEsarUX să-l poată citi.",
+		"error.sd_not_raw": "imaginea cardului SD nu este o imagine simplă a unui card (.mmc sau .img).",
+		"error.sd_size": "imaginea cardului SD și-a schimbat dimensiunea în timp ce programul era copiat.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ROM-ul lui ZX Spectrum 48K (16 KB), pe care Next-ul îl rulează când pornește rapid, fără NextZXOS. Aparține Amstrad, care permite distribuirea lui împreună cu emulatoare. ZEsarUX îl include, ca 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "ROM-ul de pornire al Next-ului (8 KB), programul pe care FPGA-ul său îl pornește primul: citește sistemul Next-ului de pe cardul SD. ZEsarUX îl include, ca tbblue_loader.rom.",
+		"setting.boot": "Pornire",
+		"setting.boot.about": "Cum pornește Next-ul. „nextzxos” îl pornește cum pornește un Next: ROM-ul de pornire citește sistemul de pe cardul SD, care își arată meniurile, iar un program din proiect este pus pe card, unde îl găsește Browser-ul. Are nevoie de o imagine de card SD și de ROM-ul de pornire. „fast” pornește imediat hardware-ul Next-ului cu ROM-ul lui Spectrum 48K și fără card SD și încarcă programul din proiect direct în mașină; un program care are nevoie de NextZXOS sau de fișiere de pe un card nu rulează așa. Face parte din mașină, deci un film are nevoie de aceeași valoare.",
+		"setting.limit_rom_turbo": "Ține NextZXOS la 7 MHz",
+		"setting.limit_rom_turbo.about": "NextZXOS își setează singur viteza procesorului, până la 28 MHz, ca pe un Next. Când este activat, procesorul nu merge mai repede de 7 MHz cât timp rulează codul propriu al NextZXOS, ceea ce cruță un calculator lent (setarea implicită a ZEsarUX); programele pornite din NextZXOS rulează cu viteza pe care o aleg. Lăsați-l dezactivat pentru a avea Next-ul așa cum este. Face parte din mașină, deci un film are nevoie de aceeași valoare.",
+		"slot.program": "Program",
+		"slot.program.help": "Un program pentru Next sau Spectrum: un fișier .nex (formatul propriu al Next-ului), un snapshot (.snx, .sna, .z80, .zsf), o casetă (.tap, .tzx, .pzx) sau un fișier pe care NextZXOS îl deschide (.bas, .dot, .scr, .sl2). Când Next-ul pornește cu NextZXOS, fișierul este pus în dosarul principal al cardului SD și îl rulați din Browser, ca pe un Next. Când pornește rapid, programul este încărcat direct în mașină.",
+		"slot.sd": "Card SD",
+		"slot.sd.help": "Imaginea cardului SD al Next-ului (.mmc sau .img), cu sistemul Next-ului (NextZXOS) pe el. ZEsarUX include una, tbblue.mmc. Ce scrie mașina pe card rămâne în mașină (și în stările ei salvate); fișierul nu este niciodată modificat. Un Next are nevoie de un card pentru a porni cu NextZXOS; cu Pornire pe „fast” nu are nevoie de niciunul."
+	}
+}

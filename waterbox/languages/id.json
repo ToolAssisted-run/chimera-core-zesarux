@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "'%1' bukan cara menyalakan Next yang dimiliki core ini.",
+		"error.no_reason": "tidak ada alasan yang diberikan",
+		"error.no_sd": "Untuk menyalakan Next dengan NextZXOS, proyek memerlukan image kartu SD. Tambahkan satu, atau atur Mulai ke \"fast\".",
+		"error.not_on_sd": "Program tidak dapat ditaruh di kartu SD: %1",
+		"error.not_started": "ZEsarUX tidak menyala: %1",
+		"error.sd_not_fat": "image kartu SD tidak memiliki sistem berkas FAT yang dapat dibaca ZEsarUX.",
+		"error.sd_not_raw": "image kartu SD bukan image biasa dari sebuah kartu (.mmc atau .img).",
+		"error.sd_size": "ukuran image kartu SD berubah saat program disalin.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ROM ZX Spectrum 48K (16 KB), yang dijalankan Next saat dinyalakan cepat, tanpa NextZXOS. ROM ini milik Amstrad, yang mengizinkannya disebarkan bersama emulator. ZEsarUX menyertakannya, sebagai 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "ROM boot Next (8 KB), program yang pertama kali dijalankan FPGA-nya: ROM ini membaca sistem Next dari kartu SD. ZEsarUX menyertakannya, sebagai tbblue_loader.rom.",
+		"setting.boot": "Mulai",
+		"setting.boot.about": "Cara Next menyala. \"nextzxos\" menyalakannya seperti Next menyala: ROM boot membaca sistem dari kartu SD, yang menampilkan menunya, dan program dalam proyek ditaruh di kartu, tempat Browser menemukannya. Diperlukan image kartu SD dan ROM boot. \"fast\" langsung menyalakan perangkat keras Next dengan ROM Spectrum 48K dan tanpa kartu SD, lalu memuat program proyek langsung ke mesin; program yang memerlukan NextZXOS atau berkas dari kartu tidak berjalan dengan cara ini. Ini bagian dari mesin, jadi sebuah movie memerlukan nilai yang sama.",
+		"setting.limit_rom_turbo": "Tahan NextZXOS di 7 MHz",
+		"setting.limit_rom_turbo.about": "NextZXOS mengatur sendiri kecepatan prosesor, hingga 28 MHz, seperti di Next. Jika aktif, prosesor tidak berjalan lebih cepat dari 7 MHz selama kode NextZXOS sendiri berjalan, yang meringankan komputer lambat (bawaan ZEsarUX); program yang dijalankan dari NextZXOS tetap berjalan pada kecepatan pilihannya. Biarkan nonaktif agar Next tetap seperti aslinya. Ini bagian dari mesin, jadi sebuah movie memerlukan nilai yang sama.",
+		"slot.program": "Program",
+		"slot.program.help": "Program untuk Next atau Spectrum: berkas .nex (format Next sendiri), snapshot (.snx, .sna, .z80, .zsf), kaset (.tap, .tzx, .pzx) atau berkas yang dibuka NextZXOS (.bas, .dot, .scr, .sl2). Saat Next menyala dengan NextZXOS, berkas ditaruh di folder teratas kartu SD, dan Anda menjalankannya dari Browser, seperti di Next. Saat menyala cepat, program dimuat langsung ke mesin.",
+		"slot.sd": "Kartu SD",
+		"slot.sd.help": "Image kartu SD Next (.mmc atau .img), berisi sistem Next (NextZXOS). ZEsarUX menyertakan satu, tbblue.mmc. Apa yang ditulis mesin ke kartu tetap di dalam mesin (dan di savestate-nya); berkasnya tidak pernah diubah. Next memerlukan kartu untuk menyala dengan NextZXOS; dengan Mulai di \"fast\" tidak diperlukan."
+	}
+}

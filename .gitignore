@@ -1,0 +1,4 @@
+build/
+minibox-diag.log
+tests/roms-local/
+tests/games-local/

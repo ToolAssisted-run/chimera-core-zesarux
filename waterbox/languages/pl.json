@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "„%1” nie jest sposobem uruchomienia Nexta, który zna ten rdzeń.",
+		"error.no_reason": "nie podano powodu",
+		"error.no_sd": "Aby uruchomić Nexta z NextZXOS, projekt potrzebuje obrazu karty SD. Dodaj go albo ustaw Start na „fast”.",
+		"error.not_on_sd": "Nie udało się umieścić programu na karcie SD: %1",
+		"error.not_started": "ZEsarUX się nie uruchomił: %1",
+		"error.sd_not_fat": "obraz karty SD nie ma systemu plików FAT, który ZEsarUX umie czytać.",
+		"error.sd_not_raw": "obraz karty SD nie jest zwykłym obrazem karty (.mmc lub .img).",
+		"error.sd_size": "obraz karty SD zmienił rozmiar podczas kopiowania programu.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ROM ZX Spectrum 48K (16 KB), który Next wykonuje, gdy jest uruchamiany szybko, bez NextZXOS. Należy do firmy Amstrad, która pozwala rozpowszechniać go z emulatorami. ZEsarUX ma go w zestawie jako 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "ROM startowy Nexta (8 KB), program, który jego FPGA uruchamia najpierw: wczytuje system Nexta z karty SD. ZEsarUX ma go w zestawie jako tbblue_loader.rom.",
+		"setting.boot": "Start",
+		"setting.boot.about": "Jak startuje Next. „nextzxos” uruchamia go tak, jak startuje Next: ROM startowy wczytuje system z karty SD, który pokazuje swoje menu, a program z projektu trafia na kartę, gdzie znajduje go Przeglądarka. Potrzebny jest obraz karty SD i ROM startowy. „fast” uruchamia sprzęt Nexta od razu z ROM-em Spectrum 48K i bez karty SD, a program z projektu wczytuje prosto do maszyny; program, który potrzebuje NextZXOS albo plików z karty, tak nie zadziała. To część maszyny, więc film potrzebuje tej samej wartości.",
+		"setting.limit_rom_turbo": "Trzymaj NextZXOS na 7 MHz",
+		"setting.limit_rom_turbo.about": "NextZXOS sam ustawia szybkość procesora, do 28 MHz, jak na Nexcie. Gdy włączone, procesor nie przekracza 7 MHz, dopóki działa własny kod NextZXOS, co oszczędza wolny komputer (ustawienie domyślne ZEsarUX); programy uruchomione z NextZXOS działają z szybkością, jaką same wybiorą. Zostaw wyłączone, aby mieć Nexta takim, jaki jest. To część maszyny, więc film potrzebuje tej samej wartości.",
+		"slot.program": "Program",
+		"slot.program.help": "Program dla Nexta lub Spectrum: plik .nex (własny format Nexta), zrzut (.snx, .sna, .z80, .zsf), taśma (.tap, .tzx, .pzx) albo plik, który otwiera NextZXOS (.bas, .dot, .scr, .sl2). Gdy Next startuje z NextZXOS, plik trafia do głównego folderu karty SD i uruchamiasz go z Przeglądarki, jak na Nexcie. Gdy startuje szybko, program jest wczytywany prosto do maszyny.",
+		"slot.sd": "Karta SD",
+		"slot.sd.help": "Obraz karty SD Nexta (.mmc lub .img) z systemem Nexta (NextZXOS). ZEsarUX ma jeden w zestawie, tbblue.mmc. To, co maszyna zapisze na karcie, zostaje w maszynie (i w jej zapisanych stanach); plik nigdy nie jest zmieniany. Next potrzebuje karty, aby wystartować z NextZXOS; przy Start ustawionym na „fast” nie potrzebuje żadnej."
+	}
+}

@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "'%1' is geen manier om de Next te starten die deze core heeft.",
+		"error.no_reason": "er werd geen reden gegeven",
+		"error.no_sd": "Om de Next met NextZXOS te starten heeft het project een SD-kaartimage nodig. Voeg er een toe, of zet Start op \"fast\".",
+		"error.not_on_sd": "Het programma kon niet op de SD-kaart worden gezet: %1",
+		"error.not_started": "ZEsarUX is niet gestart: %1",
+		"error.sd_not_fat": "het SD-kaartimage heeft geen FAT-bestandssysteem dat ZEsarUX kan lezen.",
+		"error.sd_not_raw": "het SD-kaartimage is geen gewoon image van een kaart (.mmc of .img).",
+		"error.sd_size": "het SD-kaartimage veranderde van grootte terwijl het programma werd gekopieerd.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "De ROM van de ZX Spectrum 48K (16 KB), die de Next uitvoert als hij snel start, zonder NextZXOS. Hij is van Amstrad, dat toestaat hem met emulators te verspreiden. ZEsarUX levert hem mee, als 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "De opstart-ROM van de Next (8 KB), het programma dat zijn FPGA als eerste start: hij leest het systeem van de Next van de SD-kaart. ZEsarUX levert hem mee, als tbblue_loader.rom.",
+		"setting.boot": "Start",
+		"setting.boot.about": "Hoe de Next start. \"nextzxos\" start hem zoals een Next start: de opstart-ROM leest het systeem van de SD-kaart, dat zijn menu's toont, en een programma in het project wordt op de kaart gezet, waar de Browser het vindt. Daarvoor zijn een SD-kaartimage en de opstart-ROM nodig. \"fast\" start de hardware van de Next meteen met de ROM van de 48K Spectrum en zonder SD-kaart, en laadt het programma van het project rechtstreeks in de machine; een programma dat NextZXOS of bestanden van een kaart nodig heeft, werkt zo niet. Het hoort bij de machine, dus een film heeft dezelfde waarde nodig.",
+		"setting.limit_rom_turbo": "NextZXOS op 7 MHz houden",
+		"setting.limit_rom_turbo.about": "NextZXOS stelt de snelheid van de processor zelf in, tot 28 MHz, zoals op een Next. Aan: de processor loopt niet sneller dan 7 MHz zolang de eigen code van NextZXOS draait, wat een trage computer spaart (de standaard van ZEsarUX); programma's die vanuit NextZXOS starten, houden de snelheid die ze kiezen. Laat het uit om de Next te hebben zoals hij is. Het hoort bij de machine, dus een film heeft dezelfde waarde nodig.",
+		"slot.program": "Programma",
+		"slot.program.help": "Een programma voor de Next of de Spectrum: een .nex-bestand (het eigen formaat van de Next), een snapshot (.snx, .sna, .z80, .zsf), een cassette (.tap, .tzx, .pzx) of een bestand dat NextZXOS opent (.bas, .dot, .scr, .sl2). Als de Next met NextZXOS start, wordt het bestand in de hoofdmap van de SD-kaart gezet en start u het vanuit de Browser, zoals op een Next. Als hij snel start, wordt het programma rechtstreeks in de machine geladen.",
+		"slot.sd": "SD-kaart",
+		"slot.sd.help": "Het image van de SD-kaart van de Next (.mmc of .img), met het systeem van de Next (NextZXOS) erop. ZEsarUX levert er een mee, tbblue.mmc. Wat de machine op de kaart schrijft, blijft in de machine (en in haar savestates); het bestand wordt nooit veranderd. Een Next heeft een kaart nodig om met NextZXOS te starten; met Start op \"fast\" heeft hij er geen nodig."
+	}
+}

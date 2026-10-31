@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "«%1» no és una manera d'engegar el Next que tingui aquest nucli.",
+		"error.no_reason": "no va donar cap motiu",
+		"error.no_sd": "Per engegar el Next amb NextZXOS, el projecte necessita una imatge de targeta SD. Afegiu-ne una, o poseu Arrencada a «fast».",
+		"error.not_on_sd": "No s'ha pogut posar el programa a la targeta SD: %1",
+		"error.not_started": "ZEsarUX no s'ha engegat: %1",
+		"error.sd_not_fat": "la imatge de la targeta SD no té cap sistema de fitxers FAT que ZEsarUX pugui llegir.",
+		"error.sd_not_raw": "la imatge de la targeta SD no és una imatge simple d'una targeta (.mmc o .img).",
+		"error.sd_size": "la imatge de la targeta SD ha canviat de mida mentre es copiava el programa.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "La ROM del ZX Spectrum 48K (16 KB), que el Next executa quan arrenca ràpid, sense NextZXOS. És d'Amstrad, que permet distribuir-la amb emuladors. ZEsarUX la porta, com a 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "La ROM d'arrencada del Next (8 KB), el programa que la seva FPGA executa primer: llegeix el sistema del Next de la targeta SD. ZEsarUX la porta, com a tbblue_loader.rom.",
+		"setting.boot": "Arrencada",
+		"setting.boot.about": "Com arrenca el Next. «nextzxos» l'arrenca com arrenca un Next: la ROM d'arrencada llegeix el sistema de la targeta SD, que mostra els seus menús, i un programa del projecte es posa a la targeta, on el Navegador el troba. Cal una imatge de targeta SD i la ROM d'arrencada. «fast» engega de seguida el maquinari del Next amb la ROM de l'Spectrum 48K i sense targeta SD, i carrega el programa del projecte directament a la màquina; un programa que necessiti NextZXOS o fitxers d'una targeta no funciona així. Forma part de la màquina, de manera que una pel·lícula necessita el mateix valor.",
+		"setting.limit_rom_turbo": "Mantenir NextZXOS a 7 MHz",
+		"setting.limit_rom_turbo.about": "NextZXOS fixa ell mateix la velocitat del processador, fins a 28 MHz, com en un Next. Activat, el processador no passa de 7 MHz mentre s'executa el codi propi de NextZXOS, cosa que alleuja un ordinador lent (el valor per defecte de ZEsarUX); els programes engegats des de NextZXOS van a la velocitat que triïn. Deixeu-lo desactivat per tenir el Next tal com és. Forma part de la màquina, de manera que una pel·lícula necessita el mateix valor.",
+		"slot.program": "Programa",
+		"slot.program.help": "Un programa per al Next o l'Spectrum: un fitxer .nex (el format propi del Next), una instantània (.snx, .sna, .z80, .zsf), una cinta (.tap, .tzx, .pzx) o un fitxer que obre NextZXOS (.bas, .dot, .scr, .sl2). Quan el Next arrenca amb NextZXOS, el fitxer es posa a la carpeta arrel de la targeta SD i l'executeu des del Navegador, com en un Next. Quan arrenca ràpid, el programa es carrega directament a la màquina.",
+		"slot.sd": "Targeta SD",
+		"slot.sd.help": "La imatge de la targeta SD del Next (.mmc o .img), amb el sistema del Next (NextZXOS). ZEsarUX en porta una, tbblue.mmc. El que la màquina escriu a la targeta es queda a la màquina (i als seus estats desats); el fitxer no es modifica mai. Un Next necessita una targeta per arrencar amb NextZXOS; amb Arrencada a «fast» no en necessita cap."
+	}
+}

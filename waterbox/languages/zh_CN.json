@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "“%1”不是本核心提供的 Next 启动方式。",
+		"error.no_reason": "未给出原因",
+		"error.no_sd": "要用 NextZXOS 启动 Next，项目中需要一个 SD 卡映像。请添加一个，或把“启动”设为“fast”。",
+		"error.not_on_sd": "无法把程序放到 SD 卡上：%1",
+		"error.not_started": "ZEsarUX 没有启动：%1",
+		"error.sd_not_fat": "SD 卡映像上没有 ZEsarUX 能读取的 FAT 文件系统。",
+		"error.sd_not_raw": "SD 卡映像不是一张卡的普通映像（.mmc 或 .img）。",
+		"error.sd_size": "复制程序时 SD 卡映像的大小发生了变化。",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ZX Spectrum 48K 的 ROM（16 KB），Next 不用 NextZXOS 快速启动时运行它。它属于 Amstrad，Amstrad 允许它随模拟器一起分发。ZEsarUX 附带了它，名为 48.rom。",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "Next 的启动 ROM（8 KB），即其 FPGA 最先运行的程序：它从 SD 卡读取 Next 的系统。ZEsarUX 附带了它，名为 tbblue_loader.rom。",
+		"setting.boot": "启动",
+		"setting.boot.about": "Next 的启动方式。“nextzxos”像真正的 Next 一样启动：启动 ROM 从 SD 卡读取系统，系统显示其菜单，项目中的程序会被放到卡上，可在 Browser 中找到。需要 SD 卡映像和启动 ROM。“fast”用 Spectrum 48K 的 ROM、不用 SD 卡立即启动 Next 的硬件，并把项目中的程序直接载入机器；需要 NextZXOS 或卡上文件的程序这样无法运行。它是机器的一部分，因此录像需要相同的值。",
+		"setting.limit_rom_turbo": "将 NextZXOS 限制在 7 MHz",
+		"setting.limit_rom_turbo.about": "与真正的 Next 一样，NextZXOS 会自行设置处理器速度，最高 28 MHz。开启后，在 NextZXOS 自身代码运行期间处理器不超过 7 MHz，可减轻慢速电脑的负担（ZEsarUX 的默认设置）；从 NextZXOS 启动的程序仍按它们自己选择的速度运行。若要让 Next 保持原样，请保持关闭。它是机器的一部分，因此录像需要相同的值。",
+		"slot.program": "程序",
+		"slot.program.help": "供 Next 或 Spectrum 使用的程序：.nex 文件（Next 自己的格式）、快照（.snx、.sna、.z80、.zsf）、磁带（.tap、.tzx、.pzx），或 NextZXOS 能打开的文件（.bas、.dot、.scr、.sl2）。Next 用 NextZXOS 启动时，文件会被放到 SD 卡的根文件夹，您像在真正的 Next 上一样从 Browser 运行它。快速启动时，程序会被直接载入机器。",
+		"slot.sd": "SD 卡",
+		"slot.sd.help": "Next 的 SD 卡映像（.mmc 或 .img），上面装有 Next 的系统（NextZXOS）。ZEsarUX 附带一个，名为 tbblue.mmc。机器写到卡上的内容留在机器中（以及它的即时存档中）；文件本身永远不会被改动。Next 需要一张卡才能用 NextZXOS 启动；“启动”设为“fast”时则不需要。"
+	}
+}

@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "\"%1\" bu çekirdeğin bildiği bir Next başlatma yolu değil.",
+		"error.no_reason": "bir neden belirtmedi",
+		"error.no_sd": "Next'i NextZXOS ile başlatmak için projede bir SD kart görüntüsü olmalı. Bir tane ekleyin ya da Başlatma'yı \"fast\" yapın.",
+		"error.not_on_sd": "Program SD karta konulamadı: %1",
+		"error.not_started": "ZEsarUX başlamadı: %1",
+		"error.sd_not_fat": "SD kart görüntüsünde ZEsarUX'in okuyabileceği bir FAT dosya sistemi yok.",
+		"error.sd_not_raw": "SD kart görüntüsü bir kartın düz görüntüsü değil (.mmc ya da .img).",
+		"error.sd_size": "Program kopyalanırken SD kart görüntüsünün boyutu değişti.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ZX Spectrum 48K'nin ROM'u (16 KB); Next, NextZXOS olmadan hızlı başlatıldığında bunu çalıştırır. Amstrad'a aittir ve Amstrad emülatörlerle birlikte dağıtılmasına izin verir. ZEsarUX ile birlikte 48.rom adıyla gelir.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "Next'in açılış ROM'u (8 KB), FPGA'sının ilk başlattığı program: Next'in sistemini SD karttan okur. ZEsarUX ile birlikte tbblue_loader.rom adıyla gelir.",
+		"setting.boot": "Başlatma",
+		"setting.boot.about": "Next'in nasıl başlayacağı. \"nextzxos\" onu bir Next gibi başlatır: açılış ROM'u sistemi SD karttan okur, sistem menülerini gösterir, projedeki program da Browser'ın bulacağı karta konur. Bir SD kart görüntüsü ve açılış ROM'u gerekir. \"fast\" Next'in donanımını hemen 48K Spectrum ROM'uyla ve SD kart olmadan başlatır, projedeki programı doğrudan makineye yükler; NextZXOS'a ya da karttaki dosyalara ihtiyaç duyan bir program bu şekilde çalışmaz. Makinenin bir parçasıdır, bu yüzden bir film aynı değere ihtiyaç duyar.",
+		"setting.limit_rom_turbo": "NextZXOS'u 7 MHz'de tut",
+		"setting.limit_rom_turbo.about": "NextZXOS işlemcinin hızını, bir Next'teki gibi, 28 MHz'e kadar kendisi ayarlar. Açıkken, NextZXOS'un kendi kodu çalışırken işlemci 7 MHz'den hızlı gitmez; bu yavaş bir bilgisayarı rahatlatır (ZEsarUX'in varsayılanı). NextZXOS'tan başlatılan programlar seçtikleri hızda çalışır. Next'i olduğu gibi istiyorsanız kapalı bırakın. Makinenin bir parçasıdır, bu yüzden bir film aynı değere ihtiyaç duyar.",
+		"slot.program": "Program",
+		"slot.program.help": "Next ya da Spectrum için bir program: bir .nex dosyası (Next'in kendi biçimi), bir anlık görüntü (.snx, .sna, .z80, .zsf), bir kaset (.tap, .tzx, .pzx) ya da NextZXOS'un açtığı bir dosya (.bas, .dot, .scr, .sl2). Next NextZXOS ile başladığında dosya SD kartın en üst klasörüne konur ve onu bir Next'teki gibi Browser'dan çalıştırırsınız. Hızlı başladığında program doğrudan makineye yüklenir.",
+		"slot.sd": "SD Kart",
+		"slot.sd.help": "Next'in SD kartının görüntüsü (.mmc ya da .img), üzerinde Next'in sistemi (NextZXOS) ile. ZEsarUX ile bir tane gelir: tbblue.mmc. Makinenin karta yazdıkları makinede (ve kayıtlı durumlarında) kalır; dosya asla değiştirilmez. Bir Next'in NextZXOS ile başlaması için kart gerekir; Başlatma \"fast\" iken hiç gerekmez."
+	}
+}

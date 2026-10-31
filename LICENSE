@@ -1,0 +1,54 @@
+MIT License
+
+Copyright (c) 2026 Sergio Martin and the Chimera contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+What this licence covers, and what it does not
+
+The text above covers this repository's own files: the adapter, the core's
+own display, sound and platform layers and the test runners under waterbox/,
+the test program generator under waterbox/tests/, the build files, and the
+documents.
+
+The patches under patches/ are changes to ZEsarUX and are under ZEsarUX's
+terms, the GNU General Public License version 3 or later.
+
+It does not cover what the repository builds from. The emulator is ZEsarUX,
+by Cesar Hernandez Bano and its contributors
+(https://github.com/chernandezba/zesarux), under the GNU General Public
+License version 3 or later, at the commit pinned in extern/zesarux (the
+release ZEsarUX 13.0). ZEsarUX includes modules by other authors under their
+own terms; its file src/LICENSES_info lists them and its folder
+src/licenses holds their texts. One of them, PlayTZX, is left out of the
+core because ZEsarUX's note says its licence is unknown.
+
+The program in the built package, zesarux.chimeraCore, is therefore under
+the GNU General Public License version 3 or later.
+waterbox/package-licenses.json lists every component with its licence and
+where its source is, and the built package carries their licence texts.
+
+No ROM, firmware, SD card image or game is in this repository or in the
+built package. The ZX Spectrum Next's boot ROM (tbblue_loader.rom), the ZX
+Spectrum 48K ROM (48.rom) and the SD card image with the Next's system on
+it are supplied by the user. ZEsarUX's repository, which is this
+repository's submodule, does contain copies of all three; the tests read
+them from there, and nothing of them is copied into this repository.

@@ -1,0 +1,29 @@
+diff --git a/src/timer.c b/src/timer.c
+index dff21fdc..240add98 100644
+--- a/src/timer.c
++++ b/src/timer.c
+@@ -849,6 +849,10 @@ void timer_storage_common_accelerate_saving_decrease_counter(void)
+ 
+ void timer_pause_waiting_end_frame(void)
+ {
++#ifdef CHIMERA_CORE
++	/* Chimera: nothing to wait for (get_timer_check_interrupt) */
++	return;
++#endif
+ 
+ 	//printf ("esperando final frame\n");
+ 
+@@ -1021,6 +1025,13 @@ int get_timer_check_interrupt(void)
+ {
+     int si_saltado_interrupcion;
+ 
++#ifdef CHIMERA_CORE
++    /* Chimera: no clock of the host. The 1/50 s tick comes the moment the
++       machine has run its frame's T-states, so time is bought with executed
++       instructions and nothing waits. */
++    return esperando_tiempo_final_t_estados.v;
++#endif
++
+     //Timer de tipo Date
+     if (timer_selected==TIMER_DATE) {
+         si_saltado_interrupcion=timer_check_interrupt_no_thread();

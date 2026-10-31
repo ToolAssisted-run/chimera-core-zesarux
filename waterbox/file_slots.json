@@ -1,0 +1,43 @@
+{
+  "_comment": "This file lists the files a ZX Spectrum Next project can hold. Chimera's New Project window is built from it: the SD card the Next starts from, and a program.",
+  "slots": [
+    {
+      "id": "sd",
+      "title": "slot.sd",
+      "min": 0,
+      "max": 1,
+      "formats": [
+        "mmc",
+        "img"
+      ],
+      "help": "slot.sd.help"
+    },
+    {
+      "id": "program",
+      "title": "slot.program",
+      "min": 0,
+      "max": 1,
+      "formats": [
+        "nex",
+        "snx",
+        "sna",
+        "z80",
+        "zsf",
+        "tap",
+        "tzx",
+        "pzx",
+        "bas",
+        "dot",
+        "scr",
+        "sl2"
+      ],
+      "help": "slot.program.help"
+    }
+  ],
+  "atLeastOneOf": [
+    [
+      "sd",
+      "program"
+    ]
+  ]
+}

@@ -1,0 +1,24 @@
+{
+	"texts": {
+		"error.bad_boot": "\"%1\" ei ole tämän ytimen tuntema tapa käynnistää Next.",
+		"error.no_reason": "syytä ei kerrottu",
+		"error.no_sd": "Nextin käynnistäminen NextZXOS:llä vaatii projektiin SD-kortin levykuvan. Lisää sellainen, tai aseta Käynnistys arvoon \"fast\".",
+		"error.not_on_sd": "Ohjelmaa ei voitu laittaa SD-kortille: %1",
+		"error.not_started": "ZEsarUX ei käynnistynyt: %1",
+		"error.sd_not_fat": "SD-kortin levykuvalla ei ole FAT-tiedostojärjestelmää, jota ZEsarUX osaa lukea.",
+		"error.sd_not_raw": "SD-kortin levykuva ei ole tavallinen kuva kortista (.mmc tai .img).",
+		"error.sd_size": "SD-kortin levykuvan koko muuttui ohjelmaa kopioitaessa.",
+		"firmware.48_rom": "48.rom",
+		"firmware.48_rom.about": "ZX Spectrum 48K:n ROM (16 kt), jota Next ajaa, kun se käynnistetään nopeasti ilman NextZXOS:ää. Sen omistaa Amstrad, joka sallii sen levittämisen emulaattorien mukana. ZEsarUX:n mukana se tulee nimellä 48.rom.",
+		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
+		"firmware.tbblue_loader_rom.about": "Nextin käynnistys-ROM (8 kt), ohjelma, jonka sen FPGA käynnistää ensimmäisenä: se lukee Nextin järjestelmän SD-kortilta. ZEsarUX:n mukana se tulee nimellä tbblue_loader.rom.",
+		"setting.boot": "Käynnistys",
+		"setting.boot.about": "Miten Next käynnistyy. \"nextzxos\" käynnistää sen kuten Next käynnistyy: käynnistys-ROM lukee järjestelmän SD-kortilta, ja se näyttää valikkonsa, ja projektin ohjelma laitetaan kortille, josta Browser löytää sen. Tarvitaan SD-kortin levykuva ja käynnistys-ROM. \"fast\" käynnistää Nextin laitteiston heti 48K Spectrumin ROMilla ilman SD-korttia ja lataa projektin ohjelman suoraan koneeseen; ohjelma, joka tarvitsee NextZXOS:ää tai tiedostoja kortilta, ei toimi näin. Tämä kuuluu koneeseen, joten tallenne tarvitsee saman arvon.",
+		"setting.limit_rom_turbo": "Pidä NextZXOS 7 MHz:ssä",
+		"setting.limit_rom_turbo.about": "NextZXOS asettaa suorittimen nopeuden itse, enintään 28 MHz, kuten Nextissä. Kun tämä on päällä, suoritin ei kulje 7 MHz:ä nopeammin NextZXOS:n oman koodin aikana, mikä säästää hidasta tietokonetta (ZEsarUX:n oletus); NextZXOS:stä käynnistetyt ohjelmat kulkevat valitsemallaan nopeudella. Jätä pois päältä, jos haluat Nextin sellaisena kuin se on. Tämä kuuluu koneeseen, joten tallenne tarvitsee saman arvon.",
+		"slot.program": "Ohjelma",
+		"slot.program.help": "Ohjelma Nextille tai Spectrumille: .nex-tiedosto (Nextin oma muoto), tilannevedos (.snx, .sna, .z80, .zsf), nauha (.tap, .tzx, .pzx) tai tiedosto, jonka NextZXOS avaa (.bas, .dot, .scr, .sl2). Kun Next käynnistyy NextZXOS:llä, tiedosto laitetaan SD-kortin ylimpään kansioon, ja ajat sen Browserista kuten Nextissä. Kun se käynnistyy nopeasti, ohjelma ladataan suoraan koneeseen.",
+		"slot.sd": "SD-kortti",
+		"slot.sd.help": "Nextin SD-kortin levykuva (.mmc tai .img), jolla on Nextin järjestelmä (NextZXOS). ZEsarUX:n mukana tulee yksi, tbblue.mmc. Mitä kone kirjoittaa kortille, jää koneeseen (ja sen tallennettuihin tiloihin); tiedostoa ei koskaan muuteta. Next tarvitsee kortin käynnistyäkseen NextZXOS:llä; kun Käynnistys on \"fast\", korttia ei tarvita."
+	}
+}

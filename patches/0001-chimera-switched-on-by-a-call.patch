@@ -1,0 +1,18 @@
+diff --git a/src/start.c b/src/start.c
+index a6396fa7..3ec368b8 100644
+--- a/src/start.c
++++ b/src/start.c
+@@ -9261,6 +9261,13 @@ Also, you should keep the following copyright message, beginning with "Begin Cop
+         }
+     }
+ 
++#ifdef CHIMERA_CORE
++    /* Chimera: the machine is set up; it is run a frame at a time by the
++       core (waterbox/cinterface.c), not by the loop below, and nothing of
++       the network is started. */
++    return 0;
++#endif
++
+     init_network_tables();
+ 
+     //Inicializar ZENG online
