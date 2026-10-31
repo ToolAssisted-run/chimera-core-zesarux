@@ -8,6 +8,7 @@
 		"error.no_sd": "Per engegar el Next amb NextZXOS, el projecte necessita una imatge de targeta SD. Afegiu-ne una, o poseu Arrencada a «fast».",
 		"error.not_on_sd": "No s'ha pogut posar el programa a la targeta SD: %1",
 		"error.not_started": "ZEsarUX no s'ha engegat: %1",
+		"error.other_machine": "el programa és per a una altra màquina, no per a l'ordinador Next.",
 		"error.sd_not_fat": "la imatge de la targeta SD no té cap sistema de fitxers FAT que ZEsarUX pugui llegir.",
 		"error.sd_not_raw": "la imatge de la targeta SD no és una imatge simple d'una targeta (.mmc o .img).",
 		"error.sd_too_big": "La imatge de la targeta SD fa %1 MiB. Aquest nucli guarda tota la targeta a la memòria de la màquina i té lloc per a una targeta de %2 MiB com a màxim.",

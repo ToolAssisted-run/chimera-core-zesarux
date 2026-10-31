@@ -1,0 +1,21 @@
+diff --git a/src/snap/snap.c b/src/snap/snap.c
+index 357fd0b2..02bd10f9 100644
+--- a/src/snap/snap.c
++++ b/src/snap/snap.c
+@@ -3321,7 +3321,16 @@ if (long_cabecera_adicional>25) {
+ 			} while (leidos>0);
+ 
+ 			//si modo 128k, dejar bien la paginacion
++#ifdef CHIMERA_CORE
++			/* the Next, which the core keeps when it loads a snapshot of
++			 * a 128K (--snap-no-change-machine), took each bank through
++			 * port 0x7ffd above like a 128K, and is left with the last
++			 * one paged in; the snapshot's own 0x7ffd is put back as it
++			 * is for a 128K */
++			if  (MACHINE_IS_SPECTRUM_128_P2_P2A_P3 || MACHINE_IS_TBBLUE) {
++#else
+ 			if  (MACHINE_IS_SPECTRUM_128_P2_P2A_P3) {
++#endif
+ 				out_port_spectrum_no_time(32765,z80_header_adicional[5]);
+ 
+ 

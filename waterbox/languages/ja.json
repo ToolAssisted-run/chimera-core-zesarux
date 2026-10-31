@@ -8,6 +8,7 @@
 		"error.no_sd": "Next を NextZXOS で起動するには、プロジェクトに SD カードのイメージが必要です。追加するか、「起動」を「fast」にしてください。",
 		"error.not_on_sd": "プログラムを SD カードに置けませんでした: %1",
 		"error.not_started": "ZEsarUX が起動しませんでした: %1",
+		"error.other_machine": "このプログラムは Next ではなく別のマシン用です。",
 		"error.sd_not_fat": "SD カードのイメージに、ZEsarUX が読める FAT ファイルシステムがありません。",
 		"error.sd_not_raw": "SD カードのイメージが、カードの単純なイメージ (.mmc または .img) ではありません。",
 		"error.sd_too_big": "SD カードのイメージは %1 MiB です。このコアはカード全体をマシンのメモリーに保持し、%2 MiB までのカードを収められます。",

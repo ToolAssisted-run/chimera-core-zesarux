@@ -478,6 +478,80 @@ else
 	fi
 fi
 
+# Dark Star from the same card: a .z80 snapshot of a 128K Spectrum
+# (GAMES/Classic48/DARKSTAR.Z80, "modified for the Next" by Design Design),
+# which NextZXOS's Browser hands to its snapshot loader (snapload.bas). The
+# loader ends by writing Next register 2 bit 3, the Multiface's NMI, and the
+# Multiface's ROM puts the snapshot's registers back (patch 0005; before it
+# the screen stayed black). From switching on: SPACE leaves the welcome
+# pages, ENTER opens the Browser, GAMES, Classic48, DARKSTAR.Z80; its Hall
+# of Fame by frame 2500; SPACE starts it, P and O turn the ship. The sandbox
+# prints the native build's lines every 500 frames, a state saved and
+# loaded before every frame changes nothing, and the game played is not the
+# game left alone.
+if [ -z "$sn_card" ] || [ ! -f "$sn_card" ]; then
+	report "game:sn-snapshot" SKIP "ZESARUX_SN_CARD is not set to the System/Next 24.11 card for emulators (cspect-next-1gb.img), which is not in this repository"
+else
+	sn="--set boot=card --sd $sn_card"
+	rs=""
+	addr() { rs="$rs --press $2:${3:-4}:$1"; }
+	addr "$key_space" 150 5
+	addr "$key_enter" 400 5
+	i=0; while [ $i -lt 6 ]; do addr "$key_down" $((500 + i * 10)); i=$((i + 1)); done
+	addr "$key_enter" 600 5
+	i=0; while [ $i -lt 3 ]; do addr "$key_down" $((650 + i * 10)); i=$((i + 1)); done
+	addr "$key_enter" 700 5
+	addr "$key_down" 780; addr "$key_down" 790
+	addr "$key_enter" 820 5
+	addr "$key_space" 2600 10
+	started="$rs"
+	key_o=$(hex $((1 << 18))); key_p=$(hex $((1 << 19)))
+	addr "$key_p" 2900 50
+	addr "$key_o" 3000 50
+	addr "$key_space" 3100 5
+	# shellcheck disable=SC2086
+	nat ds-n $sn --frames 3600 --every 500 $rs
+	# shellcheck disable=SC2086
+	box ds-s $sn --frames 3600 --every 500 $rs
+	# shellcheck disable=SC2086
+	box ds-r $sn --frames 3600 --every 500 $rs --rerecord
+	# shellcheck disable=SC2086
+	box ds-idle $sn --frames 3600 --every 500 $started
+	why=""
+	same ds-n ds-s || why="$why native and sandbox differ [$(last "$work/ds-s.out" | cut -c1-60)] $(tail -1 "$work/ds-s.err" | cut -c1-80);"
+	same ds-s ds-r || why="$why a state every frame changed the run [$(last "$work/ds-r.out" | cut -c1-60)];"
+	[ -n "$(vh ds-idle)" ] && [ "$(vh ds-s)" != "$(vh ds-idle)" ] || why="$why the game played and the game left alone end alike;"
+	if [ -z "$why" ]; then
+		report "game:sn-snapshot" PASS "Dark Star, a 128K .z80 snapshot on System/Next 24.11's card, loaded by NextZXOS's snapshot loader through the Multiface's NMI, started and played to frame 3600: the sandbox prints the native build's lines, a state every frame changes nothing, it is not the run left alone"
+	else
+		report "game:sn-snapshot" FAIL "$why"
+	fi
+fi
+
+# A 128K snapshot in the fast start. ZEsarUX loads a .z80 into the Next
+# (--snap-no-change-machine: by default it turned into a 128K, and the
+# core's memory exports then pointed past the machine's memory) one bank at
+# a time through port 0x7ffd, and patch 0006 gives the Next the snapshot's
+# own 0x7ffd afterwards, as ZEsarUX does for a 128K. The snapshot is made
+# by tests/make-z80.py: its program is in bank 3 at 0xC000, fills the
+# screen and stops at 0xC00E; bank 7, the last one loaded, has a jump to
+# itself at 0xC000. The sandbox prints the native build's lines and a state
+# every frame changes nothing.
+z80="$work/test128.z80"
+python3 "$here/tests/make-z80.py" "$z80" || exit 2
+nat z8-n $fast --program "$z80" --frames 100 --every 50
+box z8-s $fast --program "$z80" --frames 100 --every 50
+box z8-r $fast --program "$z80" --frames 100 --every 50 --rerecord
+why=""
+same z8-n z8-s || why="$why native and sandbox differ [$(last "$work/z8-s.out" | cut -c1-60)] $(tail -1 "$work/z8-s.err" | cut -c1-80);"
+same z8-s z8-r || why="$why a state every frame changed the run;"
+[ "$(field "$work/z8-s.out" pc)" = c00e ] || why="$why the processor is at $(field "$work/z8-s.out" pc), not at the end of the snapshot's program (c00e) $(tail -1 "$work/z8-n.err" | cut -c1-80);"
+if [ -z "$why" ]; then
+	report "snapshot:128k" PASS "a 128K .z80 snapshot in the fast start runs its program from the bank its own 0x7ffd pages in; the sandbox prints the native build's lines, a state every frame changes nothing"
+else
+	report "snapshot:128k" FAIL "$why"
+fi
+
 # What cannot be run is refused with a reason: a way of starting there is
 # not, NextZXOS with no SD card, NextZXOS with no boot ROM, and a card
 # bigger than the 1 GiB the machine's memory has room for (2 GiB of zeros,

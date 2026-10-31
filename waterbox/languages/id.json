@@ -8,6 +8,7 @@
 		"error.no_sd": "Untuk menyalakan Next dengan NextZXOS, proyek memerlukan image kartu SD. Tambahkan satu, atau atur Mulai ke \"fast\".",
 		"error.not_on_sd": "Program tidak dapat ditaruh di kartu SD: %1",
 		"error.not_started": "ZEsarUX tidak menyala: %1",
+		"error.other_machine": "program ini untuk mesin lain, bukan untuk Next.",
 		"error.sd_not_fat": "image kartu SD tidak memiliki sistem berkas FAT yang dapat dibaca ZEsarUX.",
 		"error.sd_not_raw": "image kartu SD bukan image biasa dari sebuah kartu (.mmc atau .img).",
 		"error.sd_too_big": "Image kartu SD berukuran %1 MiB. Core ini menyimpan seluruh kartu di memori mesin dan punya ruang untuk kartu paling besar %2 MiB.",

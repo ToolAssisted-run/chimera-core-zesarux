@@ -8,6 +8,7 @@
 		"error.no_sd": "Pentru a porni calculatorul Next cu NextZXOS, proiectul are nevoie de o imagine de card SD. Adăugați una sau setați Pornire la „fast”.",
 		"error.not_on_sd": "Programul nu a putut fi pus pe cardul SD: %1",
 		"error.not_started": "ZEsarUX nu a pornit: %1",
+		"error.other_machine": "programul este pentru altă mașină, nu pentru calculatorul Next.",
 		"error.sd_not_fat": "imaginea cardului SD nu are un sistem de fișiere FAT pe care ZEsarUX să-l poată citi.",
 		"error.sd_not_raw": "imaginea cardului SD nu este o imagine simplă a unui card (.mmc sau .img).",
 		"error.sd_too_big": "Imaginea cardului SD are %1 MiB. Acest nucleu ține întregul card în memoria mașinii și are loc pentru un card de cel mult %2 MiB.",

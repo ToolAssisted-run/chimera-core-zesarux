@@ -8,6 +8,7 @@
 		"error.no_sd": "要用 NextZXOS 启动 Next，项目中需要一个 SD 卡映像。请添加一个，或把“启动”设为“fast”。",
 		"error.not_on_sd": "无法把程序放到 SD 卡上：%1",
 		"error.not_started": "ZEsarUX 没有启动：%1",
+		"error.other_machine": "该程序适用于另一种机器，而不是 Next。",
 		"error.sd_not_fat": "SD 卡映像上没有 ZEsarUX 能读取的 FAT 文件系统。",
 		"error.sd_not_raw": "SD 卡映像不是一张卡的普通映像（.mmc 或 .img）。",
 		"error.sd_too_big": "SD 卡映像为 %1 MiB。本核心把整张卡保存在机器的内存中，最多能容纳 %2 MiB 的卡。",

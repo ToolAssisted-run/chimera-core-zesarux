@@ -8,6 +8,7 @@
 		"error.no_sd": "A Next gép NextZXOS rendszerrel való indításához a projektnek SD-kártya-képfájl kell. Adjon hozzá egyet, vagy állítsa az Indítást „fast” értékre.",
 		"error.not_on_sd": "A programot nem sikerült az SD-kártyára tenni: %1",
 		"error.not_started": "A ZEsarUX nem indult el: %1",
+		"error.other_machine": "a program nem a Next gépre, hanem egy másik gépre készült.",
 		"error.sd_not_fat": "az SD-kártya képfájlján nincs olyan FAT fájlrendszer, amelyet a ZEsarUX olvasni tud.",
 		"error.sd_not_raw": "az SD-kártya képfájlja nem egy kártya egyszerű képe (.mmc vagy .img).",
 		"error.sd_too_big": "Az SD-kártya képfájlja %1 MiB. Ez a mag az egész kártyát a gép memóriájában tartja, és legfeljebb %2 MiB-os kártyának van benne hely.",

@@ -8,6 +8,7 @@
 		"error.no_sd": "Ke spuštění počítače Next se systémem NextZXOS potřebuje projekt obraz SD karty. Přidejte jej, nebo nastavte Start na „fast“.",
 		"error.not_on_sd": "Program se nepodařilo umístit na SD kartu: %1",
 		"error.not_started": "ZEsarUX se nespustil: %1",
+		"error.other_machine": "program je pro jiný stroj než počítač Next.",
 		"error.sd_not_fat": "obraz SD karty nemá souborový systém FAT, který by ZEsarUX uměl číst.",
 		"error.sd_not_raw": "obraz SD karty není prostý obraz karty (.mmc nebo .img).",
 		"error.sd_too_big": "Obraz SD karty má %1 MiB. Toto jádro drží celou kartu v paměti stroje a má místo pro kartu o velikosti nejvýše %2 MiB.",

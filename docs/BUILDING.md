@@ -80,7 +80,8 @@ QT_LIB_DIR=<qt>/6.12.0/gcc_64/lib bash waterbox/tests/run-frontend.sh --chimera-
   tests are skipped and say so. `ZESARUX_SN_CARD=<cspect-next-1gb.img>`
   names the System/Next 24.11 card for emulators (from
   specnext.com/latestdistro; not in this repository) for game:sn-card,
-  which says SKIP without it. 21 tests.
+  which says SKIP without it, as game:sn-snapshot (Dark Star from that
+  card) does. 23 tests.
 - `run-frontend.sh` loads the package in Chimera's window, headless.
 - `test-packages` is Chimera's own check of a package.
 

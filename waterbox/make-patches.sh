@@ -15,7 +15,8 @@ series='
 0002-chimera-the-machine-is-the-clock|src/timer.c
 0003-chimera-hooks-for-sound-input-and-frames|src/audio/audio.c src/operaciones.c src/cores/core_spectrum.c
 0004-chimera-fat32-cards-for-emulators-and-a-lent-card|src/third_party/ff.c src/third_party/diskio.c
-0005-chimera-next-registers-nextzxos-2.09-needs|src/machines/tbblue.c src/storage/diviface.c
+0005-chimera-next-registers-nextzxos-2.09-needs|src/machines/tbblue.c src/machines/tbblue.h src/storage/diviface.c src/ula.c
+0006-chimera-a-128k-snapshot-on-the-next|src/snap/snap.c
 '
 
 rm -f "$root"/patches/*.patch

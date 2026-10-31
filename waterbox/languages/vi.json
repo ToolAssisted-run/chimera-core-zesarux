@@ -8,6 +8,7 @@
 		"error.no_sd": "Để khởi động Next bằng NextZXOS, dự án cần một ảnh thẻ SD. Hãy thêm một ảnh, hoặc đặt Khởi động thành \"fast\".",
 		"error.not_on_sd": "Không thể đặt chương trình lên thẻ SD: %1",
 		"error.not_started": "ZEsarUX không khởi động: %1",
+		"error.other_machine": "chương trình dành cho một máy khác, không phải cho Next.",
 		"error.sd_not_fat": "ảnh thẻ SD không có hệ thống tệp FAT mà ZEsarUX đọc được.",
 		"error.sd_not_raw": "ảnh thẻ SD không phải là ảnh thô của một thẻ (.mmc hoặc .img).",
 		"error.sd_too_big": "Ảnh thẻ SD có dung lượng %1 MiB. Core này giữ toàn bộ thẻ trong bộ nhớ của máy và có chỗ cho thẻ tối đa %2 MiB.",

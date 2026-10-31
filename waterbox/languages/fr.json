@@ -8,6 +8,7 @@
 		"error.no_sd": "Pour démarrer le Next avec NextZXOS, le projet a besoin d'une image de carte SD. Ajoutez-en une, ou réglez Démarrage sur « fast ».",
 		"error.not_on_sd": "Le programme n'a pas pu être mis sur la carte SD : %1",
 		"error.not_started": "ZEsarUX n'a pas démarré : %1",
+		"error.other_machine": "le programme est destiné à une autre machine que le Next.",
 		"error.sd_not_fat": "l'image de la carte SD n'a pas de système de fichiers FAT que ZEsarUX sache lire.",
 		"error.sd_not_raw": "l'image de la carte SD n'est pas une simple image de carte (.mmc ou .img).",
 		"error.sd_too_big": "L'image de la carte SD fait %1 Mio. Ce cœur garde toute la carte dans la mémoire de la machine et a de la place pour une carte de %2 Mio au plus.",

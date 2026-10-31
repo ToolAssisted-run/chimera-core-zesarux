@@ -8,6 +8,7 @@
 		"error.no_sd": "Um den Next mit NextZXOS zu starten, braucht das Projekt ein SD-Karten-Abbild. Fügen Sie eines hinzu, oder stellen Sie Start auf „fast“.",
 		"error.not_on_sd": "Das Programm konnte nicht auf die SD-Karte gebracht werden: %1",
 		"error.not_started": "ZEsarUX wurde nicht gestartet: %1",
+		"error.other_machine": "das Programm ist für eine andere Maschine als den Next.",
 		"error.sd_not_fat": "Das SD-Karten-Abbild hat kein FAT-Dateisystem, das ZEsarUX lesen kann.",
 		"error.sd_not_raw": "Das SD-Karten-Abbild ist kein einfaches Abbild einer Karte (.mmc oder .img).",
 		"error.sd_too_big": "Das SD-Karten-Abbild ist %1 MiB groß. Dieser Kern hält die ganze Karte im Speicher der Maschine und hat Platz für eine Karte von höchstens %2 MiB.",

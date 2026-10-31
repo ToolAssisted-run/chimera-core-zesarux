@@ -1,5 +1,5 @@
 diff --git a/src/machines/tbblue.c b/src/machines/tbblue.c
-index 3b41ad32..327ead4c 100644
+index 3b41ad32..c7efbe7d 100644
 --- a/src/machines/tbblue.c
 +++ b/src/machines/tbblue.c
 @@ -3708,7 +3708,15 @@ z80_byte tbblue_get_diviface_enabled(void)
@@ -54,7 +54,37 @@ index 3b41ad32..327ead4c 100644
  
      //TODO puerto 0xdffd
  
-@@ -4828,6 +4856,9 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+@@ -4809,6 +4837,29 @@ void tbblue_generate_divmmc_nmi(void)
+ 
+ }
+ 
++#ifdef CHIMERA_CORE
++/* The Next's Multiface: 8 KiB of ROM at 0x014000 and 8 KiB of RAM at
++ * 0x016000 of its memory (ZEsarUX's multiface_enable knows them), paged in
++ * at 0x0000-0x3FFF by its NMI, with the enable and disable ports of the
++ * type register 0x0A bits 7:6 chooses (0x3F and 0xBF for the +3 type, the
++ * Next's default). */
++int chimera_tbblue_multiface_nmi=0;
++
++void tbblue_generate_multiface_nmi(void)
++{
++    if (!multiface_enabled.v) multiface_enable();
++    switch ((tbblue_registers[10]>>6)&3) {
++        case 0: multiface_type=MULTIFACE_TYPE_THREE; break;
++        case 1: multiface_type=MULTIFACE_TYPE_128; break;
++        /* 10 = Multiface 128 v87.12 and 11 = Multiface 1: both page in
++         * with port 0x9F and out with 0x1F, ZEsarUX's Multiface 1 ports */
++        default: multiface_type=MULTIFACE_TYPE_ONE; break;
++    }
++    chimera_tbblue_multiface_nmi=1;
++    generate_nmi();
++}
++#endif
++
+ //tbblue_last_register
+ //void tbblue_set_value_port(z80_byte value)
+ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+@@ -4828,6 +4879,9 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
      z80_byte last_register_6=tbblue_registers[6];
      z80_byte last_register_7=tbblue_registers[7];
      z80_byte last_register_8=tbblue_registers[8];
@@ -64,7 +94,32 @@ index 3b41ad32..327ead4c 100644
      z80_byte last_register_17=tbblue_registers[17];
      z80_byte last_register_21=tbblue_registers[21];
      z80_byte last_register_66=tbblue_registers[66];
-@@ -5076,6 +5107,14 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+@@ -4964,6 +5018,24 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+                 }
+ 
+             }
++#ifdef CHIMERA_CORE
++            /* bit 3: the Multiface's NMI, which ZEsarUX documents above and
++             * did not act on. NextZXOS's snapshot loader (snapload.bas,
++             * for .z80 and .sna files) ends by writing 0x08 here: the
++             * Multiface's ROM then puts the machine's registers back. The
++             * same rules as the divMMC's NMI: only when the bit was 0, not
++             * in config mode, and not while the divMMC or the Multiface is
++             * paged in (the bit is then cleared, as on a Next). */
++            if (value&8 && (last_register_2&8)==0 && maquina!=0 && maquina!=7) {
++                if (diviface_paginacion_automatica_activa.v || (multiface_enabled.v && multiface_switched_on.v)) {
++                    debug_printf(VERBOSE_DEBUG,"Tried to generate multiface nmi inside divmmc or multiface. Not allowed");
++                    tbblue_registers[2] &=(255-8);
++                }
++                else {
++                    tbblue_generate_multiface_nmi();
++                }
++            }
++#endif
+ 
+ 
+             break;
+@@ -5076,6 +5148,14 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
          break;
  
  
@@ -79,6 +134,21 @@ index 3b41ad32..327ead4c 100644
          case 7:
          /*
          (R/W)	07 => Turbo mode
+diff --git a/src/machines/tbblue.h b/src/machines/tbblue.h
+index 4a569dc6..a3ecc1eb 100644
+--- a/src/machines/tbblue.h
++++ b/src/machines/tbblue.h
+@@ -319,6 +319,10 @@ extern void tbblue_get_string_palette_format(char *texto);
+ 
+ extern int tbblue_pendiente_retn_stackless;
+ extern void tbblue_handle_nmi(void);
++#ifdef CHIMERA_CORE
++extern int chimera_tbblue_multiface_nmi;
++extern void tbblue_generate_multiface_nmi(void);
++#endif
+ 
+ //extern int tbblue_prueba_dentro_nmi;
+ 
 diff --git a/src/storage/diviface.c b/src/storage/diviface.c
 index 13f447b4..7e63ffa1 100644
 --- a/src/storage/diviface.c
@@ -124,3 +194,48 @@ index 13f447b4..7e63ffa1 100644
  
      //Traps que paginan memoria y saltan despues de leer instruccion
      switch (reg_pc) {
+diff --git a/src/ula.c b/src/ula.c
+index a8f5c698..06e91613 100644
+--- a/src/ula.c
++++ b/src/ula.c
+@@ -31,6 +31,9 @@
+ #include "contend.h"
+ #include "zxvision.h"
+ #include "multiface.h"
++#ifdef CHIMERA_CORE
++#include "tbblue.h"
++#endif
+ #include "betadisk.h"
+ #include "settings.h"
+ #include "divmmc.h"
+@@ -329,7 +332,14 @@ void nmi_handle_pending_prepost_fetch(void)
+     nmi_pending_pre_opcode=0;
+     nmi_pending_post_opcode=0;
+ 
++#ifdef CHIMERA_CORE
++    /* On the Next, the Multiface pages in for its own NMI only (Next
++     * register 2 bit 3), not for the divMMC's */
++    if (multiface_enabled.v && (!MACHINE_IS_TBBLUE || chimera_tbblue_multiface_nmi)) {
++        chimera_tbblue_multiface_nmi=0;
++#else
+     if (multiface_enabled.v) {
++#endif
+ 		multiface_map_memory();
+         multiface_lockout=0;
+ 	}
+@@ -428,6 +438,15 @@ void generate_nmi_prepare_fetch(void)
+         nmi_pending_pre_opcode=1;
+         nmi_pending_post_opcode=0;
+     }
++#ifdef CHIMERA_CORE
++    /* The Next's Multiface is paged in for the fetch at 0x0066 itself:
++     * its ROM has a jump there (JP 0x006D in enNextMF.rom), where the
++     * system's ROM has the RETN that would end the NMI at once */
++    if (MACHINE_IS_TBBLUE && chimera_tbblue_multiface_nmi) {
++        nmi_pending_pre_opcode=1;
++        nmi_pending_post_opcode=0;
++    }
++#endif
+ 
+     //prueba betadisk. todo indica por la rom que hace pre, aunque luego igualmente al lanzar la nmi, peta
+     if (betadisk_enabled.v) {

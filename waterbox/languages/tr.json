@@ -8,6 +8,7 @@
 		"error.no_sd": "Next bilgisayarını NextZXOS sistemiyle başlatmak için projede bir SD kart görüntüsü olmalı. Bir tane ekleyin ya da Başlatma ayarını \"fast\" yapın.",
 		"error.not_on_sd": "Program SD karta konulamadı: %1",
 		"error.not_started": "ZEsarUX başlamadı: %1",
+		"error.other_machine": "program Next bilgisayarı için değil, başka bir makine içindir.",
 		"error.sd_not_fat": "SD kart görüntüsünde ZEsarUX emülatörünün okuyabileceği bir FAT dosya sistemi yok.",
 		"error.sd_not_raw": "SD kart görüntüsü bir kartın düz görüntüsü değil (.mmc ya da .img).",
 		"error.sd_too_big": "SD kart görüntüsü %1 MiB. Bu çekirdek kartın tamamını makinenin belleğinde tutar ve en fazla %2 MiB'lık bir karta yer vardır.",

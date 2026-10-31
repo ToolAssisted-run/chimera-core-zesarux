@@ -8,6 +8,7 @@
 		"error.no_sd": "Next-tietokoneen käynnistäminen NextZXOS-järjestelmällä vaatii projektiin SD-kortin levykuvan. Lisää sellainen, tai aseta Käynnistys arvoon \"fast\".",
 		"error.not_on_sd": "Ohjelmaa ei voitu laittaa SD-kortille: %1",
 		"error.not_started": "ZEsarUX ei käynnistynyt: %1",
+		"error.other_machine": "ohjelma on toiselle koneelle kuin Next-tietokoneelle.",
 		"error.sd_not_fat": "SD-kortin levykuvalla ei ole FAT-tiedostojärjestelmää, jota ZEsarUX osaa lukea.",
 		"error.sd_not_raw": "SD-kortin levykuva ei ole tavallinen kuva kortista (.mmc tai .img).",
 		"error.sd_too_big": "SD-kortin levykuva on %1 MiB. Tämä ydin pitää koko kortin koneen muistissa, ja tilaa on enintään %2 MiB:n kortille.",

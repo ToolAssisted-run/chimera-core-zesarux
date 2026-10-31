@@ -97,7 +97,7 @@ program, so neither is used:
 - `meson.build` lists the sources: the 175 files the Makefile compiled for
   those options, less the null drivers (the core's own replace them), less
   `main_unix.c` (the core is started by a call), less PlayTZX.
-- The patches are five, all under `#ifdef CHIMERA_CORE`:
+- The patches are six, all under `#ifdef CHIMERA_CORE`:
   - 0001 `start.c`: `zesarux_main` returns once the machine is set up
     instead of entering its loop;
   - 0002 `timer.c`: the 1/50 s tick is "the machine has run its frame", and
@@ -110,8 +110,13 @@ program, so neither is used:
     whatever its number of clusters, and the core can lend FatFs the card
     the machine holds instead of FatFs reading a second copy of the file
     ("The System/Next 24.11 card");
-  - 0005 `machines/tbblue.c`, `storage/diviface.c`: three things of the
-    Next's newer cores that NextZXOS 2.09 needs (same section).
+  - 0005 `machines/tbblue.c`, `machines/tbblue.h`, `storage/diviface.c`,
+    `ula.c`: three things of the Next's newer cores that NextZXOS 2.09
+    needs (same section), and the Multiface's NMI by Next register 2 bit 3
+    ("Fourth round");
+  - 0006 `snap/snap.c`: a .z80 snapshot of a 128K loaded into the Next
+    gets its own port 0x7ffd back, as ZEsarUX gives it to a 128K
+    ("Fourth round").
 
 ## How the core is put together
 
@@ -199,6 +204,16 @@ The owner accepted the second round's recommendations:
   round had already written it so in the 26 language tables, and
   `waterbox/tests/check-names.py` (texts:names) holds it. The texts added
   in the third round keep it too.
+
+## The owner's decisions on the third round (user-decided, 2026-10-31)
+
+- **The SD card stays whole in the machine's memory, for now.** Reading it
+  sector by sector from the file ("How the card is carried") is not done.
+- **The ZEsarUX gaps behind patches 0004 and 0005 are not reported to
+  ZEsarUX's author, for now.** They stay this core's patches: FatFs's
+  FAT32 rule, the divMMC's paging by register 0x0A bit 4, register 0xB9,
+  and register 0x8E with bit 3 clear. The gaps found in the fourth round
+  (the Multiface's NMI, the 128K snapshot's 0x7ffd) are kept the same way.
 
 ## The 48K ROM is built in (2026-10-31)
 
@@ -447,13 +462,93 @@ a state saved and loaded before every frame, and not the run left alone:
   program), by hand: its menu by frame 2500, K (keys) and 5 (difficulty)
   start it, P and SPACE to frame 3500, the score is 50.
 
-Tried and not played: Halls of the Things loads and starts (its map,
-"Terror Incognita..?") but the key that leaves the map was not found;
-Angry Bloaters and Santa's Pressie were tried only before the fixes;
-TX-1696 (a demo that loads many files and streams its music from the
-card) shows a broken picture at frame 3500; DARKSTAR.Z80 (a 128K
-snapshot) shows a black screen at frame 4000. None of these is said to
-work.
+In the third round Halls of the Things, Angry Bloaters, Santa's Pressie,
+TX-1696 and DARKSTAR.Z80 were started and not played; the fourth round
+says why each failed ("Fourth round").
+
+## Fourth round: the programs that did not work (2026-10-31)
+
+Each started from switching on with "card" through NextZXOS 2.09's
+Browser, from the 24.11 card. For each: what it was, and whether it is the
+core, a gap of ZEsarUX's, or the program. The Next's documentation
+compared with is the card's own: `docs/EXTRA-HW/io-port-system/registers.txt`
+and `PORTS.TXT` (read from the card; not copied here).
+
+- **DARKSTAR.Z80: a gap of ZEsarUX's, the Multiface's NMI.** The file is a
+  .z80 snapshot of a 128K ("modified for the Next" by Design Design,
+  2018). The Browser hands a .z80 to NextZXOS's snapshot loader
+  (`snapload.bas`, as the card's `NEXTZXOS/BROWSER.CFG` says), which loads
+  the snapshot's memory and ends by writing 0x08 to Next register 2: "bit
+  3 = Generate multiface nmi". The Multiface's ROM (`enNextMF.rom`, which
+  "card" and the firmware load to 0x014000) then puts the snapshot's
+  registers back. ZEsarUX documents the bit in its source and does not act
+  on it, so the loader carried on into code that was never meant to run,
+  returned through a stack that was not there and ran into empty memory
+  (traced: the processor ran the text of the file's path at 0xFF00, and
+  then a loop at 0x0000); the screen stayed black. Patch 0005 now makes
+  that bit page in the Next's Multiface (ZEsarUX's own Multiface module
+  already knows where the Next keeps its ROM and RAM) with the ports
+  register 0x0A bits 7:6 choose, under the documentation's rules (only
+  when the bit was 0, not in config mode, not while the divMMC or the
+  Multiface is paged in). The Multiface is paged in for the fetch at
+  0x0066 itself: its ROM has a jump there (JP 0x006D), where the system's
+  ROM has a RETN that would end the NMI at once. A divMMC NMI does not
+  page the Multiface in. Played: its Hall of Fame by frame 2500, SPACE
+  starts it, the ship turned with P and O; in the test script as
+  game:sn-snapshot.
+- **The fast start with a .z80 (found while looking at DARKSTAR): the
+  core.** ZEsarUX turns into the machine a .z80 or .sna was made for (a
+  128K here); the core's memory exports kept pointing at a Next's 2 MiB,
+  and the native runner crashed reading them. The core now starts ZEsarUX
+  with `--snap-no-change-machine`, so the snapshot is loaded into the
+  Next. A 128K snapshot was then left with the last bank ZEsarUX loaded
+  paged in (it loads each bank through port 0x7ffd) and ran into the
+  48K ROM: patch 0006 writes the snapshot's own 0x7ffd afterwards, as
+  ZEsarUX does for a 128K. DARKSTAR.Z80 in the fast start shows its Hall
+  of Fame at frame 600 and plays, natively, in the sandbox and with a
+  state every frame the same. Any other program that turns ZEsarUX into
+  another machine (a .zsf of another machine does) is now refused with a
+  reason (`error.other_machine`, a new text in the 26 tables) instead of
+  running a machine the core does not describe: seen with the option
+  taken out on purpose, "ZEsarUX did not start: the program is for
+  another machine than the Next". The test script's snapshot:128k loads a
+  128K snapshot it makes itself (`tests/make-z80.py`).
+- **Angry Bloaters and Santa's Pressie: they work now.** Both failed in the
+  third round before patch 0005; with it, Angry Bloaters starts with 1
+  and S and was played to stage 1 (score 10, a life lost), and Santa's
+  Pressie ("Santa's Chimney Challenge!") starts with ENTER and was played
+  (two presents delivered, three wasted). The third round's Browser steps
+  for Santa's Pressie had opened LICENSE.TXT instead of the .nex.
+- **Halls of the Things: the program; there is no map to leave.** What
+  looked like a map is the game: a view of the tower with "Terror
+  Incognita..?" over it, and the man (white, on the right) moves with
+  Z, X, N and M (the game's Key Layout page: Z left, X right, N up, M
+  down, F fireball, L lightning, A arrow, S sword, SPACE centres the
+  man). Played: the man moved left and up, the view scrolled, a fireball
+  fired.
+- **TX-1696: a gap of ZEsarUX's, the Next's CTC and its interrupt
+  controller.** Its intro ("A man in his technoshed") plays; at frame
+  about 1740 it sets Next register 0xC0 to hardware IM2 mode, enables the
+  CTC's channel 0 interrupt (0xC5), programs channel 0 as a timer at
+  28 MHz / 16 / 112 = 15625 times a second (port 0x183B, control word
+  0x85, constant 0x70) and the line interrupt, and plays its music from an
+  interrupt routine at 0x8000 that writes samples to a DAC. ZEsarUX 13.0
+  has no CTC and no hardware IM2 mode: no interrupt came, and the
+  picture stood still from frame 1740 on (the program still ran its main
+  loop). Not fixed in this step.
+
+Tests of this step, against Chimera main cb46d2b7: run-gate.sh with the
+24.11 card, 23 passed, 0 failed, 0 skipped (two new tests: game:sn-snapshot
+and snapshot:128k); run-frontend.sh 3 of 3; Chimera's test-packages on a
+folder with only this package, all passed; check-core-texts.py 25 keys,
+every one named; check-names.py 0; check-proper-nouns.py 0. Seen to fail:
+with the Multiface's NMI and patch 0006 both taken out on purpose,
+game:sn-snapshot failed ("the game played and the game left alone end
+alike": the screen stays black either way) and snapshot:128k failed ("the
+processor is at c000"). Angry Bloaters, Santa's Pressie, Halls of the
+Things and Dark Star, each played by hand: native and sandbox the same
+lines every 500 frames, the same with a state every frame, and not the run
+left alone.
 
 ## What the user brings
 

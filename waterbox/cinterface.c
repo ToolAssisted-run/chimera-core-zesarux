@@ -525,7 +525,13 @@ ECL_EXPORT int Init(void)
 	 *                        stays in its memory (and in its states), and
 	 *                        never reaches the file;
 	 *  --nex-no-automount-esxdos    a .nex file is loaded into memory only;
-	 *                        no folder of the host is offered to it.
+	 *                        no folder of the host is offered to it;
+	 *  --snap-no-change-machine     a .z80 or .sna snapshot of another
+	 *                        Spectrum (a 48K, a 128K) is loaded into the
+	 *                        Next's memory, and the machine stays a Next
+	 *                        (by default ZEsarUX turns into the snapshot's
+	 *                        machine, and the core's memory and buttons are
+	 *                        a Next's).
 	 */
 	static char *argv[64];
 	int argc = 0;
@@ -554,6 +560,7 @@ ECL_EXPORT int Init(void)
 	argv[argc++] = (char *)"--quickexit";
 	argv[argc++] = (char *)"--tbblue-autoconfigure-sd-already-asked";
 	argv[argc++] = (char *)"--nex-no-automount-esxdos";
+	argv[argc++] = (char *)"--snap-no-change-machine";
 	/* NextZXOS sets the processor's speed itself (up to 28 MHz). ZEsarUX
 	 * holds it at 7 MHz inside the ROM by default, to spare the host; a
 	 * Next does not, and the setting says which. */
@@ -584,6 +591,15 @@ ECL_EXPORT int Init(void)
 	if (chimera_last_error[0]) {
 		/* ZEsarUX starts the machine even when a file could not be used */
 		snprintf(g_loadError, sizeof g_loadError, "error.not_started" TEXT_ARG "%s", chimera_last_error);
+		return 0;
+	}
+	if (!MACHINE_IS_TBBLUE) {
+		/* a program ZEsarUX loads in the fast start may turn it into
+		 * the machine the program was made for (a .zsf of another
+		 * machine does; .z80 and .sna do not, with
+		 * --snap-no-change-machine); the core's memory, buttons and
+		 * picture are a Next's */
+		snprintf(g_loadError, sizeof g_loadError, "error.not_started" TEXT_ARG "error.other_machine");
 		return 0;
 	}
 	if (g_cardBoot) {
