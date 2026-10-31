@@ -25,6 +25,9 @@ design log, with what was decided, why, and what was measured.
   The same file is compiled for the sandbox and for the host.
 - `waterbox/scrchimera.c`, `audiochimera.c` - the core's display and sound
   card, compiled in place of ZEsarUX's null drivers.
+- `waterbox/chimera_roms.c`, `gen-roms.py`, `ROMS.txt` - the 48K ROM built
+  into the core (read from the submodule at build time), how ZEsarUX is
+  given it, and its terms.
   `waterbox/chimera_compat.c` - the machine's clock and the other system
   calls the link wraps. `chimera_glue.h` is what they share.
 - `waterbox/guest-syscalls.c`, `waterbox/guest-shim/` - the sandbox build's
@@ -60,7 +63,9 @@ machine, run builds and tests under a memory cap
 
 The tests read the Next's boot ROM, the 48K ROM and the SD card image from
 the ZEsarUX submodule (`ZESARUX_TEST_FIRMWARE=<folder>` takes them from
-elsewhere). None of them is in this repository or in the package.
+elsewhere), on this machine and on CI (user-decided, 2026-10-31). None of
+them is in this repository; the 48K ROM alone is in the package, built into
+the core.
 
 ## Rules
 
@@ -76,8 +81,9 @@ elsewhere). None of them is in this repository or in the package.
   the same lines for the same input.
 - **The same input gives the same run, every time.** Nothing may read the
   host's clock, the user's files or the network.
-- **No ROM, firmware, SD card or game is committed** or packaged. Packaging
-  any of them is the owner's to decide.
+- **No ROM, firmware, SD card or game is committed.** The 48K ROM is
+  packaged (built in, user-decided 2026-10-31); packaging anything else is
+  the owner's to decide.
 - **A new test is broken on purpose once and seen to fail.** docs/PLAN.md
   says how each was.
 - **Write in plain language**, ASCII in every `.md`.
@@ -88,6 +94,5 @@ elsewhere). None of them is in this repository or in the package.
 ## What is the owner's to decide
 
 Publishing a repository, a place in Chimera's list of official cores,
-anything a licence does not plainly allow (packaging the Next's boot ROM,
-the 48K ROM or an SD card above all), and reporting anything to ZEsarUX's
-author.
+anything a licence does not plainly allow (packaging the Next's boot ROM
+or an SD card above all), and reporting anything to ZEsarUX's author.

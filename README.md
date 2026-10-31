@@ -21,8 +21,8 @@ use a small program they make themselves.
   (`tbblue_loader.rom`, on Chimera's Firmware page) and an SD card image
   with the Next's system on it, in the project. ZEsarUX comes with both
   (`tbblue_loader.rom`, `tbblue.mmc`).
-- To start it fast, without NextZXOS: the 48K Spectrum's ROM (`48.rom`),
-  which ZEsarUX also comes with.
+- To start it fast, without NextZXOS: nothing. The 48K Spectrum's ROM it
+  runs on is built into the core.
 
 A program (`.nex` and the other formats the Next opens) goes in the project
 too: with NextZXOS it is put on the card, where the Browser finds it.
@@ -59,5 +59,6 @@ is the design log: what was decided, why, and what was measured.
 This repository's own code is MIT; the patches to ZEsarUX are under
 ZEsarUX's terms. ZEsarUX is under the GNU General Public License version 3
 or later, and so is the program in the built package, which carries the
-licence texts of everything in it. The package contains no ROM, no SD card
-and no game. See [LICENSE](LICENSE).
+licence texts of everything in it. The package contains the 48K Spectrum's
+ROM, which Amstrad allows to be distributed (but not sold on its own); it
+contains no other ROM, no SD card and no game. See [LICENSE](LICENSE).

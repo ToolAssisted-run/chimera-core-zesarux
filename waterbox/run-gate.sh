@@ -9,12 +9,14 @@
 # Chimera's own headless runner (chimera-run); the package is the one
 # waterbox/build-package.sh -o build/pkg made (ZESARUX_PACKAGE names another).
 #
-# The Next's firmware and SD card: the tests take the three files ZEsarUX
-# itself comes with, from the pinned submodule (extern/zesarux/src):
-# tbblue_loader.rom (the Next's boot ROM), tbblue.mmc (an SD card with
-# NextZXOS on it) and 48.rom (the Spectrum's ROM, for the fast start).
-# ZESARUX_TEST_FIRMWARE=<folder> takes them from another folder instead. None
-# of them is copied into this repository or into the package.
+# The Next's firmware and SD card: the tests take the files ZEsarUX itself
+# comes with, from the pinned submodule (extern/zesarux/src):
+# tbblue_loader.rom (the Next's boot ROM) and tbblue.mmc (an SD card with
+# NextZXOS on it), and 48.rom (the Spectrum's ROM) to compare with the copy
+# built into the core, which the fast start runs on (user-decided,
+# 2026-10-31: docs/PLAN.md). ZESARUX_TEST_FIRMWARE=<folder> takes them from
+# another folder instead. None of them is copied into this repository; the
+# 48K ROM alone is in the package.
 #
 # The program the tests load is made by this script (tests/make-nex.py): no
 # game is involved, and no test needs one.
@@ -65,7 +67,8 @@ if [ ! -f "$fw/tbblue_loader.rom" ] || [ ! -f "$fw/tbblue.mmc" ] || [ ! -f "$fw/
 	exit 2
 fi
 nextzxos="--firmware $fw/tbblue_loader.rom --sd $fw/tbblue.mmc"
-fast="--firmware $fw/48.rom --set boot=fast"
+# the fast start needs nothing handed over: its ROM is built in
+fast="--set boot=fast"
 prog="$work/test.nex"
 python3 "$here/tests/make-nex.py" "$prog" || exit 2
 
@@ -99,6 +102,30 @@ if [ -z "$why" ]; then
 	report "boot:fast" PASS "600 frames with buttons pressed: the sandbox gives the native build's lines; 50 frames a second, 312 samples a frame, 704x608"
 else
 	report "boot:fast" FAIL "$why"
+fi
+
+# The 48K ROM is built into the core. The fast start with no ROM handed
+# over, with upstream's 48.rom handed over, and with a wrong file of that
+# name handed over (16 KiB of noise) runs the same 300 frames with buttons,
+# natively and in the sandbox: the built-in ROM is upstream's, and it wins
+# over any file of its name. (Seen to fail, docs/PLAN.md: with the core
+# not answering for the name, the run with no ROM did not start and the
+# wrong ROM's run differed.)
+wrong="$work/wrong"
+mkdir -p "$wrong"
+python3 -c 'import random,sys; r=random.Random(48); sys.stdout.buffer.write(bytes(r.randrange(256) for _ in range(16384)))' > "$wrong/48.rom"
+box rom-none $fast --frames 300 --every 50 --exercise
+box rom-up $fast --firmware "$fw/48.rom" --frames 300 --every 50 --exercise
+box rom-wrong $fast --firmware "$wrong/48.rom" --frames 300 --every 50 --exercise
+nat rom-wrong-n $fast --firmware "$wrong/48.rom" --frames 300 --every 50 --exercise
+why=""
+same rom-none rom-up || why="$why with upstream's 48.rom handed over the run differs [$(last "$work/rom-up.out" | cut -c1-60)] $(tail -1 "$work/rom-none.err" | cut -c1-80);"
+same rom-none rom-wrong || why="$why a wrong 48.rom handed over changed the run (the built-in ROM did not win);"
+same rom-wrong rom-wrong-n || why="$why native and sandbox differ;"
+if [ -z "$why" ]; then
+	report "rom:built-in" PASS "the fast start with no ROM handed over, with upstream's 48.rom and with a wrong file of that name gives the same 300 frames, natively and in the sandbox"
+else
+	report "rom:built-in" FAIL "$why"
 fi
 
 # NextZXOS, started from the card as a Next starts: the boot ROM, the
@@ -355,6 +382,7 @@ if [ -z "$chimera_root" ] || [ ! -x "$engine" ] || [ ! -f "$package" ]; then
 	report "frontend:movie" SKIP "$why"
 	report "frontend:firmware" SKIP "$why"
 	report "frontend:suggest" SKIP "$why"
+	report "frontend:built-in-rom" SKIP "$why"
 else
 	fe_frames=1500
 	shot=1499
@@ -420,6 +448,22 @@ else
 		report "frontend:suggest" PASS "the core suggests the fast start for a project with a program and no card, and NextZXOS for one with the card"
 	else
 		report "frontend:suggest" FAIL "program only [$(tail -1 "$work/sg-prog.out" | cut -c1-60)] with the card [$(tail -1 "$work/sg-sd.out" | cut -c1-60)]"
+	fi
+	# The fast start in the frontend with no firmware handed over at all:
+	# the project of the test program, set to start fast, runs, and its
+	# picture at frame 99 is this repository's runner's.
+	env -u DISPLAY "$engine" --new-project "$fe_dir/fast.chimeraProject" "$package" --file "program=$fe_dir/test.nex" \
+		--settings '{"boot":"fast"}' --movie "$work/keys.movie" > "$fe_dir/fast.log" 2>&1
+	env -u DISPLAY "$engine" --project "$fe_dir/fast.chimeraProject" "$package" --files "$fe_dir" --frames 100 \
+		--screenshot "99=$work/fe-fast.tga" > "$work/fe-fast.out" 2>&1
+	fast_rc=$?
+	# shellcheck disable=SC2046,SC2086
+	box fe-fast $fast --program "$prog" --frames 100 --ppm "$work/fe-fast.ppm" $(python3 "$here/tests/make-movie.py" "$fe_frames" $movie_buttons --as-presses)
+	verdict="$(python3 "$same_picture" "$work/fe-fast.tga" "$work/fe-fast.ppm" 2>&1)"; same_rc=$?
+	if [ "$fast_rc" = 0 ] && [ "$same_rc" = 0 ]; then
+		report "frontend:built-in-rom" PASS "a project that starts fast runs in chimera-run with no firmware handed over; its picture at frame 99 is this repository's runner's ($verdict)"
+	else
+		report "frontend:built-in-rom" FAIL "chimera-run exit $fast_rc [$(tail -1 "$work/fe-fast.out" | cut -c1-80)]; pictures: $verdict"
 	fi
 fi
 

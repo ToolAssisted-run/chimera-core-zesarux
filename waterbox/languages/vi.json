@@ -8,8 +8,6 @@
 		"error.sd_not_fat": "ảnh thẻ SD không có hệ thống tệp FAT mà ZEsarUX đọc được.",
 		"error.sd_not_raw": "ảnh thẻ SD không phải là ảnh thô của một thẻ (.mmc hoặc .img).",
 		"error.sd_size": "ảnh thẻ SD đã đổi kích thước trong lúc sao chép chương trình.",
-		"firmware.48_rom": "48.rom",
-		"firmware.48_rom.about": "ROM của ZX Spectrum 48K (16 KB), mà Next chạy khi khởi động nhanh, không có NextZXOS. ROM này thuộc về Amstrad, hãng cho phép phân phối nó cùng với trình giả lập. ZEsarUX có kèm nó, với tên 48.rom.",
 		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
 		"firmware.tbblue_loader_rom.about": "ROM khởi động của Next (8 KB), chương trình mà FPGA của nó chạy đầu tiên: nó đọc hệ thống của Next từ thẻ SD. ZEsarUX có kèm nó, với tên tbblue_loader.rom.",
 		"setting.boot": "Khởi động",

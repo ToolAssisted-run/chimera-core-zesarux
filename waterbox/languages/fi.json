@@ -8,8 +8,6 @@
 		"error.sd_not_fat": "SD-kortin levykuvalla ei ole FAT-tiedostojärjestelmää, jota ZEsarUX osaa lukea.",
 		"error.sd_not_raw": "SD-kortin levykuva ei ole tavallinen kuva kortista (.mmc tai .img).",
 		"error.sd_size": "SD-kortin levykuvan koko muuttui ohjelmaa kopioitaessa.",
-		"firmware.48_rom": "48.rom",
-		"firmware.48_rom.about": "ZX Spectrum 48K:n ROM (16 kt), jota Next ajaa, kun se käynnistetään nopeasti ilman NextZXOS:ää. Sen omistaa Amstrad, joka sallii sen levittämisen emulaattorien mukana. ZEsarUX:n mukana se tulee nimellä 48.rom.",
 		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
 		"firmware.tbblue_loader_rom.about": "Nextin käynnistys-ROM (8 kt), ohjelma, jonka sen FPGA käynnistää ensimmäisenä: se lukee Nextin järjestelmän SD-kortilta. ZEsarUX:n mukana se tulee nimellä tbblue_loader.rom.",
 		"setting.boot": "Käynnistys",

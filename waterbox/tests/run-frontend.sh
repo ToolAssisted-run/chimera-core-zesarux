@@ -7,14 +7,15 @@
 #    over as firmware was found, the card was read and the system started);
 #  - a setting made in the project reaches the machine: with Start set to
 #    "fast" and the test program in the project, the memory at that frame is
-#    another, and is what the native build has with that setting;
+#    another, and is what the native build has with that setting (with no
+#    firmware handed over: the fast start's 48K ROM is built into the core);
 #  - the keys the package ships become Chimera's keys.
 #
 # Usage: waterbox/tests/run-frontend.sh --chimera-root <chimera checkout> [--frames N]
 # Needs: Chimera built with its window and chimera-run, the package
 # (waterbox/build-package.sh -o build/pkg, or ZESARUX_PACKAGE=<file>), the
-# native build. The Next's boot ROM, 48K ROM and SD card come from the
-# pinned ZEsarUX submodule, or from ZESARUX_TEST_FIRMWARE=<folder>.
+# native build. The Next's boot ROM and SD card come from the pinned
+# ZEsarUX submodule, or from ZESARUX_TEST_FIRMWARE=<folder>.
 # QT_LIB_DIR=<folder> names where Qt's libraries are when the window does
 # not find them by itself (Chimera's tools/ci-chimera.sh installs Qt into
 # <its folder>/6.12.0/gcc_64).
@@ -46,7 +47,7 @@ fw="${ZESARUX_TEST_FIRMWARE:-$root/extern/zesarux/src}"
 [ -x "$crun" ] || { echo "chimera-run is not built: $crun" >&2; exit 1; }
 [ -f "$package" ] || { echo "the package is not there: $package (run waterbox/build-package.sh -o build/pkg)" >&2; exit 1; }
 [ -x "$rn" ] || { echo "the native build is not there: $rn" >&2; exit 1; }
-for f in tbblue_loader.rom 48.rom tbblue.mmc; do
+for f in tbblue_loader.rom tbblue.mmc; do
 	[ -f "$fw/$f" ] || { echo "no $f in $fw (git submodule update --init, or ZESARUX_TEST_FIRMWARE)" >&2; exit 1; }
 done
 
@@ -70,9 +71,10 @@ report() { printf '%-22s %-6s %s\n' "$1" "$2" "$3"; case "$2" in PASS) ok=$((ok 
 
 # A game runs only in a project (Chimera, 2026-10-26): each run opens one,
 # made with chimera-run --new-project, with the settings and firmware given.
-make_project() { # <tag> <settings JSON> <firmware id=path> <slot=path>...
+make_project() { # <tag> <settings JSON> <firmware id=path, or ""> <slot=path>...
 	local tag="$1" settings="$2" firmware="$3"; shift 3
-	local dir="$work/project.$tag" files=() s
+	local dir="$work/project.$tag" files=() s fwargs=()
+	[ -n "$firmware" ] && fwargs=(--firmware "$firmware")
 	rm -rf "$dir" && mkdir -p "$dir"
 	: > "$dir/empty.movie"
 	for s in "$@"; do
@@ -80,9 +82,9 @@ make_project() { # <tag> <settings JSON> <firmware id=path> <slot=path>...
 		files+=(--file "${s%%=*}=$dir/$(basename "${s#*=}")")
 	done
 	"$crun" --new-project "$dir/$tag.chimeraProject" "$package" "${files[@]}" --movie "$dir/empty.movie" \
-		--settings "$settings" --firmware "$firmware" > "$dir/make.log" 2>&1 && echo "$dir/$tag.chimeraProject"
+		--settings "$settings" "${fwargs[@]}" > "$dir/make.log" 2>&1 && echo "$dir/$tag.chimeraProject"
 }
-run_frontend() { # <tag> <project> <firmware id> <firmware path> <frames> [lua script]
+run_frontend() { # <tag> <project> <firmware id, or ""> <firmware path> <frames> [lua script]
 	local tag="$1" project="$2" fw_id="$3" fw_path="$4" nframes="$5" lua="${6:-frontend-ram.lua}"
 	local job="$work/job.$tag.txt" out="$work/$tag.ram.bin"
 	[ "$lua" = dump-controls.lua ] && out="$work/$tag.controls.json"
@@ -94,7 +96,9 @@ run_frontend() { # <tag> <project> <firmware id> <firmware path> <frames> [lua s
 	} > "$job"
 	# the firmware, remembered as the Firmware window remembers a file
 	# chosen by hand (keyed under the core's name)
-	python3 "$here/settings-config.py" "$work/settings.$tag.json" '{}' "{\"$fw_id\": \"$fw_path\"}"
+	local fwmap='{}'
+	[ -n "$fw_id" ] && fwmap="{\"$fw_id\": \"$fw_path\"}"
+	python3 "$here/settings-config.py" "$work/settings.$tag.json" '{}' "$fwmap"
 	( cd "$chimera_root" && MINIHAWK_JOB="$job" timeout 900 "$chimera_exe" --headless \
 		"--config=$work/settings.$tag.json" "--core=$package" "--lua=$here/$lua" "--project=$project" ) > "$work/$tag.log" 2>&1
 	[ -f "$work/$tag.meta.txt" ] && grep -q "^status=OK" "$work/$tag.meta.txt"
@@ -117,22 +121,21 @@ else
 	report "window:memory" FAIL "the memory differs from the native build's"
 fi
 
-rom48="$fw/48.rom"
-if ! native_ram fast --firmware "$rom48" --set boot=fast --program "$prog"; then
+if ! native_ram fast --set boot=fast --program "$prog"; then
 	report "window:setting" FAIL "the native runner failed: $(tail -1 "$work/native.fast.txt")"
-elif ! project="$(make_project fast '{"boot": "fast"}' "48.rom=$rom48" "program=$prog")"; then
+elif ! project="$(make_project fast '{"boot": "fast"}' "" "program=$prog")"; then
 	report "window:setting" FAIL "no project made: $(tail -1 "$work/project.fast/make.log")"
-elif ! run_frontend fast "$project" 48.rom "$rom48" "$frames"; then
+elif ! run_frontend fast "$project" "" "" "$frames"; then
 	report "window:setting" FAIL "Chimera did not finish the run: $(tail -2 "$work/fast.log" | tr '\n' ' ' | cut -c1-200)"
 elif cmp -s "$work/native.fast.ram.bin" "$work/fast.ram.bin" && ! cmp -s "$work/fast.ram.bin" "$work/base.ram.bin"; then
-	report "window:setting" PASS "with Start set to fast and the test program in the project, the memory at frame $frames is another, and is the native build's with that setting"
+	report "window:setting" PASS "with Start set to fast, the test program in the project and no firmware handed over, the memory at frame $frames is another, and is the native build's with that setting"
 else
 	report "window:setting" FAIL "fast start: same as native $(cmp -s "$work/native.fast.ram.bin" "$work/fast.ram.bin" && echo yes || echo no); differs from NextZXOS $(cmp -s "$work/fast.ram.bin" "$work/base.ram.bin" && echo no || echo yes)"
 fi
 
 # the keys the package ships are the machine's when nobody changed them (the
 # window keeps only the keys a person changed; fresh settings have none)
-if [ -n "${project:-}" ] && run_frontend keys "$project" 48.rom "$rom48" 1 dump-controls.lua; then
+if [ -n "${project:-}" ] && run_frontend keys "$project" "" "" 1 dump-controls.lua; then
 	if python3 "$here/check-keybinds.py" "$work/keys.controls.json" "$wb/default_keybinds.json" "ZX Spectrum Next Keyboard and Joystick" > "$work/keys.txt" 2>&1; then
 		report "window:keys" PASS "$(cat "$work/keys.txt")"
 	else

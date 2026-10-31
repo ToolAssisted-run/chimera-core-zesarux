@@ -8,8 +8,6 @@
 		"error.sd_not_fat": "image kartu SD tidak memiliki sistem berkas FAT yang dapat dibaca ZEsarUX.",
 		"error.sd_not_raw": "image kartu SD bukan image biasa dari sebuah kartu (.mmc atau .img).",
 		"error.sd_size": "ukuran image kartu SD berubah saat program disalin.",
-		"firmware.48_rom": "48.rom",
-		"firmware.48_rom.about": "ROM ZX Spectrum 48K (16 KB), yang dijalankan Next saat dinyalakan cepat, tanpa NextZXOS. ROM ini milik Amstrad, yang mengizinkannya disebarkan bersama emulator. ZEsarUX menyertakannya, sebagai 48.rom.",
 		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
 		"firmware.tbblue_loader_rom.about": "ROM boot Next (8 KB), program yang pertama kali dijalankan FPGA-nya: ROM ini membaca sistem Next dari kartu SD. ZEsarUX menyertakannya, sebagai tbblue_loader.rom.",
 		"setting.boot": "Mulai",

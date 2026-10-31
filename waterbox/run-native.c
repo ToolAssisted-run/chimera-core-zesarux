@@ -46,6 +46,24 @@ int __wrap_clock_gettime(clockid_t id, struct timespec *ts)
 	return 0;
 }
 
+/* A built-in ROM is opened from the core's memory, as in the sandbox
+ * (chimera_roms.c, guest-syscalls.c); the link wraps fopen (meson.build).
+ * The host's C library is asked for large files, so its headers turn a
+ * call of fopen into fopen64: both are wrapped. */
+#include "chimera_roms.h"
+FILE *__real_fopen(const char *path, const char *mode);
+FILE *__wrap_fopen(const char *path, const char *mode)
+{
+	FILE *rom = chimera_rom_fopen(path, mode);
+	return rom ? rom : __real_fopen(path, mode);
+}
+FILE *__real_fopen64(const char *path, const char *mode);
+FILE *__wrap_fopen64(const char *path, const char *mode)
+{
+	FILE *rom = chimera_rom_fopen(path, mode);
+	return rom ? rom : __real_fopen64(path, mode);
+}
+
 static int write_file(const char *name, const char *text)
 {
 	FILE *f = fopen(name, "wb");

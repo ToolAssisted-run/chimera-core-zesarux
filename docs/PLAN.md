@@ -50,9 +50,9 @@ the repository, which moves every day.
 - **Does it recompile?** No. An interpreter.
 - **What must the user bring?** For NextZXOS: the Next's boot ROM
   (`tbblue_loader.rom`, 8 KiB) and an SD card image with the Next's system
-  on it. For the fast start (no NextZXOS): the 48K Spectrum's ROM
-  (`48.rom`). ZEsarUX's repository contains all three; see "What the user
-  brings" below for their terms and the owner's question.
+  on it. For the fast start (no NextZXOS): nothing; the 48K Spectrum's ROM
+  it runs on is built into the core (user-decided, 2026-10-31). ZEsarUX's
+  repository contains all three; see "What the user brings".
 - **What can a test run on a public runner?** Everything here, if the three
   files may be read from the ZEsarUX submodule there (they are in it, as
   they are on this machine). The tests use no game: the program they load is
@@ -157,17 +157,54 @@ program, so neither is used:
   link wraps; an error is kept and becomes the reason `Init` refuses (a ROM
   that is not there is reported before ZEsarUX's display is up).
 
-## Decisions (2026-10-31), the owner's questions among them
+## The owner's decisions (user-decided, 2026-10-31)
 
-- **Nothing of the Next's firmware or card is packaged** (awaiting the
-  owner). The boot ROM, the 48K ROM and the SD card are firmware and a slot
-  file the user brings, although ZEsarUX's repository has all three. The
-  sensible default while nobody has read their terms closely; see "What the
-  user brings".
-- **The tests read those three files from the ZEsarUX submodule** (awaiting
-  the owner). They are upstream's own files, at the pinned commit; nothing
-  of them is copied into this repository. ZESARUX_TEST_FIRMWARE points the
-  tests elsewhere.
+The owner accepted every recommendation of the first round:
+
+- **The tests may read the Next's boot ROM (`tbblue_loader.rom`), the 48K
+  ROM (`48.rom`) and the SD card image (`tbblue.mmc`) from the pinned
+  ZEsarUX submodule**, on this machine and on a public CI runner. They are
+  upstream's own files at the pinned commit; nothing of them is copied into
+  this repository. ZESARUX_TEST_FIRMWARE points the tests elsewhere.
+- **The 48K ROM is packaged**, on the same terms as the Fuse core's Amstrad
+  ROMs (built into the core; Amstrad allows its distribution). Done: see
+  "The 48K ROM is built in" below. The fast start needs nothing from the
+  user any more.
+- **The Next's boot ROM stays firmware the user supplies**, and **the SD
+  card image is not packaged**.
+- **Start defaults to `nextzxos`**, and the core suggests `fast` for a
+  project that has a program and no card (as built).
+- **The system id is `ZXN`**, with the Fuse core's key names and movie
+  letters (as built).
+- **The Next only, for now.** ZEsarUX's other machines may come later, if
+  wanted ("Other machines ZEsarUX would bring").
+- **Publishing waits for the owner's review.**
+
+## The 48K ROM is built in (2026-10-31)
+
+- `waterbox/gen-roms.py` writes ZEsarUX's own `src/48.rom` (at the pinned
+  commit) into a C file when the core is built, and stops if its SHA-1 is
+  not 5EA7C2B8... (the same 16 KiB as Fuse's 48.rom). This repository
+  holds no ROM.
+- `waterbox/chimera_roms.c` hands it to ZEsarUX. ZEsarUX loads a ROM in
+  three steps (cpu.c, `rom_load`): `find_sharedfile` looks for it in a
+  list of folders, `get_file_size` asks its size, `fopen` reads it. The
+  link wraps all three (and `fopen64` natively, which the host's headers
+  turn `fopen` into); for the name `48.rom` the first answers with a path
+  no mounted file can have (`chimera-built-in/48.rom`), and the other two
+  answer that path from the core's memory (`fmemopen`). No patch to
+  ZEsarUX.
+- The built-in ROM wins over a file of the same name, as in the Fuse
+  core: what the machine runs must not depend on what is mounted beside it.
+- The firmware entry for `48.rom` is gone from `waterbox.config`, and with
+  it its two texts in the 26 tables.
+- `waterbox/ROMS.txt` says whose the ROM is and on what terms (Amstrad's,
+  as Fuse's `roms/README.copyright` states them; ZEsarUX's repository has
+  no such text); `package-licenses.json` lists it and the package carries
+  it.
+
+## Decisions (2026-10-31)
+
 - **Two ways to start** (setting "Start"): `nextzxos` (the default, as a
   Next starts: boot ROM, firmware and NextZXOS from the card) and `fast`
   (ZEsarUX's "fast boot": the Next's hardware with the 48K ROM, no card,
@@ -213,10 +250,11 @@ program, so neither is used:
   hardware; parts carry their own licences, the Amstrad ROMs among them.
   Whether ZEsarUX's 64 MiB card is "the distribution in its entirety" is not
   plain. Not packaged.
-- `48.rom` (16 KiB, SHA-1 5EA7C2B824672E914525D1D5C419D71B84A426A2), for
-  the fast start: Amstrad's ROM, which Amstrad allows to be distributed with
-  emulators. The owner allowed the Fuse core to build Amstrad's ROMs in
-  (2026-10-12); the same could be done here. Not packaged.
+- Not brought: `48.rom` (16 KiB, SHA-1
+  5EA7C2B824672E914525D1D5C419D71B84A426A2), for the fast start:
+  Amstrad's ROM, which Amstrad allows to be distributed. Built into the
+  core (user-decided, 2026-10-31), as the Fuse core builds in Amstrad's
+  ROMs.
 
 ## What was measured (2026-10-31)
 
@@ -260,6 +298,13 @@ skipped, in 4 minutes.
 - program:sd-card: the program copied to the card is listed by the Browser
   and run by NextZXOS (the processor in its code at frame 1800), native and
   sandbox the same; the card file is unchanged.
+- rom:built-in (2026-10-31): the fast start with no ROM handed over, with
+  upstream's 48.rom handed over and with 16 KiB of noise named 48.rom
+  handed over: the same 300 frames with buttons, natively and in the
+  sandbox. frontend:built-in-rom: a project set to start fast, with no
+  firmware, runs in chimera-run and shows the runner's picture at frame 99.
+  The first native build of this crashed: the host's headers turn `fopen`
+  into `fopen64`, which was not wrapped yet.
 - settings:refused: an unknown start, no card, no boot ROM: each refused
   with a reason.
 - frontend:picture, frontend:states, frontend:movie, frontend:firmware, in
@@ -281,6 +326,9 @@ Chimera's contract test (`test-packages` on a folder with only this
 package): all passed. `tools/check-core-texts.py`: 20 keys, every one named.
 
 Seen to fail:
+- rom:built-in and frontend:built-in-rom (2026-10-31), with the core made
+  not to answer for `48.rom` (on purpose, taken out): both failed ("Unable
+  to open rom file 48.rom"), with every other fast-start test;
 - the native-against-sandbox tests, with the sandbox's clock one second
   ahead of the native build's (a change made on purpose and taken out):
   boot:nextzxos, time:virtual and program:sd-card failed. A change of the

@@ -76,15 +76,17 @@ QT_LIB_DIR=<qt>/6.12.0/gcc_64/lib bash waterbox/tests/run-frontend.sh --chimera-
 
 - `run-gate.sh` (the test script) compares the native build with the
   sandbox, test by test, and runs the package in chimera-run when
-  `CHIMERA_ROOT` names a Chimera checkout; without it, the four frontend
-  tests are skipped and say so. 13 tests, about two and a half minutes.
+  `CHIMERA_ROOT` names a Chimera checkout; without it, the six frontend
+  tests are skipped and say so. 18 tests, about five minutes.
 - `run-frontend.sh` loads the package in Chimera's window, headless.
 - `test-packages` is Chimera's own check of a package.
 
 The Next's boot ROM (`tbblue_loader.rom`), the 48K ROM (`48.rom`) and the
 SD card image (`tbblue.mmc`) are read from the ZEsarUX submodule's `src/`;
-`ZESARUX_TEST_FIRMWARE=<folder>` takes them from another folder. The test
-program is made by `waterbox/tests/make-nex.py`. No test needs a game.
+`ZESARUX_TEST_FIRMWARE=<folder>` takes them from another folder. The 48K
+ROM is also built into the core: `waterbox/gen-roms.py` reads it from the
+submodule while building and checks its SHA-1. The test program is made by
+`waterbox/tests/make-nex.py`.
 
 ## Troubleshooting
 

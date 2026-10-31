@@ -8,8 +8,6 @@
 		"error.sd_not_fat": "на образі SD-картки немає файлової системи FAT, яку може прочитати ZEsarUX.",
 		"error.sd_not_raw": "образ SD-картки не є простим образом картки (.mmc або .img).",
 		"error.sd_size": "образ SD-картки змінив розмір під час копіювання програми.",
-		"firmware.48_rom": "48.rom",
-		"firmware.48_rom.about": "ПЗП ZX Spectrum 48K (16 КБ), яке Next виконує, коли запускається швидко, без NextZXOS. Воно належить Amstrad, яка дозволяє поширювати його разом з емуляторами. Воно є в комплекті ZEsarUX як 48.rom.",
 		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
 		"firmware.tbblue_loader_rom.about": "Завантажувальне ПЗП Next (8 КБ), програма, яку його ПЛІС запускає першою: вона читає систему Next з SD-картки. Воно є в комплекті ZEsarUX як tbblue_loader.rom.",
 		"setting.boot": "Запуск",

@@ -8,8 +8,6 @@
 		"error.sd_not_fat": "az SD-kártya képfájlján nincs olyan FAT fájlrendszer, amelyet a ZEsarUX olvasni tud.",
 		"error.sd_not_raw": "az SD-kártya képfájlja nem egy kártya egyszerű képe (.mmc vagy .img).",
 		"error.sd_size": "az SD-kártya képfájljának mérete megváltozott a program másolása közben.",
-		"firmware.48_rom": "48.rom",
-		"firmware.48_rom.about": "A ZX Spectrum 48K ROM-ja (16 KB), amelyet a Next futtat, ha gyorsan, NextZXOS nélkül indul. Az Amstradé, amely engedi, hogy emulátorokkal együtt terjesszék. A ZEsarUX tartalmazza, 48.rom néven.",
 		"firmware.tbblue_loader_rom": "tbblue_loader.rom",
 		"firmware.tbblue_loader_rom.about": "A Next indító ROM-ja (8 KB), a program, amelyet az FPGA-ja elsőként indít: beolvassa a Next rendszerét az SD-kártyáról. A ZEsarUX tartalmazza, tbblue_loader.rom néven.",
 		"setting.boot": "Indítás",

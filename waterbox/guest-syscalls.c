@@ -97,12 +97,15 @@ void backtrace_symbols_fd(void *const *buffer, int size, int fd)
 
 /* A file's name as ZEsarUX makes it from a command line ("./tbblue.mmc",
  * chimera_compat.c) is the mounted file's bare name. The guest's link wraps
- * fopen and open (meson.build). */
+ * fopen and open (meson.build). A built-in ROM is opened from the core's
+ * memory (chimera_roms.c). */
 #include <stdio.h>
+#include "chimera_roms.h"
 FILE *__real_fopen(const char *path, const char *mode);
 FILE *__wrap_fopen(const char *path, const char *mode)
 {
-	return __real_fopen(bare(path), mode);
+	FILE *rom = chimera_rom_fopen(path, mode);
+	return rom ? rom : __real_fopen(bare(path), mode);
 }
 int __real_open(const char *path, int flags, ...);
 int __wrap_open(const char *path, int flags, ...)

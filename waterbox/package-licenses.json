@@ -1,8 +1,8 @@
 {
   "package": "zesarux",
   "effectiveTerms": "GPL-3.0-or-later",
-  "commercialUse": "allowed under the GPL",
-  "note": "The core is ZEsarUX (GPL-3.0-or-later) by Cesar Hernandez Bano and its contributors, built with this repository's patches (GPL-3.0-or-later) and integration (MIT). ZEsarUX includes modules by others under their own terms, each listed here with its text: SimCoupe's ATOM Lite code, Fuse's disassembler, ungac (GPL-2.0-or-later); mdvtool, undaad (GPL-3.0-or-later); Musashi, scl2trd, unPAWs (MIT); the SC/MP emulation and grackle (BSD-3-Clause); FatFs (BSD-1-Clause); zip and miniz (Unlicense); UnrealSpeccy's SPG loader (freeware without restrictions); two fonts (CC-BY-SA-3.0 and CC-BY-3.0); and the HiLow Data Drive's material (permission to emulate). PlayTZX, whose licence ZEsarUX says is unknown, is left out of the core. The package contains no ROM, no firmware, no SD card image and no game: the Next's boot ROM, the 48K ROM and the SD card are supplied by the user.",
+  "commercialUse": "allowed under the GPL for the program; the 48K ROM inside may be distributed but not sold on its own (see the ROM's entry)",
+  "note": "The core is ZEsarUX (GPL-3.0-or-later) by Cesar Hernandez Bano and its contributors, built with this repository's patches (GPL-3.0-or-later) and integration (MIT). ZEsarUX includes modules by others under their own terms, each listed here with its text: SimCoupe's ATOM Lite code, Fuse's disassembler, ungac (GPL-2.0-or-later); mdvtool, undaad (GPL-3.0-or-later); Musashi, scl2trd, unPAWs (MIT); the SC/MP emulation and grackle (BSD-3-Clause); FatFs (BSD-1-Clause); zip and miniz (Unlicense); UnrealSpeccy's SPG loader (freeware without restrictions); two fonts (CC-BY-SA-3.0 and CC-BY-3.0); and the HiLow Data Drive's material (permission to emulate). PlayTZX, whose licence ZEsarUX says is unknown, is left out of the core. The package also contains the ZX Spectrum 48K's ROM, built into the core, as ZEsarUX itself is distributed with it (src/48.rom): copyright Amstrad, who allow its distribution but retain the copyright; it may not be sold on its own. waterbox/ROMS.txt, carried in this package, says so. The package contains no other ROM, no firmware, no SD card image and no game: the Next's boot ROM and the SD card are supplied by the user.",
   "components": [
     {
       "name": "chimera-core-zesarux (integration)",
@@ -122,6 +122,14 @@
       "license": "Unlicense",
       "url": "https://github.com/kuba--/zip",
       "file": "extern/zesarux/src/licenses/LICENSE_zip"
+    },
+    {
+      "name": "The ZX Spectrum 48K's ROM (as ZEsarUX is distributed with it): whose it is, and its terms",
+      "license": "Amstrad's permission to distribute",
+      "url": "https://github.com/chernandezba/zesarux",
+      "commit": "{submodule:extern/zesarux}",
+      "file": "waterbox/ROMS.txt",
+      "sourceUrl": "https://github.com/chernandezba/zesarux/archive/{commit}.tar.gz"
     }
   ]
 }

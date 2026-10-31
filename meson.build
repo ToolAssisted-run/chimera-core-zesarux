@@ -105,16 +105,27 @@ zs_sources = files(
   zs / 'zxvision/zxvision.c', zs / 'zxvision/zxvision_topbar.c',
   # the core's own layers under ZEsarUX
   'waterbox/scrchimera.c', 'waterbox/audiochimera.c', 'waterbox/chimera_compat.c',
+  'waterbox/chimera_roms.c',
 )
+
+# The 48K Spectrum's ROM, for the Next's fast start, is built into the core
+# (user-decided, 2026-10-31): read from the pinned submodule at build time
+# by waterbox/gen-roms.py, which checks its SHA-1; this repository holds no
+# ROM. waterbox/chimera_roms.c hands it to ZEsarUX.
+zs_sources += custom_target('chimera_roms_data',
+  input: [files('waterbox/gen-roms.py'), files(zs / '48.rom')],
+  output: 'chimera_roms_data.c',
+  command: [find_program('python3'), '@INPUT0@', meson.current_source_dir() / zs, '@OUTPUT@'])
 
 # What ZEsarUX asks of the system that is the machine's business: the
 # clock, the C library's random numbers, sleeping, signal handlers, the
 # system's name and the current folder; and ZEsarUX's own messages, to keep
-# an error as the reason a start failed (waterbox/chimera_compat.c). Wrapped
-# at the link, for every object.
+# an error as the reason a start failed (waterbox/chimera_compat.c); and the
+# finding of a ROM, which the built-in ROM answers (waterbox/chimera_roms.c,
+# with fopen below). Wrapped at the link, for every object.
 link_wrap = []
 foreach f : ['time', 'gettimeofday', 'localtime', 'mktime', 'rand', 'srand', 'sleep', 'usleep', 'signal', 'uname',
-             'getcwd', 'debug_printf']
+             'getcwd', 'debug_printf', 'find_sharedfile', 'get_file_size']
   link_wrap += '-Wl,--wrap=' + f
 endforeach
 
@@ -140,9 +151,9 @@ else
   executable('run-native', zs_sources + files('waterbox/cinterface.c', 'waterbox/run-native.c'),
     include_directories: [include_directories('waterbox/native-shim'), zs_inc],
     c_args: ['-I' + mb / 'source/guest/include', '-I' + mb / 'extern/jsmn'],
-    # the sandbox's clock, which stands still at the project's start
-    # (waterbox/run-native.c)
-    link_args: link_wrap + ['-Wl,--wrap=clock_gettime'],
+    # the sandbox's clock, which stands still at the project's start, and
+    # fopen (fopen64 here), which opens the built-in ROM (waterbox/run-native.c)
+    link_args: link_wrap + ['-Wl,--wrap=clock_gettime', '-Wl,--wrap=fopen', '-Wl,--wrap=fopen64'],
     dependencies: [m])
 
   mbhost = mb / 'build/meson-linux/source/host'
