@@ -295,6 +295,10 @@ Seen to fail:
 - the sandbox's clock one second ahead again, after game:warhawk was added:
   game:warhawk failed with boot:nextzxos, time:virtual and program:sd-card.
 
+A fresh clone (submodule from the local checkout), built with HOME set to
+an empty folder: the same core.wbx byte for byte. A native build with GCC
+13: NextZXOS to its menu with the GCC 14 build's lines.
+
 Speed, in the sandbox: about 200 frames a second at NextZXOS's menu
 (28 MHz), 193 frames a second for the test program at 28 MHz; 4 times a
 real Next.

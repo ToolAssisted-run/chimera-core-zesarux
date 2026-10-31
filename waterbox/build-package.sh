@@ -62,7 +62,8 @@ python3 "$mb/source/guest/package-licenses.py" "$root" "$staging"
 core_version="${CORE_VERSION:-}"
 if [ -z "$core_version" ]; then
 	if commit="$(git -C "$root" rev-parse --short=12 HEAD 2>/dev/null)"; then
-		git -C "$root" diff --quiet HEAD 2>/dev/null || commit="$commit-dirty"
+		# the patches applied in the submodule are not a change of this tree
+		git -C "$root" diff --quiet --ignore-submodules=dirty HEAD 2>/dev/null || commit="$commit-dirty"
 		core_version="$commit+local"
 	else
 		core_version="unversioned+local"

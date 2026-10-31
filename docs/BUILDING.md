@@ -1,8 +1,10 @@
 # Building and testing
 
 This builds `zesarux.chimeraCore` from source and runs its tests. It has
-been done on Ubuntu 24.04 with GCC 14, on 2026-10-31. Not yet done: a build
-with GCC 13 (what a CI runner has), and a build from a fresh clone.
+been done on Ubuntu 24.04 with GCC 14, on 2026-10-31, and from a fresh
+clone with an empty HOME (the same core.wbx, byte for byte). A native build
+with GCC 13, which is what a CI runner has, runs NextZXOS to its menu with
+the same lines as the GCC 14 build.
 
 ## What is needed
 
