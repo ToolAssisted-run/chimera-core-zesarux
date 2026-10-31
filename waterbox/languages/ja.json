@@ -19,6 +19,8 @@
 		"slot.program": "プログラム",
 		"slot.program.help": "Next または Spectrum 用のプログラム: .nex ファイル (Next 独自の形式)、スナップショット (.snx、.sna、.z80、.zsf)、テープ (.tap、.tzx、.pzx)、または NextZXOS が開くファイル (.bas、.dot、.scr、.sl2)。Next が NextZXOS で起動するときは、ファイルは SD カードの最上位のフォルダーに置かれ、実機と同じく Browser から実行します。高速起動のときは、プログラムが直接マシンに読み込まれます。",
 		"slot.sd": "SD カード",
-		"slot.sd.help": "Next の SD カードのイメージ (.mmc または .img) で、Next のシステム (NextZXOS) が入っているもの。ZEsarUX に tbblue.mmc が付属しています。マシンがカードに書いた内容はマシンの中 (とそのセーブステート) に残り、ファイルが変更されることはありません。Next を NextZXOS で起動するにはカードが必要です。「起動」が「fast」なら不要です。"
+		"slot.sd.help": "Next の SD カードのイメージ (.mmc または .img) で、Next のシステム (NextZXOS) が入っているもの。ZEsarUX に tbblue.mmc が付属しています。マシンがカードに書いた内容はマシンの中 (とそのセーブステート) に残り、ファイルが変更されることはありません。Next を NextZXOS で起動するにはカードが必要です。「起動」が「fast」なら不要です。",
+		"suggest.fast": "プロジェクトに SD カードがないので、Next は 48K の ROM で高速起動し、プログラムは直接マシンに読み込まれます。Next を実機と同じく起動するには、NextZXOS の入った SD カードを追加してください。",
+		"suggest.nextzxos": "プロジェクトに SD カードがあるので、Next は実機と同じくそこから NextZXOS で起動します。"
 	}
 }

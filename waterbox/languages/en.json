@@ -19,6 +19,8 @@
 		"slot.program": "Program",
 		"slot.program.help": "A program for the Next or the Spectrum: a .nex file (the Next's own), a snapshot (.snx, .sna, .z80, .zsf), a tape (.tap, .tzx, .pzx) or a file NextZXOS opens (.bas, .dot, .scr, .sl2). When the Next starts with NextZXOS, the file is put in the top folder of the SD card, and you run it from the Browser, as on a Next. When it starts fast, the program is loaded straight into the machine.",
 		"slot.sd": "SD Card",
-		"slot.sd.help": "The image of the Next's SD card (.mmc or .img), with the Next's system (NextZXOS) on it. ZEsarUX comes with one, tbblue.mmc. What the machine writes to the card stays in the machine (and in its savestates); the file is never changed. A Next needs a card to start with NextZXOS; with Start set to \"fast\" it needs none."
+		"slot.sd.help": "The image of the Next's SD card (.mmc or .img), with the Next's system (NextZXOS) on it. ZEsarUX comes with one, tbblue.mmc. What the machine writes to the card stays in the machine (and in its savestates); the file is never changed. A Next needs a card to start with NextZXOS; with Start set to \"fast\" it needs none.",
+		"suggest.fast": "The project has no SD card, so the Next starts fast, with the 48K ROM, and the program is loaded straight into the machine. Add an SD card with NextZXOS to start the Next as a Next does.",
+		"suggest.nextzxos": "The project has an SD card, so the Next starts with NextZXOS from it, as a Next does."
 	}
 }

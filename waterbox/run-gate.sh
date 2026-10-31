@@ -342,7 +342,8 @@ fi
 #  - a movie's row has the columns the package declares, and the movie
 #    recorded is the movie that was played;
 #  - NextZXOS with no boot ROM handed over does not start, and the ROM is
-#    named.
+#    named;
+#  - the start the core suggests for a project, with and without a card.
 chimera_root="${CHIMERA_ROOT:-}"
 engine="$chimera_root/build/dll/chimera-run"
 package="${ZESARUX_PACKAGE:-$root/build/pkg/zesarux.chimeraCore}"
@@ -353,6 +354,7 @@ if [ -z "$chimera_root" ] || [ ! -x "$engine" ] || [ ! -f "$package" ]; then
 	report "frontend:states" SKIP "$why"
 	report "frontend:movie" SKIP "$why"
 	report "frontend:firmware" SKIP "$why"
+	report "frontend:suggest" SKIP "$why"
 else
 	fe_frames=1500
 	shot=1499
@@ -405,6 +407,19 @@ else
 		report "frontend:firmware" PASS "NextZXOS with no boot ROM handed over does not start, and the ROM is named (exit $refused)"
 	else
 		report "frontend:firmware" FAIL "no boot ROM: exit $refused [$(tail -1 "$work/fe-nofw.out" | cut -c1-90)]"
+	fi
+	# What the core suggests before a machine is built: a project with only
+	# a program starts fast (there is no card to start NextZXOS from); one
+	# with the card starts NextZXOS.
+	cp "$prog" "$fe_dir/"
+	env -u DISPLAY "$engine" --new-project "$fe_dir/progonly.chimeraProject" "$package" --file "program=$fe_dir/test.nex" \
+		--movie "$work/keys.movie" > "$fe_dir/progonly.log" 2>&1
+	env -u DISPLAY "$engine" --project "$fe_dir/progonly.chimeraProject" "$package" --suggest > "$work/sg-prog.out" 2>&1
+	env -u DISPLAY "$engine" --project "$fe_dir/rec.chimeraProject" "$package" --suggest > "$work/sg-sd.out" 2>&1
+	if grep -q '^{"values":{"boot":"fast"}' "$work/sg-prog.out" && grep -q '^{"values":{"boot":"nextzxos"}' "$work/sg-sd.out"; then
+		report "frontend:suggest" PASS "the core suggests the fast start for a project with a program and no card, and NextZXOS for one with the card"
+	else
+		report "frontend:suggest" FAIL "program only [$(tail -1 "$work/sg-prog.out" | cut -c1-60)] with the card [$(tail -1 "$work/sg-sd.out" | cut -c1-60)]"
 	fi
 fi
 

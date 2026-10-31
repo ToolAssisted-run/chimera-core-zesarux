@@ -19,6 +19,8 @@
 		"slot.program": "Program",
 		"slot.program.help": "Program pro Next nebo Spectrum: soubor .nex (vlastní formát Nextu), snapshot (.snx, .sna, .z80, .zsf), kazeta (.tap, .tzx, .pzx) nebo soubor, který otevírá NextZXOS (.bas, .dot, .scr, .sl2). Když Next startuje s NextZXOS, soubor se umístí do hlavní složky SD karty a spustíte jej z Prohlížeče, jako na Nextu. Když startuje rychle, program se nahraje přímo do stroje.",
 		"slot.sd": "SD karta",
-		"slot.sd.help": "Obraz SD karty Nextu (.mmc nebo .img) se systémem Nextu (NextZXOS). ZEsarUX jeden obsahuje, tbblue.mmc. Co stroj zapíše na kartu, zůstává ve stroji (a v jeho uložených stavech); soubor se nikdy nemění. Next potřebuje kartu, aby nastartoval s NextZXOS; se Startem na „fast“ žádnou nepotřebuje."
+		"slot.sd.help": "Obraz SD karty Nextu (.mmc nebo .img) se systémem Nextu (NextZXOS). ZEsarUX jeden obsahuje, tbblue.mmc. Co stroj zapíše na kartu, zůstává ve stroji (a v jeho uložených stavech); soubor se nikdy nemění. Next potřebuje kartu, aby nastartoval s NextZXOS; se Startem na „fast“ žádnou nepotřebuje.",
+		"suggest.fast": "Projekt nemá SD kartu, takže Next startuje rychle s ROM 48K a program se nahraje přímo do stroje. Přidejte SD kartu s NextZXOS, aby Next startoval jako skutečný Next.",
+		"suggest.nextzxos": "Projekt má SD kartu, takže Next startuje z ní s NextZXOS, jako skutečný Next."
 	}
 }

@@ -174,6 +174,10 @@ program, so neither is used:
   the program loaded straight into memory). Fast needs only the 48K ROM; a
   program that wants NextZXOS's services or files from the card does not
   run that way.
+- **The core suggests the start** (`SuggestSettings`): `nextzxos` when the
+  project has an SD card, `fast` when it has only a program, so that a
+  person who brings only a .nex is not refused for want of a card. The New
+  Project window shows the suggestion with a note saying why.
 - **"Hold NextZXOS at 7 MHz"** (off by default). ZEsarUX by default holds
   the processor at 7 MHz while NextZXOS's own code runs, to spare the host
   (its `--denyturbotbbluerom`). A Next does not; the core does not either
@@ -219,7 +223,7 @@ program, so neither is used:
 On this machine (Linux, GCC 14), against Chimera at 3f8ea7e2
 (~/chimera-scratch-bump), miniBox of that checkout.
 
-`CHIMERA_ROOT=<chimera> waterbox/run-gate.sh`: 15 passed, 0 failed, 0
+`CHIMERA_ROOT=<chimera> waterbox/run-gate.sh`: 16 passed, 0 failed, 0
 skipped, in 4 minutes.
 
 - boot:fast: 600 frames with buttons by a pattern, native and sandbox the
@@ -262,7 +266,9 @@ skipped, in 4 minutes.
   chimera-run with projects: a recorded movie of 1500 frames played back by
   another process shows this repository's runner's picture at frame 1499,
   also with a save and load before every frame; the movie's row has 42 + 6
-  columns; NextZXOS with no boot ROM is refused and the ROM named.
+  columns; NextZXOS with no boot ROM is refused and the ROM named; the core
+  suggests the fast start for a project with a program and no card, and
+  NextZXOS for one with the card (chimera-run --suggest).
 
 `waterbox/tests/run-frontend.sh --chimera-root <chimera>` (Chimera's Qt
 window, headless, QT_LIB_DIR set to Qt's lib folder): 3 of 3. NextZXOS 1000
@@ -293,7 +299,9 @@ Seen to fail:
 - next:hardware, with make-nex.py's --without made to do nothing (on
   purpose, taken out): all four parts failed;
 - the sandbox's clock one second ahead again, after game:warhawk was added:
-  game:warhawk failed with boot:nextzxos, time:virtual and program:sd-card.
+  game:warhawk failed with boot:nextzxos, time:virtual and program:sd-card;
+- frontend:suggest, with the core suggesting nothing for a project with only
+  a program (on purpose, taken out): it failed.
 
 A fresh clone (submodule from the local checkout), built with HOME set to
 an empty folder: the same core.wbx byte for byte. A native build with GCC

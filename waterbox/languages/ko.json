@@ -19,6 +19,8 @@
 		"slot.program": "프로그램",
 		"slot.program.help": "Next 또는 Spectrum용 프로그램: .nex 파일(Next 고유 형식), 스냅숏(.snx, .sna, .z80, .zsf), 테이프(.tap, .tzx, .pzx), 또는 NextZXOS가 여는 파일(.bas, .dot, .scr, .sl2). Next가 NextZXOS로 시작하면 파일은 SD 카드의 최상위 폴더에 놓이고, 실제 Next처럼 Browser에서 실행합니다. 빠르게 시작하면 프로그램이 기계에 바로 불러와집니다.",
 		"slot.sd": "SD 카드",
-		"slot.sd.help": "Next의 SD 카드 이미지(.mmc 또는 .img)로, Next의 시스템(NextZXOS)이 들어 있습니다. ZEsarUX에 tbblue.mmc가 포함되어 있습니다. 기계가 카드에 쓴 내용은 기계(와 그 상태 저장) 안에 남으며, 파일은 결코 바뀌지 않습니다. Next가 NextZXOS로 시작하려면 카드가 필요하며, '시작'이 \"fast\"이면 필요하지 않습니다."
+		"slot.sd.help": "Next의 SD 카드 이미지(.mmc 또는 .img)로, Next의 시스템(NextZXOS)이 들어 있습니다. ZEsarUX에 tbblue.mmc가 포함되어 있습니다. 기계가 카드에 쓴 내용은 기계(와 그 상태 저장) 안에 남으며, 파일은 결코 바뀌지 않습니다. Next가 NextZXOS로 시작하려면 카드가 필요하며, '시작'이 \"fast\"이면 필요하지 않습니다.",
+		"suggest.fast": "프로젝트에 SD 카드가 없으므로 Next는 48K ROM으로 빠르게 시작하고, 프로그램은 기계에 바로 불러와집니다. Next를 실제 Next처럼 시작하려면 NextZXOS가 들어 있는 SD 카드를 추가하세요.",
+		"suggest.nextzxos": "프로젝트에 SD 카드가 있으므로 Next는 실제 Next처럼 그 카드에서 NextZXOS로 시작합니다."
 	}
 }

@@ -19,6 +19,8 @@
 		"slot.program": "Programa",
 		"slot.program.help": "Un programa per al Next o l'Spectrum: un fitxer .nex (el format propi del Next), una instantània (.snx, .sna, .z80, .zsf), una cinta (.tap, .tzx, .pzx) o un fitxer que obre NextZXOS (.bas, .dot, .scr, .sl2). Quan el Next arrenca amb NextZXOS, el fitxer es posa a la carpeta arrel de la targeta SD i l'executeu des del Navegador, com en un Next. Quan arrenca ràpid, el programa es carrega directament a la màquina.",
 		"slot.sd": "Targeta SD",
-		"slot.sd.help": "La imatge de la targeta SD del Next (.mmc o .img), amb el sistema del Next (NextZXOS). ZEsarUX en porta una, tbblue.mmc. El que la màquina escriu a la targeta es queda a la màquina (i als seus estats desats); el fitxer no es modifica mai. Un Next necessita una targeta per arrencar amb NextZXOS; amb Arrencada a «fast» no en necessita cap."
+		"slot.sd.help": "La imatge de la targeta SD del Next (.mmc o .img), amb el sistema del Next (NextZXOS). ZEsarUX en porta una, tbblue.mmc. El que la màquina escriu a la targeta es queda a la màquina (i als seus estats desats); el fitxer no es modifica mai. Un Next necessita una targeta per arrencar amb NextZXOS; amb Arrencada a «fast» no en necessita cap.",
+		"suggest.fast": "El projecte no té targeta SD, així que el Next arrenca ràpid, amb la ROM del 48K, i el programa es carrega directament a la màquina. Afegiu una targeta SD amb NextZXOS per arrencar el Next com un Next.",
+		"suggest.nextzxos": "El projecte té una targeta SD, així que el Next arrenca amb NextZXOS des d'ella, com un Next."
 	}
 }

@@ -19,6 +19,8 @@
 		"slot.program": "程序",
 		"slot.program.help": "供 Next 或 Spectrum 使用的程序：.nex 文件（Next 自己的格式）、快照（.snx、.sna、.z80、.zsf）、磁带（.tap、.tzx、.pzx），或 NextZXOS 能打开的文件（.bas、.dot、.scr、.sl2）。Next 用 NextZXOS 启动时，文件会被放到 SD 卡的根文件夹，您像在真正的 Next 上一样从 Browser 运行它。快速启动时，程序会被直接载入机器。",
 		"slot.sd": "SD 卡",
-		"slot.sd.help": "Next 的 SD 卡映像（.mmc 或 .img），上面装有 Next 的系统（NextZXOS）。ZEsarUX 附带一个，名为 tbblue.mmc。机器写到卡上的内容留在机器中（以及它的即时存档中）；文件本身永远不会被改动。Next 需要一张卡才能用 NextZXOS 启动；“启动”设为“fast”时则不需要。"
+		"slot.sd.help": "Next 的 SD 卡映像（.mmc 或 .img），上面装有 Next 的系统（NextZXOS）。ZEsarUX 附带一个，名为 tbblue.mmc。机器写到卡上的内容留在机器中（以及它的即时存档中）；文件本身永远不会被改动。Next 需要一张卡才能用 NextZXOS 启动；“启动”设为“fast”时则不需要。",
+		"suggest.fast": "项目中没有 SD 卡，因此 Next 用 48K 的 ROM 快速启动，程序会被直接载入机器。要像真正的 Next 一样启动，请添加一张装有 NextZXOS 的 SD 卡。",
+		"suggest.nextzxos": "项目中有 SD 卡，因此 Next 像真正的 Next 一样从卡上启动 NextZXOS。"
 	}
 }

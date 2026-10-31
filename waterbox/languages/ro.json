@@ -19,6 +19,8 @@
 		"slot.program": "Program",
 		"slot.program.help": "Un program pentru Next sau Spectrum: un fișier .nex (formatul propriu al Next-ului), un snapshot (.snx, .sna, .z80, .zsf), o casetă (.tap, .tzx, .pzx) sau un fișier pe care NextZXOS îl deschide (.bas, .dot, .scr, .sl2). Când Next-ul pornește cu NextZXOS, fișierul este pus în dosarul principal al cardului SD și îl rulați din Browser, ca pe un Next. Când pornește rapid, programul este încărcat direct în mașină.",
 		"slot.sd": "Card SD",
-		"slot.sd.help": "Imaginea cardului SD al Next-ului (.mmc sau .img), cu sistemul Next-ului (NextZXOS) pe el. ZEsarUX include una, tbblue.mmc. Ce scrie mașina pe card rămâne în mașină (și în stările ei salvate); fișierul nu este niciodată modificat. Un Next are nevoie de un card pentru a porni cu NextZXOS; cu Pornire pe „fast” nu are nevoie de niciunul."
+		"slot.sd.help": "Imaginea cardului SD al Next-ului (.mmc sau .img), cu sistemul Next-ului (NextZXOS) pe el. ZEsarUX include una, tbblue.mmc. Ce scrie mașina pe card rămâne în mașină (și în stările ei salvate); fișierul nu este niciodată modificat. Un Next are nevoie de un card pentru a porni cu NextZXOS; cu Pornire pe „fast” nu are nevoie de niciunul.",
+		"suggest.fast": "Proiectul nu are card SD, așa că Next-ul pornește rapid, cu ROM-ul 48K, iar programul este încărcat direct în mașină. Adăugați un card SD cu NextZXOS pentru a porni Next-ul ca un Next.",
+		"suggest.nextzxos": "Proiectul are un card SD, așa că Next-ul pornește de pe el cu NextZXOS, ca un Next."
 	}
 }

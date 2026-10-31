@@ -19,6 +19,8 @@
 		"slot.program": "Program",
 		"slot.program.help": "Program untuk Next atau Spectrum: berkas .nex (format Next sendiri), snapshot (.snx, .sna, .z80, .zsf), kaset (.tap, .tzx, .pzx) atau berkas yang dibuka NextZXOS (.bas, .dot, .scr, .sl2). Saat Next menyala dengan NextZXOS, berkas ditaruh di folder teratas kartu SD, dan Anda menjalankannya dari Browser, seperti di Next. Saat menyala cepat, program dimuat langsung ke mesin.",
 		"slot.sd": "Kartu SD",
-		"slot.sd.help": "Image kartu SD Next (.mmc atau .img), berisi sistem Next (NextZXOS). ZEsarUX menyertakan satu, tbblue.mmc. Apa yang ditulis mesin ke kartu tetap di dalam mesin (dan di savestate-nya); berkasnya tidak pernah diubah. Next memerlukan kartu untuk menyala dengan NextZXOS; dengan Mulai di \"fast\" tidak diperlukan."
+		"slot.sd.help": "Image kartu SD Next (.mmc atau .img), berisi sistem Next (NextZXOS). ZEsarUX menyertakan satu, tbblue.mmc. Apa yang ditulis mesin ke kartu tetap di dalam mesin (dan di savestate-nya); berkasnya tidak pernah diubah. Next memerlukan kartu untuk menyala dengan NextZXOS; dengan Mulai di \"fast\" tidak diperlukan.",
+		"suggest.fast": "Proyek tidak memiliki kartu SD, jadi Next menyala cepat dengan ROM 48K, dan program dimuat langsung ke mesin. Tambahkan kartu SD berisi NextZXOS untuk menyalakan Next seperti Next.",
+		"suggest.nextzxos": "Proyek memiliki kartu SD, jadi Next menyala dengan NextZXOS dari kartu itu, seperti Next."
 	}
 }

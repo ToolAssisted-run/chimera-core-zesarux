@@ -36,7 +36,9 @@ Hard Reset. A joystick of four directions and two fire buttons, on the
 arrow keys, Tab and the backslash; the Next's programs choose what kind of
 joystick it is.
 
-- **Start**: `nextzxos` or `fast`.
+- **Start**: `nextzxos` or `fast`. The New Project window suggests
+  `nextzxos` for a project with an SD card and `fast` for one with only a
+  program.
 - **Hold NextZXOS at 7 MHz**: ZEsarUX's way of sparing a slow computer; off
   by default, as on a Next.
 

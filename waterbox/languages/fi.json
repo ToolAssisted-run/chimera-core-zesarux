@@ -19,6 +19,8 @@
 		"slot.program": "Ohjelma",
 		"slot.program.help": "Ohjelma Nextille tai Spectrumille: .nex-tiedosto (Nextin oma muoto), tilannevedos (.snx, .sna, .z80, .zsf), nauha (.tap, .tzx, .pzx) tai tiedosto, jonka NextZXOS avaa (.bas, .dot, .scr, .sl2). Kun Next käynnistyy NextZXOS:llä, tiedosto laitetaan SD-kortin ylimpään kansioon, ja ajat sen Browserista kuten Nextissä. Kun se käynnistyy nopeasti, ohjelma ladataan suoraan koneeseen.",
 		"slot.sd": "SD-kortti",
-		"slot.sd.help": "Nextin SD-kortin levykuva (.mmc tai .img), jolla on Nextin järjestelmä (NextZXOS). ZEsarUX:n mukana tulee yksi, tbblue.mmc. Mitä kone kirjoittaa kortille, jää koneeseen (ja sen tallennettuihin tiloihin); tiedostoa ei koskaan muuteta. Next tarvitsee kortin käynnistyäkseen NextZXOS:llä; kun Käynnistys on \"fast\", korttia ei tarvita."
+		"slot.sd.help": "Nextin SD-kortin levykuva (.mmc tai .img), jolla on Nextin järjestelmä (NextZXOS). ZEsarUX:n mukana tulee yksi, tbblue.mmc. Mitä kone kirjoittaa kortille, jää koneeseen (ja sen tallennettuihin tiloihin); tiedostoa ei koskaan muuteta. Next tarvitsee kortin käynnistyäkseen NextZXOS:llä; kun Käynnistys on \"fast\", korttia ei tarvita.",
+		"suggest.fast": "Projektissa ei ole SD-korttia, joten Next käynnistyy nopeasti 48K:n ROMilla ja ohjelma ladataan suoraan koneeseen. Lisää SD-kortti, jolla on NextZXOS, jos haluat Nextin käynnistyvän kuten Next.",
+		"suggest.nextzxos": "Projektissa on SD-kortti, joten Next käynnistyy siltä NextZXOS:llä, kuten Next."
 	}
 }

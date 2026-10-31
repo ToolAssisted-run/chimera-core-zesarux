@@ -19,6 +19,8 @@
 		"slot.program": "Program",
 		"slot.program.help": "Next ya da Spectrum için bir program: bir .nex dosyası (Next'in kendi biçimi), bir anlık görüntü (.snx, .sna, .z80, .zsf), bir kaset (.tap, .tzx, .pzx) ya da NextZXOS'un açtığı bir dosya (.bas, .dot, .scr, .sl2). Next NextZXOS ile başladığında dosya SD kartın en üst klasörüne konur ve onu bir Next'teki gibi Browser'dan çalıştırırsınız. Hızlı başladığında program doğrudan makineye yüklenir.",
 		"slot.sd": "SD Kart",
-		"slot.sd.help": "Next'in SD kartının görüntüsü (.mmc ya da .img), üzerinde Next'in sistemi (NextZXOS) ile. ZEsarUX ile bir tane gelir: tbblue.mmc. Makinenin karta yazdıkları makinede (ve kayıtlı durumlarında) kalır; dosya asla değiştirilmez. Bir Next'in NextZXOS ile başlaması için kart gerekir; Başlatma \"fast\" iken hiç gerekmez."
+		"slot.sd.help": "Next'in SD kartının görüntüsü (.mmc ya da .img), üzerinde Next'in sistemi (NextZXOS) ile. ZEsarUX ile bir tane gelir: tbblue.mmc. Makinenin karta yazdıkları makinede (ve kayıtlı durumlarında) kalır; dosya asla değiştirilmez. Bir Next'in NextZXOS ile başlaması için kart gerekir; Başlatma \"fast\" iken hiç gerekmez.",
+		"suggest.fast": "Projede SD kart yok, bu yüzden Next 48K ROM'uyla hızlı başlar ve program doğrudan makineye yüklenir. Next'i bir Next gibi başlatmak için NextZXOS içeren bir SD kart ekleyin.",
+		"suggest.nextzxos": "Projede bir SD kart var, bu yüzden Next, bir Next gibi, ondan NextZXOS ile başlar."
 	}
 }

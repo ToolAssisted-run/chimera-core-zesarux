@@ -19,6 +19,8 @@
 		"slot.program": "Chương trình",
 		"slot.program.help": "Một chương trình cho Next hoặc Spectrum: tệp .nex (định dạng riêng của Next), ảnh chụp (.snx, .sna, .z80, .zsf), băng (.tap, .tzx, .pzx) hoặc tệp mà NextZXOS mở (.bas, .dot, .scr, .sl2). Khi Next khởi động bằng NextZXOS, tệp được đặt vào thư mục gốc của thẻ SD, và bạn chạy nó từ Browser, như trên Next. Khi khởi động nhanh, chương trình được nạp thẳng vào máy.",
 		"slot.sd": "Thẻ SD",
-		"slot.sd.help": "Ảnh thẻ SD của Next (.mmc hoặc .img), có hệ thống của Next (NextZXOS) trên đó. ZEsarUX có kèm một ảnh, tbblue.mmc. Những gì máy ghi lên thẻ ở lại trong máy (và trong các trạng thái lưu của nó); tệp không bao giờ bị thay đổi. Next cần một thẻ để khởi động bằng NextZXOS; khi Khởi động là \"fast\" thì không cần thẻ nào."
+		"slot.sd.help": "Ảnh thẻ SD của Next (.mmc hoặc .img), có hệ thống của Next (NextZXOS) trên đó. ZEsarUX có kèm một ảnh, tbblue.mmc. Những gì máy ghi lên thẻ ở lại trong máy (và trong các trạng thái lưu của nó); tệp không bao giờ bị thay đổi. Next cần một thẻ để khởi động bằng NextZXOS; khi Khởi động là \"fast\" thì không cần thẻ nào.",
+		"suggest.fast": "Dự án không có thẻ SD, nên Next khởi động nhanh bằng ROM 48K, và chương trình được nạp thẳng vào máy. Hãy thêm một thẻ SD có NextZXOS để khởi động Next như một chiếc Next.",
+		"suggest.nextzxos": "Dự án có thẻ SD, nên Next khởi động bằng NextZXOS từ thẻ đó, như một chiếc Next."
 	}
 }

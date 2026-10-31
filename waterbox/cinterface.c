@@ -150,6 +150,25 @@ static int copy_to_sd(const char *program)
 	return copied;
 }
 
+/* What the New Project window is told before the machine is built (called
+ * instead of Init, with the project's files mounted): with an SD card in the
+ * project the Next starts with NextZXOS from it; with a program and no card
+ * it starts fast, since NextZXOS has no card to start from. Nothing runs. */
+ECL_EXPORT const char *SuggestSettings(void)
+{
+	static char answer[256];
+	char sd[512], program[512];
+	slot_file("sd", sd, sizeof sd);
+	slot_file("program", program, sizeof program);
+	if (sd[0])
+		snprintf(answer, sizeof answer, "{\"values\":{\"boot\":\"nextzxos\"},\"note\":\"suggest.nextzxos\"}");
+	else if (program[0])
+		snprintf(answer, sizeof answer, "{\"values\":{\"boot\":\"fast\"},\"note\":\"suggest.fast\"}");
+	else
+		snprintf(answer, sizeof answer, "{\"values\":{},\"note\":\"\"}");
+	return answer;
+}
+
 ECL_EXPORT int Init(void)
 {
 	g_loadError[0] = '\0';

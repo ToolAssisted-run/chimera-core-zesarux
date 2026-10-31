@@ -19,6 +19,8 @@
 		"slot.program": "Programma",
 		"slot.program.help": "Un programma per il Next o lo Spectrum: un file .nex (il formato del Next), uno snapshot (.snx, .sna, .z80, .zsf), un nastro (.tap, .tzx, .pzx) o un file che NextZXOS apre (.bas, .dot, .scr, .sl2). Quando il Next si avvia con NextZXOS, il file viene messo nella cartella principale della scheda SD e lo avviate dal Browser, come su un Next. Quando si avvia rapidamente, il programma viene caricato direttamente nella macchina.",
 		"slot.sd": "Scheda SD",
-		"slot.sd.help": "L'immagine della scheda SD del Next (.mmc o .img), con il sistema del Next (NextZXOS). ZEsarUX ne include una, tbblue.mmc. Ciò che la macchina scrive sulla scheda resta nella macchina (e nei suoi salvataggi di stato); il file non viene mai modificato. Un Next ha bisogno di una scheda per avviarsi con NextZXOS; con Avvio su «fast» non ne serve nessuna."
+		"slot.sd.help": "L'immagine della scheda SD del Next (.mmc o .img), con il sistema del Next (NextZXOS). ZEsarUX ne include una, tbblue.mmc. Ciò che la macchina scrive sulla scheda resta nella macchina (e nei suoi salvataggi di stato); il file non viene mai modificato. Un Next ha bisogno di una scheda per avviarsi con NextZXOS; con Avvio su «fast» non ne serve nessuna.",
+		"suggest.fast": "Il progetto non ha una scheda SD, quindi il Next si avvia rapidamente, con la ROM del 48K, e il programma viene caricato direttamente nella macchina. Aggiungete una scheda SD con NextZXOS per avviare il Next come un Next.",
+		"suggest.nextzxos": "Il progetto ha una scheda SD, quindi il Next si avvia con NextZXOS da essa, come un Next."
 	}
 }
