@@ -262,29 +262,31 @@ fi
 
 # The Next's own hardware. The test program sets up a hardware sprite, a
 # copper list that shifts Layer 2 sideways part way down the screen, a DMA
-# copy into the screen's colours and a tone on the first AY chip. Each,
-# left out of the program (make-nex.py --without), changes the run: the
-# picture for the first three, the sound for the tone. The whole program
-# runs the same natively, in the sandbox and with a state saved and loaded
-# before every frame.
+# copy into the screen's colours, two rows of tiles on the tilemap, a tone
+# on each of the three AY chips (each on another channel) and two saw waves
+# on the 8-bit DACs. Each, left out of the program (make-nex.py --without),
+# changes the run: the picture for the sprite, the copper, the DMA and the
+# tilemap; the sound, and not the picture, for the tones and the DACs. The
+# whole program runs the same natively, in the sandbox and with a state
+# saved and loaded before every frame.
 hw_bad=""
 box hw-all $fast --program "$prog" --frames 100 --every 50
 nat hw-all-n $fast --program "$prog" --frames 100 --every 50
 box hw-all-r $fast --program "$prog" --frames 100 --every 50 --rerecord
-for f in sprite copper dma sound; do
+for f in sprite copper dma tilemap sound ay2 ay3 dacs; do
 	python3 "$here/tests/make-nex.py" "$work/no-$f.nex" --without "$f" || exit 2
 	box "hw-no-$f" $fast --program "$work/no-$f.nex" --frames 100 --every 50
-	if [ "$f" = sound ]; then
-		[ "$(field "$work/hw-no-$f.out" audioHash)" != "$(field "$work/hw-all.out" audioHash)" ] || hw_bad="$hw_bad without the tone the sound is the same;"
-		[ "$(vh "hw-no-$f")" = "$(vh hw-all)" ] || hw_bad="$hw_bad without the tone the picture changed;"
-	else
-		[ -n "$(vh "hw-no-$f")" ] && [ "$(vh "hw-no-$f")" != "$(vh hw-all)" ] || hw_bad="$hw_bad without the $f the picture is the same;"
-	fi
+	case "$f" in sound|ay2|ay3|dacs)
+		[ -n "$(field "$work/hw-no-$f.out" audioHash)" ] && [ "$(field "$work/hw-no-$f.out" audioHash)" != "$(field "$work/hw-all.out" audioHash)" ] || hw_bad="$hw_bad without the $f the sound is the same;"
+		[ "$(vh "hw-no-$f")" = "$(vh hw-all)" ] || hw_bad="$hw_bad without the $f the picture changed;" ;;
+	*)
+		[ -n "$(vh "hw-no-$f")" ] && [ "$(vh "hw-no-$f")" != "$(vh hw-all)" ] || hw_bad="$hw_bad without the $f the picture is the same;" ;;
+	esac
 done
 same hw-all hw-all-n || hw_bad="$hw_bad native and sandbox differ;"
 same hw-all hw-all-r || hw_bad="$hw_bad a state every frame changed the run;"
 if [ -z "$hw_bad" ]; then
-	report "next:hardware" PASS "a hardware sprite, the copper, the DMA and an AY tone each change the run when the program leaves them out; the whole is the same natively, in the sandbox and with a state every frame"
+	report "next:hardware" PASS "a hardware sprite, the copper, the DMA, the tilemap, a tone on each of the three AY chips and the DACs each change the run when the program leaves them out; the whole is the same natively, in the sandbox and with a state every frame"
 else
 	report "next:hardware" FAIL "$hw_bad"
 fi
@@ -353,6 +355,50 @@ if [ -z "$why" ]; then
 	report "game:warhawk" PASS "Warhawk from the SD card through NextZXOS's Browser, started and played to frame 5000: the sandbox prints the native build's lines, a state every frame changes nothing, and it is not the run left alone"
 else
 	report "game:warhawk" FAIL "$why"
+fi
+
+# Another game from that card: Nextoid (a bat-and-ball game for the Next),
+# in GAMES/Next/Nextoid/NEXTOID.NEX. From switching on, through the Browser
+# as for Warhawk to its menu by about frame 2500; 1 (keyboard) and S start
+# level 1; SPACE launches the ball, P is held, and the ball breaks a brick
+# (the score is 20 at frame 3400). The sandbox prints the native build's
+# lines every 500 frames, a state saved and loaded before every frame
+# changes nothing, and the run is not the run with nothing pressed after
+# the game was started (there the ball is never launched).
+nextoid=""
+addn() { nextoid="$nextoid --press $2:${3:-4}:$1"; }
+key_s=$(hex $((1 << 21))); key_1=$(hex 1)
+addn "$key_enter" 1100
+i=0; while [ $i -lt 8 ]; do addn "$key_down" $((1200 + i * 10)); i=$((i + 1)); done
+addn "$key_enter" 1300
+i=0; while [ $i -lt 4 ]; do addn "$key_down" $((1350 + i * 10)); i=$((i + 1)); done
+addn "$key_enter" 1400
+i=0; while [ $i -lt 8 ]; do addn "$key_down" $((1450 + i * 10)); i=$((i + 1)); done
+addn "$key_enter" 1620
+i=0; while [ $i -lt 2 ]; do addn "$key_down" $((1670 + i * 10)); i=$((i + 1)); done
+addn "$key_enter" 1720
+addn "$key_1" 2600 10
+addn "$key_s" 2700 10
+started="$nextoid"
+addn "$key_space" 3100 10
+addn "$key_p" 3150 60
+addn "$key_space" 3250 5
+# shellcheck disable=SC2086
+nat nx-n $nextzxos --frames 3400 --every 500 $to_menu $nextoid
+# shellcheck disable=SC2086
+box nx-s $nextzxos --frames 3400 --every 500 $to_menu $nextoid
+# shellcheck disable=SC2086
+box nx-r $nextzxos --frames 3400 --every 500 $to_menu $nextoid --rerecord
+# shellcheck disable=SC2086
+box nx-idle $nextzxos --frames 3400 --every 500 $to_menu $started
+why=""
+same nx-n nx-s || why="$why native and sandbox differ [$(last "$work/nx-s.out" | cut -c1-60)] $(tail -1 "$work/nx-s.err" | cut -c1-80);"
+same nx-s nx-r || why="$why a state every frame changed the run [$(last "$work/nx-r.out" | cut -c1-60)];"
+[ -n "$(vh nx-idle)" ] && [ "$(vh nx-s)" != "$(vh nx-idle)" ] || why="$why the game played and the game left alone end alike;"
+if [ -z "$why" ]; then
+	report "game:nextoid" PASS "Nextoid from the SD card through NextZXOS's Browser, started and played to frame 3400: the sandbox prints the native build's lines, a state every frame changes nothing, and it is not the run left alone"
+else
+	report "game:nextoid" FAIL "$why"
 fi
 
 # What cannot be run is refused with a reason: a way of starting there is

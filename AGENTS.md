@@ -38,7 +38,8 @@ design log, with what was decided, why, and what was measured.
 - `waterbox/*.sh` - `setup-guest.sh`, `build-package.sh`, `run-gate.sh`
   (the test script), `apply-patches.sh`, `make-patches.sh`.
 - `waterbox/tests/` - the window test (`run-frontend.sh` and its Lua and
-  Python helpers), `make-nex.py` (writes the test program), `make-movie.py`.
+  Python helpers), `make-nex.py` (writes the test program), `make-movie.py`,
+  `check-names.py` (names in the language tables).
 - `waterbox/waterbox.config`, `file_slots.json`, `default_keybinds.json`,
   `package-licenses.json`, `languages/` - what the package declares.
 - `build/` - every build output, ignored by git.

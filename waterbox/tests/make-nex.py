@@ -3,7 +3,7 @@
 .nex file (the Next's own format for a program), made here byte by byte so
 that the repository needs no assembler and holds no program of anybody's.
 
-usage: make-nex.py <out.nex> [--without sprite,copper,dma,sound]
+usage: make-nex.py <out.nex> [--without sprite,copper,dma,sound,tilemap,ay2,ay3,dacs]
 
 What it does, so that a test can see each part:
  - a Layer 2 picture (the Next's 256x192 screen of 256 colours) is part of
@@ -26,7 +26,19 @@ What it does, so that a test can see each part:
      picture sideways from line 140 to line 170 of each frame;
    - dma: the zxnDMA copies 32 bytes of colours into row 10 of the Spectrum
      screen's colours;
-   - sound: the first AY sound chip plays a tone on its channel A.
+   - sound: the first AY sound chip plays a tone on its channel A;
+   - tilemap: the tilemap (the Next's layer of 8x8 tiles, 40x32 of them
+     over the whole display) shows two rows of solid green tiles, at the
+     screen's character rows 9 and 11, between the rows the controls paint
+     and the Layer 2 stripes; every other tile is transparent;
+   - ay2: the second AY chip (the Next has three, "TurboSound") plays a
+     tone on its channel B;
+   - ay3: the third AY chip plays a tone on its channel C;
+   - dacs: the Next's 8-bit DACs (the Specdrum and Covox ports, 0xDF for
+     DACs A and D, 0xB3 for B and C) are written every frame from the frame
+     counter: two saw waves of 50 steps a second.
+   The program turns on the three AY chips and the DACs (Next register 8)
+   whichever parts are left out.
  - a counter of frames at 0x9200 (in the "RAM" domain, bank 2 at 0x8000,
    at 0x9200 - 0x8000 + 0x8000 = 0x9200); its interrupt routine is at
    0x9191, where the processor waits between frames.
@@ -106,11 +118,43 @@ def assemble(features):
                   0xCF,                         # load
                   0x87):                        # enable
             out(0x006B, v)
-    if "sound" in features:
-        # AY: channel A tone period 0x0100, only tone A on, volume 15
-        for reg, val in ((0, 0x00), (1, 0x01), (7, 0x3E), (8, 0x0F)):
+    # three AY chips, the DACs and the internal speaker on, whatever is
+    # left out (Next register 8: bit 1 TurboSound, bit 3 DACs, bit 4 speaker)
+    nextreg(0x08, 0x1A)
+
+    def ay(chip, regs):
+        # TurboSound: 0xFFFD written with 1 11 111 nn chooses the chip
+        # (nn = 3 the first, 2 the second, 1 the third)
+        out(0xFFFD, 0xFC | (3 - chip))
+        for reg, val in regs:
             out(0xFFFD, reg)
             out(0xBFFD, val)
+
+    if "sound" in features:
+        # AY 1: channel A tone period 0x0100, only tone A on, volume 15
+        ay(0, ((0, 0x00), (1, 0x01), (7, 0x3E), (8, 0x0F)))
+    if "ay2" in features:
+        # AY 2: channel B tone period 0x0180, only tone B on, volume 15
+        ay(1, ((2, 0x80), (3, 0x01), (7, 0x3D), (9, 0x0F)))
+    if "ay3" in features:
+        # AY 3: channel C tone period 0x0240, only tone C on, volume 15
+        ay(2, ((4, 0x40), (5, 0x02), (7, 0x3B), (10, 0x0F)))
+    out(0xFFFD, 0xFF)               # the first AY chosen again
+    if "tilemap" in features:
+        # the tilemap and its tiles are in bank 5, part of the file: the
+        # map (40x32, one byte a tile) at 0x6000, the tiles (32 bytes each,
+        # 4 bits a dot) at 0x6600. Palette offset 1: dot 0xC is colour 0x1C,
+        # set to green here; dot 0xF is the transparent one (Next register
+        # 0x4C).
+        nextreg(0x6E, 0x20)         # map at 0x4000 + 0x2000
+        nextreg(0x6F, 0x26)         # tiles at 0x4000 + 0x2600
+        nextreg(0x6C, 0x10)         # every tile: palette offset 1
+        nextreg(0x4C, 0x0F)         # dot 0xF is transparent
+        nextreg(0x43, 0x30)         # writing the tilemap's first palette
+        nextreg(0x40, 0x1C)         # its colour 0x1C
+        nextreg(0x41, 0x1C)         # is green (RRRGGGBB)
+        nextreg(0x43, 0x00)
+        nextreg(0x6B, 0xA0)         # on, 40x32, no attribute bytes
     emit(0xAF)                      # xor a
     emit(0x32); word(0x9200)        # ld (0x9200),a
     labels["loop"] = here()
@@ -118,6 +162,17 @@ def assemble(features):
     emit(0x76)                      # halt
     emit(0x21); word(0x9200)        # ld hl,0x9200
     emit(0x34)                      # inc (hl)
+    if "dacs" in features:
+        # every frame: DACs A and D the counter times 16, B and C times 8
+        emit(0x7E)                  # ld a,(hl)
+        emit(0x07, 0x07, 0x07, 0x07)    # rlca x4
+        emit(0x01); word(0x00DF)    # ld bc,0x00DF
+        emit(0xED, 0x79)            # out (c),a
+        emit(0x7E)                  # ld a,(hl)
+        emit(0x07, 0x07, 0x07)      # rlca x3
+        emit(0x01); word(0x00B3)    # ld bc,0x00B3
+        emit(0xED, 0x79)            # out (c),a
+        emit(0x21); word(0x9200)    # ld hl,0x9200
     emit(0x7E)                      # ld a,(hl)
     emit(0xE6, 0x01)                # and 1
     emit(0xC2); ref("loop")         # jp nz,loop   (odd frames: nothing read)
@@ -163,7 +218,7 @@ def assemble(features):
 
 
 def main():
-    features = {"sprite", "copper", "dma", "sound"}
+    features = {"sprite", "copper", "dma", "sound", "tilemap", "ay2", "ay3", "dacs"}
     if "--without" in sys.argv:
         for f in sys.argv[sys.argv.index("--without") + 1].split(","):
             features.discard(f)
@@ -182,6 +237,16 @@ def main():
     bank5 = bytearray(0x4000)
     for i in range(0x1800, 0x1B00):
         bank5[i] = 0x38
+    # the tilemap (0x6000, 40x32) and its tiles (0x6600): tile 0 all
+    # transparent dots (0xF), tile 1 all dots 0xC; tile 1 on the map's rows
+    # 13 and 15 (the screen's character rows 9 and 11: the map starts 32
+    # dots above and left of the screen), columns 4 to 35 (the screen's
+    # width)
+    for row in (13, 15):
+        for col in range(4, 36):
+            bank5[0x2000 + row * 40 + col] = 1
+    bank5[0x2600:0x2620] = b"\xff" * 32
+    bank5[0x2620:0x2640] = b"\xcc" * 32
     # the Layer 2 picture: 0xE3 is the transparent colour
     layer2 = bytearray(256 * 192)
     for y in range(192):

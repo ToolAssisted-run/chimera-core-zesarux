@@ -298,11 +298,17 @@ accents, as this file is ASCII.)
 
 ## What was measured (2026-10-31)
 
-On this machine (Linux, GCC 14), against Chimera at 3f8ea7e2
-(~/chimera-scratch-bump), miniBox of that checkout.
+On this machine (Linux, GCC 14). First against Chimera at 3f8ea7e2, then
+(second round, the same day) against Chimera main cb46d2b7, both in
+~/chimera-scratch-bump, with the miniBox of that checkout. The numbers
+below are the second round's unless they say otherwise.
 
-`CHIMERA_ROOT=<chimera> waterbox/run-gate.sh`: 16 passed, 0 failed, 0
-skipped, in 4 minutes.
+`CHIMERA_ROOT=<chimera> waterbox/run-gate.sh`: 20 passed, 0 failed, 0
+skipped, in 308 seconds (first round: 16 of 16, in 4 minutes).
+
+- texts:names: every name in the 26 language tables as it is written
+  ("Names are never translated or bent", above).
+- rom:built-in, frontend:built-in-rom: see "The 48K ROM is built in".
 
 - boot:fast: 600 frames with buttons by a pattern, native and sandbox the
   same lines every 60 frames; 50 frames a second, 312 samples a frame,
@@ -325,9 +331,31 @@ skipped, in 4 minutes.
   starts the ROM again and keeps the Next's settings (the program's Layer 2
   stays on), which is how ZEsarUX does it.
 - next:hardware: the test program's hardware sprite, copper list (Layer 2
-  shifted sideways for lines 140 to 170), zxnDMA copy and AY tone each
-  change the run when left out (make-nex.py --without); the whole is the
-  same natively, in the sandbox and with a state every frame.
+  shifted sideways for lines 140 to 170), zxnDMA copy, tilemap (two rows of
+  green tiles at the screen's character rows 9 and 11, its own palette
+  colour set by the program), a tone on each of the three AY chips (chip 1
+  channel A, chip 2 channel B, chip 3 channel C, chosen through port 0xFFFD
+  as TurboSound does) and two saw waves on the DACs (ports 0xDF and 0xB3,
+  written every frame) each change the run when left out (make-nex.py
+  --without): the picture for the first four, the sound and not the
+  picture for the others. The whole is the same natively, in the sandbox
+  and with a state every frame. The program turns on TurboSound and the
+  DACs itself (Next register 8 = 0x1A); ZEsarUX's fast start already does,
+  NextZXOS may not.
+- game:nextoid (second round): Nextoid, a bat-and-ball game on the same
+  card (GAMES/Next/Nextoid/NEXTOID.NEX), through the Browser as Warhawk is;
+  its menu by frame 2500, 1 (keyboard) and S ("Press S to start game!")
+  give level 1; SPACE launches the ball, which breaks a brick (score 20 at
+  frame 3400). Native and sandbox the same lines every 500 frames, the same
+  with a state every frame, and not the run left alone after the start.
+- Two more games from the card, tried by hand and not in the test script
+  (second round), each through the Browser and to frame 3000, native and
+  sandbox the same lines every 500 frames: The Lords of Midnight
+  (GAMES/Next/LordsOfMidnight/LOM.NEX), its title page and, after SPACE
+  and ENTER, the first view ("Luxor the Moonprince ... looking Southeast
+  to the Downs of Shadows"); and the Night-Knight demo
+  (Night-Knight-Demo.nex), its "Get ready" page and stage 1 played with
+  the joystick (the floor turned yellow under the knight, score 50).
 - game:warhawk: Warhawk (Rusty Pixels, 2019), a Next game on the card
   ZEsarUX comes with (the Next's own system distribution): from switching
   on through NextZXOS's Browser (GAMES, Next, Warhawk, Warhawk.nex), its
@@ -385,7 +413,13 @@ Seen to fail:
 - the window test, with the native build run one frame short (on purpose,
   taken out): window:memory and window:setting failed;
 - next:hardware, with make-nex.py's --without made to do nothing (on
-  purpose, taken out): all four parts failed;
+  purpose, taken out): all four parts failed; in the second round, with
+  --without made to ignore the four new parts: the test failed on each of
+  the four ("without the tilemap the picture is the same", and the sound
+  for ay2, ay3 and dacs);
+- game:nextoid, with the run left alone made the same as the run played
+  (on purpose, taken out): it failed ("the game played and the game left
+  alone end alike");
 - the sandbox's clock one second ahead again, after game:warhawk was added:
   game:warhawk failed with boot:nextzxos, time:virtual and program:sd-card;
 - frontend:suggest, with the core suggesting nothing for a project with only
@@ -401,12 +435,15 @@ real Next.
 
 ## What is not done
 
-- One game has been tried, Warhawk, from the card ZEsarUX comes with; no
-  commercial game, and none of the card's other games.
-- Not tried: the tilemap; the second and third AY chips, the DACs and the
-  sound of a real game listened to; programs that load more files from the
-  card; a card bigger than 64 MiB; .snx, .tap and the other program formats
-  in the program slot.
+- Four games have been tried, all from the card ZEsarUX comes with:
+  Warhawk and Nextoid in the test script, The Lords of Midnight and the
+  Night-Knight demo by hand to frame 3000. No commercial game. The card's
+  other games (Angry Bloaters, Halls of the Things, Revival Survival,
+  Santa's Pressie and the BASIC ones) not tried.
+- Not tried: the sound of a real game listened to (the tests compare
+  sound by its hash); programs that load more files from the card; a card
+  bigger than 64 MiB; .snx, .tap and the other program formats in the
+  program slot.
 - The 60 Hz mode: not looked into.
 - The Kempston mouse (the Next's PS/2 mouse) has no input here.
 - The Next's extended keyboard registers (Next registers 0xB0 and 0xB1)
@@ -417,25 +454,36 @@ real Next.
   Windows is still to be run before the core is called done.
 - No movie recorded by hand in Chimera's window.
 
-## Where this stands (2026-10-31)
+## Where this stands (2026-10-31, second round)
 
-Built and tested locally, not published. What works: NextZXOS boots from an
-SD card image to its menu and runs a program from its Browser; Warhawk, a
-Next game from that card, runs from boot to play; the fast start runs a
-.nex directly; picture (Layer 2, sprites, copper), sound, keys, joystick,
-resets, DMA, savestates (same process and another process), the project's
-clock, the package in chimera-run and in Chimera's Qt window. Native and
-sandbox agree on every test.
+Built and tested locally, against Chimera main cb46d2b7; not published,
+no remote. The owner's answers to the first round are in ("The owner's
+decisions"); the one that changed the core, packaging the 48K ROM, is
+done: the fast start needs nothing from the user. Every name in the 26
+language tables is now written as it is, and the test script checks it.
+
+What works: NextZXOS boots from an SD card image to its menu and runs a
+program from its Browser; Warhawk and Nextoid, Next games from that card,
+run from boot to play in the test script, and The Lords of Midnight and
+the Night-Knight demo were run by hand; the fast start runs a .nex
+directly, on the built-in 48K ROM; picture (Layer 2, sprites, copper,
+tilemap), sound (beeper, three AY chips, DACs), keys, joystick, resets,
+DMA, savestates (same process and another process), the project's clock,
+the package in chimera-run and in Chimera's Qt window. Native and sandbox
+agree on every test.
+
+Tests of this round: run-gate.sh 20 passed, 0 failed, 0 skipped;
+run-frontend.sh (Qt window, headless) 3 of 3; Chimera's test-packages on
+a folder with only this package, all passed; check-core-texts.py 20 keys,
+every one named; check-names.py 0; Chimera's check-proper-nouns.py on
+waterbox/ 0.
 
 Next, in order:
-1. The owner's answers (the questions above): may the boot ROM, the 48K ROM
-   and the card be read from the submodule in tests and CI, and may any of
-   them be packaged.
-2. More games: the card's others (Nextoid, Lords of Midnight, Night-Knight
-   ...) and commercial Next games from the owner; a movie recorded by hand
-   in Chimera's window and played back.
-3. The tilemap in the test program.
-4. CI (the workflow is written), and the Windows run of the frontend gate.
+1. The owner's review, then publishing (the owner's).
+2. Commercial Next games from the owner (none on this machine); a movie
+   recorded by hand in Chimera's window and played back.
+3. CI (the workflow is written, never run: no remote), and the Windows run
+   of the frontend tests.
 
 Traps met:
 - A frame cannot be ended by watching the T-state counter: the firmware's
@@ -446,3 +494,9 @@ Traps met:
   wraps: the native runner uses realpath(".") for its own paths.
 - The 48K ROM does not read the clock, so a clock change shows only on the
   NextZXOS tests.
+- The host's C library turns `fopen` into `fopen64` (large files), so a
+  link wrap of `fopen` alone misses ZEsarUX's calls in the native build;
+  musl, in the sandbox, has only `fopen`.
+- Nextoid's menu says "Press S", in a font where S looks like 5.
+- Colour 0x1C of the tilemap's palette showed black in ZEsarUX until the
+  test program set it; the test program now sets it to green.

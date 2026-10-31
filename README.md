@@ -12,8 +12,10 @@ New, local and not published. NextZXOS starts from an SD card image to its
 menu and runs a program from its Browser; a program can also be loaded
 straight into the machine without NextZXOS. Picture, sound, keys, the
 joystick, both resets and savestates work, and the sandboxed core gives the
-same results as a plain native build. No game has been tried yet; the tests
-use a small program they make themselves.
+same results as a plain native build. Four free games from the SD card
+ZEsarUX comes with have been run (Warhawk, Nextoid, The Lords of Midnight
+and the Night-Knight demo); the tests also use a small program they make
+themselves.
 
 ## What you bring
 

@@ -114,8 +114,8 @@ jobs:
           sh ./waterbox/run-gate.sh > gate.out 2>&1 || rc=$?
           cat gate.out
           [ "$rc" -eq 0 ]
-          for t in boot:fast rom:built-in boot:nextzxos time:virtual state:every-frame state:other-process \
-                   input:buttons input:reset next:hardware program:sd-card game:warhawk settings:refused \
+          for t in texts:names boot:fast rom:built-in boot:nextzxos time:virtual state:every-frame state:other-process \
+                   input:buttons input:reset next:hardware program:sd-card game:warhawk game:nextoid settings:refused \
                    frontend:picture frontend:states frontend:movie frontend:firmware frontend:suggest \
                    frontend:built-in-rom; do
             grep -q "^$t  *PASS " gate.out || { echo "$t did not pass"; exit 1; }
