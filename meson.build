@@ -105,7 +105,7 @@ zs_sources = files(
   zs / 'zxvision/zxvision.c', zs / 'zxvision/zxvision_topbar.c',
   # the core's own layers under ZEsarUX
   'waterbox/scrchimera.c', 'waterbox/audiochimera.c', 'waterbox/chimera_compat.c',
-  'waterbox/chimera_roms.c',
+  'waterbox/chimera_roms.c', 'waterbox/next_interrupts.c',
 )
 
 # The 48K Spectrum's ROM, for the Next's fast start, is built into the core

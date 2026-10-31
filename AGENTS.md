@@ -30,6 +30,8 @@ design log, with what was decided, why, and what was measured.
   given it, and its terms.
   `waterbox/chimera_compat.c` - the machine's clock and the other system
   calls the link wraps. `chimera_glue.h` is what they share.
+- `waterbox/next_interrupts.c` - the Next's CTC and its interrupt
+  controller's hardware IM2 mode, which ZEsarUX does not have.
 - `waterbox/guest-syscalls.c`, `waterbox/guest-shim/` - the sandbox build's
   answers to calls the sandbox lacks.
 - `waterbox/run-native.c`, `run-wbx.c`, `gate-harness.h` - the native

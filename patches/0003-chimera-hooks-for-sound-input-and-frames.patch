@@ -18,10 +18,24 @@ index aeafc996..fc26591c 100644
  	audio_buffer[audio_buffer_indice+1]=valor_sonido_derecho;
  
 diff --git a/src/cores/core_spectrum.c b/src/cores/core_spectrum.c
-index 9e0d179f..774f6906 100644
+index 9e0d179f..5b031f56 100644
 --- a/src/cores/core_spectrum.c
 +++ b/src/cores/core_spectrum.c
-@@ -401,6 +401,14 @@ void core_spectrum_fin_frame_pantalla(void)
+@@ -352,6 +352,13 @@ void core_spectrum_fin_frame_pantalla(void)
+ 
+     //Final de instrucciones ejecutadas en un frame de pantalla
+ 
++#ifdef CHIMERA_CORE
++    /* the Next: the ULA's interrupt goes through its interrupt controller
++     * (waterbox/next_interrupts.c), which in hw im2 mode makes it itself */
++    if (MACHINE_IS_TBBLUE) chimera_next_frame_interrupt();
++    if (MACHINE_IS_TBBLUE && chimera_next_hwim2()) {}
++    else
++#endif
+     //En estado wait no se lanzan interrupciones
+     if (iff1.v==1 && z80_wait_signal.v==0) {
+         interrupcion_maskable_generada.v=1;
+@@ -401,6 +408,14 @@ void core_spectrum_fin_frame_pantalla(void)
      cpu_loop_refresca_pantalla();
      //temp_xx_veces++;
  
@@ -36,8 +50,46 @@ index 9e0d179f..774f6906 100644
      vofile_send_frame(rainbow_buffer);
  
  
+@@ -809,6 +824,12 @@ void core_spectrum_handle_interrupts(void)
+ 
+         //desactivar interrupciones al generar una
+         iff1.v=iff2.v=0;
++#ifdef CHIMERA_CORE
++        /* the Next in hw im2 mode: its interrupt controller gives the
++         * vector, in every interrupt mode (the acknowledge is the same) */
++        int chimera_hw_vector=-1;
++        if (MACHINE_IS_TBBLUE && chimera_next_hwim2()) chimera_hw_vector=chimera_next_int_ack();
++#endif
+         //Modelos spectrum
+ 
+         if (im_mode==0 || im_mode==1) {
+@@ -822,6 +843,9 @@ void core_spectrum_handle_interrupts(void)
+ 
+             if (MACHINE_IS_TSCONF) temp_i=reg_i*256+tsconf_vector_fired_interrupt;
+ 
++#ifdef CHIMERA_CORE
++            else if (chimera_hw_vector>=0) temp_i=reg_i*256+chimera_hw_vector;
++#endif
+             else temp_i=get_im2_interrupt_vector();
+             dir_l=peek_byte(temp_i++);
+             dir_h=peek_byte(temp_i);
+@@ -1002,7 +1026,14 @@ void core_spectrum_ciclo_fetch(void)
+ 
+ 
+     //Soporte interrupciones raster zxuno
++#ifdef CHIMERA_CORE
++    /* on the Next in hw im2 mode the line interrupt is the interrupt
++     * controller's (waterbox/next_interrupts.c), with the CTC */
++    if (MACHINE_IS_ZXUNO || (MACHINE_IS_TBBLUE && !chimera_next_hwim2())) zxuno_tbblue_handle_raster_interrupts();
++    if (MACHINE_IS_TBBLUE) chimera_next_step();
++#else
+     if (MACHINE_IS_ZXUNO || MACHINE_IS_TBBLUE) zxuno_tbblue_handle_raster_interrupts();
++#endif
+ 
+     //Soporte DMA ZXUNO
+     if (MACHINE_IS_ZXUNO && zxuno_dma_disabled.v==0) zxuno_handle_dma();
 diff --git a/src/operaciones.c b/src/operaciones.c
-index c575f007..55ef61a6 100644
+index c575f007..ae56e6a6 100644
 --- a/src/operaciones.c
 +++ b/src/operaciones.c
 @@ -6437,6 +6437,13 @@ z80_byte teclado_matrix_puerto_final(z80_byte puerto_h)
@@ -68,3 +120,24 @@ index c575f007..55ef61a6 100644
  
                          z80_byte acumulado=0;
  
+@@ -7294,6 +7308,10 @@ z80_byte lee_puerto_spectrum_no_time(z80_byte puerto_h,z80_byte puerto_l)
+ 		//if (puerto==0x24DF) return tbblue_port_24df;
+ 		if (puerto==TBBLUE_REGISTER_PORT) return tbblue_get_register_port();
+ 		if (puerto==TBBLUE_VALUE_PORT) return tbblue_get_value_port();
++#ifdef CHIMERA_CORE
++		/* the Next's CTC (waterbox/next_interrupts.c) */
++		if (chimera_next_is_ctc_port(puerto)) return chimera_next_ctc_read(puerto);
++#endif
+ 		if (puerto==TBBLUE_SPRITE_INDEX_PORT)	return tbblue_get_port_sprite_index();
+ 		if (puerto==TBBLUE_LAYER2_PORT)	return tbblue_get_port_layer2_value();
+ 
+@@ -9436,6 +9454,9 @@ acts as expected unless this registe is explicitly changed by the user/software.
+ 		//if (puerto==0x24D9 || puerto==0x24DB || puerto==0x24DD || puerto==0x24DF) tbblue_out_port(puerto,value);
+ 		if (puerto==TBBLUE_REGISTER_PORT) tbblue_set_register_port(value);
+ 		if (puerto==TBBLUE_VALUE_PORT) tbblue_set_value_port(value);
++#ifdef CHIMERA_CORE
++		if (chimera_next_is_ctc_port(puerto)) chimera_next_ctc_write(puerto,value);
++#endif
+ 
+ 		//Puerto tipicamente 32765
+ 		// the hardware will respond only to those port addresses with

@@ -17,6 +17,7 @@ series='
 0004-chimera-fat32-cards-for-emulators-and-a-lent-card|src/third_party/ff.c src/third_party/diskio.c
 0005-chimera-next-registers-nextzxos-2.09-needs|src/machines/tbblue.c src/machines/tbblue.h src/storage/diviface.c src/ula.c
 0006-chimera-a-128k-snapshot-on-the-next|src/snap/snap.c
+0007-chimera-reti-reaches-the-next-interrupt-controller|src/cpus/z80_codpred.c
 '
 
 rm -f "$root"/patches/*.patch

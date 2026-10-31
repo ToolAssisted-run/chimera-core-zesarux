@@ -296,6 +296,35 @@ else
 	report "next:hardware" FAIL "$hw_bad"
 fi
 
+# The Next's CTC and its interrupt controller's hardware IM2 mode (patch
+# 0007 and waterbox/next_interrupts.c; ZEsarUX 13.0 had neither). The test
+# program with its CTC part (make-nex.py --with ctc): channel 0 a timer of
+# 28 MHz / 256 / 256 whose interrupt goes, by the vector the controller
+# makes for it (0x06), to a routine of its own that counts. Over 200
+# frames the count is 200 frames' worth of 28 MHz clock ticks over 65536:
+# 8 ticks for each T-state at 3.5 MHz, 69888 or 70908 T-states a frame,
+# 1706 to 1731 (the CTC's clock, as the Next's documentation gives it; a
+# wrong vector leaves it at 0). The sandbox prints the native build's
+# lines, a state every frame changes nothing, and the picture is not the
+# program's without the CTC.
+ctcprog="$work/ctc.nex"
+python3 "$here/tests/make-nex.py" "$ctcprog" --with ctc || exit 2
+nat ctc-n $fast --program "$ctcprog" --frames 200 --every 50
+box ctc-s $fast --program "$ctcprog" --frames 200 --every 50 --dump-ram "$work/ctc.ram"
+box ctc-r $fast --program "$ctcprog" --frames 200 --every 50 --rerecord
+box ctc-none $fast --program "$prog" --frames 200 --every 50
+count=$(python3 -c 'import sys; d=open(sys.argv[1],"rb").read(); o=2*16384+0x1202; print(d[o]|d[o+1]<<8)' "$work/ctc.ram" 2> /dev/null)
+why=""
+same ctc-n ctc-s || why="$why native and sandbox differ [$(last "$work/ctc-s.out" | cut -c1-60)] $(tail -1 "$work/ctc-s.err" | cut -c1-80);"
+same ctc-s ctc-r || why="$why a state every frame changed the run;"
+[ "$(vh ctc-s)" != "$(vh ctc-none)" ] || why="$why the picture is the program's without the CTC;"
+[ "${count:-0}" -ge 1700 ] && [ "${count:-0}" -le 1740 ] || why="$why the CTC's routine counted ${count:-nothing} interrupts in 200 frames, not 1706 to 1731;"
+if [ -z "$why" ]; then
+	report "next:ctc" PASS "the CTC's channel 0 interrupted $count times in 200 frames through the vector hardware IM2 mode makes for it (28 MHz / 256 / 256); the sandbox prints the native build's lines, a state every frame changes nothing"
+else
+	report "next:ctc" FAIL "$why"
+fi
+
 # A program goes on the SD card. With NextZXOS the test program is copied
 # into the card's top folder; the Browser lists it last, sixteen lines down,
 # and ENTER runs it with NextZXOS's own loader. The processor ends in the

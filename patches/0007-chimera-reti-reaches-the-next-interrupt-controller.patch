@@ -1,0 +1,18 @@
+diff --git a/src/cpus/z80_codpred.c b/src/cpus/z80_codpred.c
+index 6928744d..1d8fd3db 100644
+--- a/src/cpus/z80_codpred.c
++++ b/src/cpus/z80_codpred.c
+@@ -752,6 +752,13 @@ void instruccion_ed_77 ()
+ //RETI
+ 	//iff1.v=iff2.v; Reti no hace esto
+ 	reg_pc=pop_valor();
++#ifdef CHIMERA_CORE
++	/* the Next's interrupt controller sees RETI (waterbox/next_interrupts.c) */
++	{
++		extern void chimera_next_reti(void);
++		chimera_next_reti();
++	}
++#endif
+ }
+ 
+ void instruccion_ed_78 ()

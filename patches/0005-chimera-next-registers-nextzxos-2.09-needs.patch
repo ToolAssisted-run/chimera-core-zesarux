@@ -1,5 +1,5 @@
 diff --git a/src/machines/tbblue.c b/src/machines/tbblue.c
-index 3b41ad32..c7efbe7d 100644
+index 3b41ad32..a5bf3aa8 100644
 --- a/src/machines/tbblue.c
 +++ b/src/machines/tbblue.c
 @@ -3708,7 +3708,15 @@ z80_byte tbblue_get_diviface_enabled(void)
@@ -18,7 +18,17 @@ index 3b41ad32..c7efbe7d 100644
  }
  
  void tbblue_set_emulator_setting_divmmc(void)
-@@ -3956,6 +3964,10 @@ Bit	Function
+@@ -3915,6 +3923,9 @@ void tbblue_reset_common(void)
+     tbblue_registers[31]=0;
+     tbblue_registers[34]=0;
+     tbblue_registers[35]=0;
++#ifdef CHIMERA_CORE
++    chimera_next_interrupts_reset();
++#endif
+     tbblue_registers[50]=0;
+     tbblue_registers[51]=0;
+     tbblue_registers[66]=15;
+@@ -3956,6 +3967,10 @@ Bit	Function
  
      tbblue_registers[0xB8]=0x83;
      tbblue_registers[0xBB]=0xCD;
@@ -29,7 +39,7 @@ index 3b41ad32..c7efbe7d 100644
  
      tbblue_clip_windows[TBBLUE_CLIP_WINDOW_LAYER2][0]=0;
      tbblue_clip_windows[TBBLUE_CLIP_WINDOW_LAYER2][1]=255;
-@@ -4682,8 +4694,24 @@ Writes immediately change the current mmu mapping as if by port write
+@@ -4682,8 +4697,24 @@ Writes immediately change the current mmu mapping as if by port write
      //printf ("Puerto 32765: %d puerto 8189: %d\n",valor_final_puerto_32765,valor_final_puerto_8189);
  
  
@@ -54,7 +64,7 @@ index 3b41ad32..c7efbe7d 100644
  
      //TODO puerto 0xdffd
  
-@@ -4809,6 +4837,29 @@ void tbblue_generate_divmmc_nmi(void)
+@@ -4809,6 +4840,29 @@ void tbblue_generate_divmmc_nmi(void)
  
  }
  
@@ -84,7 +94,7 @@ index 3b41ad32..c7efbe7d 100644
  //tbblue_last_register
  //void tbblue_set_value_port(z80_byte value)
  void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
-@@ -4828,6 +4879,9 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+@@ -4828,6 +4882,9 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
      z80_byte last_register_6=tbblue_registers[6];
      z80_byte last_register_7=tbblue_registers[7];
      z80_byte last_register_8=tbblue_registers[8];
@@ -94,7 +104,18 @@ index 3b41ad32..c7efbe7d 100644
      z80_byte last_register_17=tbblue_registers[17];
      z80_byte last_register_21=tbblue_registers[21];
      z80_byte last_register_66=tbblue_registers[66];
-@@ -4964,6 +5018,24 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+@@ -4898,6 +4955,10 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+             return;
+     }
+ 
++#ifdef CHIMERA_CORE
++    /* the Next's interrupt controller (waterbox/next_interrupts.c) */
++    if (chimera_next_register_write(index_position,value)) return;
++#endif
+     tbblue_registers[index_position]=value;
+ 
+ 
+@@ -4964,6 +5025,24 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
                  }
  
              }
@@ -119,7 +140,7 @@ index 3b41ad32..c7efbe7d 100644
  
  
              break;
-@@ -5076,6 +5148,14 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+@@ -5076,6 +5155,14 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
          break;
  
  
@@ -134,17 +155,40 @@ index 3b41ad32..c7efbe7d 100644
          case 7:
          /*
          (R/W)	07 => Turbo mode
+@@ -5479,6 +5566,10 @@ z80_byte tbblue_get_value_port_register(z80_byte registro)
+ 
+ 
+ 
++#ifdef CHIMERA_CORE
++    /* 0xC0 bits 2:1: the processor's interrupt mode */
++    if (registro==0xC0) return chimera_next_register_read_c0();
++#endif
+     switch(registro)
+     {
+         case 0:
 diff --git a/src/machines/tbblue.h b/src/machines/tbblue.h
-index 4a569dc6..a3ecc1eb 100644
+index 4a569dc6..1e1fbf67 100644
 --- a/src/machines/tbblue.h
 +++ b/src/machines/tbblue.h
-@@ -319,6 +319,10 @@ extern void tbblue_get_string_palette_format(char *texto);
+@@ -319,6 +319,22 @@ extern void tbblue_get_string_palette_format(char *texto);
  
  extern int tbblue_pendiente_retn_stackless;
  extern void tbblue_handle_nmi(void);
 +#ifdef CHIMERA_CORE
 +extern int chimera_tbblue_multiface_nmi;
 +extern void tbblue_generate_multiface_nmi(void);
++/* waterbox/next_interrupts.c: the Next's CTC and hw im2 mode */
++extern int chimera_next_hwim2(void);
++extern int chimera_next_register_write(z80_byte reg,z80_byte value);
++extern z80_byte chimera_next_register_read_c0(void);
++extern void chimera_next_interrupts_reset(void);
++extern int chimera_next_is_ctc_port(z80_int port);
++extern void chimera_next_ctc_write(z80_int port,z80_byte value);
++extern z80_byte chimera_next_ctc_read(z80_int port);
++extern z80_byte chimera_next_int_ack(void);
++extern void chimera_next_reti(void);
++extern void chimera_next_frame_interrupt(void);
++extern void chimera_next_step(void);
 +#endif
  
  //extern int tbblue_prueba_dentro_nmi;

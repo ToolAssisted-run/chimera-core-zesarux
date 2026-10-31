@@ -97,7 +97,7 @@ program, so neither is used:
 - `meson.build` lists the sources: the 175 files the Makefile compiled for
   those options, less the null drivers (the core's own replace them), less
   `main_unix.c` (the core is started by a call), less PlayTZX.
-- The patches are six, all under `#ifdef CHIMERA_CORE`:
+- The patches are seven, all under `#ifdef CHIMERA_CORE`:
   - 0001 `start.c`: `zesarux_main` returns once the machine is set up
     instead of entering its loop;
   - 0002 `timer.c`: the 1/50 s tick is "the machine has run its frame", and
@@ -113,10 +113,15 @@ program, so neither is used:
   - 0005 `machines/tbblue.c`, `machines/tbblue.h`, `storage/diviface.c`,
     `ula.c`: three things of the Next's newer cores that NextZXOS 2.09
     needs (same section), and the Multiface's NMI by Next register 2 bit 3
-    ("Fourth round");
+    ("Fourth round"), and the register hooks of the Next's CTC and
+    hardware IM2 mode ("The Next's CTC and hardware IM2 mode");
   - 0006 `snap/snap.c`: a .z80 snapshot of a 128K loaded into the Next
     gets its own port 0x7ffd back, as ZEsarUX gives it to a 128K
-    ("Fourth round").
+    ("Fourth round");
+  - 0007 `cpus/z80_codpred.c`: RETI tells the Next's interrupt
+    controller (same section).
+  Patch 0003 also carries the hooks for the CTC's ports, the ULA's
+  interrupt, the step after each instruction and the vector.
 
 ## How the core is put together
 
@@ -535,7 +540,14 @@ and `PORTS.TXT` (read from the card; not copied here).
   interrupt routine at 0x8000 that writes samples to a DAC. ZEsarUX 13.0
   has no CTC and no hardware IM2 mode: no interrupt came, and the
   picture stood still from frame 1740 on (the program still ran its main
-  loop). Not fixed in this step.
+  loop). The CTC and the hardware IM2 mode are now the core's
+  ("The Next's CTC and hardware IM2 mode", below): TX-1696's interrupt
+  routine then runs 313 times a frame and its music streams from the card
+  (the main loop reads 512 bytes of TITLE15.RAW a frame through esxDOS and
+  the routine writes them to the DAC at port 0xDF). Its picture still
+  stands still from frame 1740 to frame 9000 (tried), and it reads no key
+  in that time: the program updates its 128 hardware sprites every frame
+  with the same values. Why was not found. Not said to work.
 
 Tests of this step, against Chimera main cb46d2b7: run-gate.sh with the
 24.11 card, 23 passed, 0 failed, 0 skipped (two new tests: game:sn-snapshot
@@ -549,6 +561,48 @@ processor is at c000"). Angry Bloaters, Santa's Pressie, Halls of the
 Things and Dark Star, each played by hand: native and sandbox the same
 lines every 500 frames, the same with a state every frame, and not the run
 left alone.
+
+## The Next's CTC and hardware IM2 mode (2026-10-31, fourth round)
+
+ZEsarUX 13.0 has neither the Next's CTC (its counter/timer) nor its
+interrupt controller's "hardware IM2 mode", in which the controller gives
+the processor a vector of its own for each device. Both are now the
+core's own code, `waterbox/next_interrupts.c`, called from small hooks
+under `CHIMERA_CORE`: the CTC's ports and the controller's registers
+(patches 0003 and 0005), the ULA's interrupt at the end of a frame, the
+step after each instruction and the vector (0003), and RETI (0007,
+`cpus/z80_codpred.c`). What it follows, from the card's
+`registers.txt` and `PORTS.TXT`:
+
+- Four CTC channels on ports 0x183B to 0x1B3B ("temporarily reduced to
+  four channels from eight"), each a Zilog CTC channel: timer (prescaler
+  16 or 256) or counter, a time constant (0 is 256), each channel's zero
+  count feeding the next channel's trigger, the Next's hard and soft
+  reset rules. A read gives the down counter.
+- The CTC's clock is the Next's 28 MHz: eight ticks for each 3.5 MHz
+  T-state, whatever speed the processor runs at. (TX-1696's 28 MHz / 16 /
+  112 is 15625 a second, its music's sample rate.)
+- Register 0xC0 bit 0 chooses the pulse (ZEsarUX's own handling, kept) or
+  hardware IM2 mode: vector = 0xC0 bits 7:5, the device times 2 (0 the
+  line interrupt, 3 to 6 the CTC's channels, 11 the ULA). In that mode the
+  line and ULA interrupts are made by this file too. A device waits until
+  it is taken; once taken it is "in service" until RETI, and it and every
+  device of lower priority wait until then, as Zilog peripherals on a
+  daisy chain do.
+- 0xC4 to 0xC6 enable the devices' interrupts (0xC4's line and ULA bits
+  are register 0x22's, both ways); 0xC8 to 0xCA say which devices made one
+  (written with 1s to clear; a pending one stays set).
+- A guess the documentation does not settle: the CTC control word's bit 7
+  (its interrupt) and the channel's bit in 0xC5 are treated as one bit.
+
+Not done: the UARTs' interrupts, a DMA transfer being interrupted (0xCC
+to 0xCE), the CTC's trigger edge bit and its vector word, and channels 4
+to 7.
+
+The test script's next:ctc runs the test program with a CTC part
+(`make-nex.py --with ctc`): channel 0 at 28 MHz / 256 / 256, its own
+interrupt routine reached through vector 0x06; it counted 1706 interrupts
+in 200 frames (the 48K timing's 69888 T-states a frame give 1706.25).
 
 ## What the user brings
 
@@ -739,9 +793,10 @@ real Next.
 - Games tried: from the card ZEsarUX comes with, Warhawk and Nextoid in
   the test script, The Lords of Midnight and the Night-Knight demo by hand;
   from the 24.11 card, Revival Survival in the test script, Warhawk (2024)
-  and NextBASIC Invaders by hand. No commercial game. Halls of the
-  Things, TX-1696 and DARKSTAR.Z80 were started and not played ("Games
-  from the card"); the 24.11 card's other games and demos not tried.
+  and NextBASIC Invaders by hand, and in the fourth round Dark Star in
+  the test script, Angry Bloaters, Santa's Pressie and Halls of the
+  Things by hand. No commercial game. TX-1696 runs with a still picture
+  ("Fourth round"); the 24.11 card's other games and demos not tried.
 - Not tried: the sound of a real game listened to (the tests compare
   sound by its hash); .snx, .tap and the other program formats in the
   program slot (with "card" the test program is put on the 24.11 card and
@@ -764,39 +819,40 @@ real Next.
   declared memory costs Windows commit charge up front was not measured.
 - No movie recorded by hand in Chimera's window.
 
-## Where this stands (2026-10-31, third round)
+## Where this stands (2026-10-31, fourth round)
 
 Built and tested locally, against Chimera main cb46d2b7; not published,
-no remote. The owner's answer to the second round (the Browser stays a
-name) is written down and was already applied.
+no remote. The owner's answers to the third round are written down ("The
+owner's decisions on the third round"): the card stays whole in memory,
+and nothing is reported to ZEsarUX's author for now.
 
-New this round: the System/Next 24.11 card for emulators boots, with a
-third way to start, "card", in which the core does the firmware's work
-(the card's own firmware cannot read its file system); NextZXOS 2.09
-needed three fixes to ZEsarUX's Next (patch 0005) and FatFs a fix to its
-FAT32 rule (patch 0004). The card is carried in the machine's memory and
-not in states (a state at Warhawk's title is 5.8 MB); a running machine
-holds about 1.1 GB. Three games from that card were played from switching
-on, native and sandbox alike, with states: Revival Survival in the test
-script (game:sn-card, SKIP without ZESARUX_SN_CARD), Warhawk (2024) and
-NextBASIC Invaders by hand.
+New this round ("Fourth round" and "The Next's CTC and hardware IM2
+mode"): the Next's Multiface NMI (Dark Star, a .z80 from the 24.11 card,
+now loads through NextZXOS's snapshot loader and plays); .z80 and .sna
+snapshots stay on the Next in the fast start (a crash of the native
+runner before), with a 128K snapshot's own 0x7ffd, and a program that
+would turn ZEsarUX into another machine is refused; the Next's CTC and
+hardware IM2 mode (four channels, vectors, priorities, RETI). Angry
+Bloaters, Santa's Pressie and Halls of the Things play (Halls was never
+stuck: its "map" is the game). TX-1696 now runs its interrupts and
+streams its music, but its picture still stands still; why is not known.
 
-What works, as before: NextZXOS 2.06 from ZEsarUX's own card with the
-boot ROM; the fast start on the built-in 48K ROM; picture, sound, keys,
-joystick, resets, DMA, savestates, the project's clock, the package in
-chimera-run and in Chimera's Qt window. Native and sandbox agree on every
-test.
-
-Tests of this round: run-gate.sh with the 24.11 card 21 passed, 0
-failed, 0 skipped; run-frontend.sh (Qt window, headless) 3 of 3;
-Chimera's test-packages on a folder with only this package, all passed;
-check-core-texts.py 24 keys, every one named; check-names.py 0;
-Chimera's check-proper-nouns.py on waterbox/ 0.
+Tests of this round: run-gate.sh with the 24.11 card 24 passed, 0
+failed, 0 skipped (new: game:sn-snapshot, snapshot:128k, next:ctc, each
+seen to fail with its fix taken out on purpose); run-frontend.sh (Qt
+window, headless) 3 of 3; Chimera's test-packages on a folder with only
+this package, all passed; check-core-texts.py 25 keys, every one named;
+check-names.py 0; check-proper-nouns.py 0. By hand, from the 24.11 card:
+Angry Bloaters, Santa's Pressie, Halls of the Things, native and sandbox
+the same lines every 500 frames, the same with a state every frame, not
+the run left alone; TX-1696 to frame 3000 native and sandbox the same,
+the same with a state every frame.
 
 Next, in order:
 1. The owner's review, then publishing (the owner's).
-2. The owner's call on carrying the card sector by sector (saves about
-   1 GB of memory a machine; needs ZEsarUX's card emulation reworked).
+2. TX-1696's still picture: what its title loop waits for (it reads no
+   key and its sprites do not move); compare with CSpect on the same
+   card if the owner wants it pursued.
 3. Commercial Next games from the owner (none on this machine); a movie
    recorded by hand in Chimera's window and played back, with the 24.11
    card.
@@ -827,3 +883,11 @@ Traps met:
   empty memory, was each time a register of the Next's newer cores that
   ZEsarUX does not have; a trace of the last few thousand instructions
   before the processor reached address 0 (or a run of NOPs) found each.
+  In the fourth round the same trace found the Multiface's NMI (Next
+  register 2 bit 3). A black screen with the processor at 0x0038 every
+  frame was a loop at 0x0000 after such a jump, not a program waiting.
+- The test program fills its interrupt table at start: a vector written
+  into the table in the .nex file is overwritten; the program must write
+  it after the fill.
+- The Layer 2 picture covers the bottom half of the test program's
+  screen: a test that paints colours there shows nothing.

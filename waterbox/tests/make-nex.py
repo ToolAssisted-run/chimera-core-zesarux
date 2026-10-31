@@ -4,6 +4,7 @@
 that the repository needs no assembler and holds no program of anybody's.
 
 usage: make-nex.py <out.nex> [--without sprite,copper,dma,sound,tilemap,ay2,ay3,dacs]
+                   [--with ctc]
 
 What it does, so that a test can see each part:
  - a Layer 2 picture (the Next's 256x192 screen of 256 colours) is part of
@@ -39,6 +40,16 @@ What it does, so that a test can see each part:
      counter: two saw waves of 50 steps a second.
    The program turns on the three AY chips and the DACs (Next register 8)
    whichever parts are left out.
+ - only when asked (--with ctc), the Next's CTC and its interrupt
+   controller's hardware IM2 mode: Next register 0xC0 = 0x01 (vectors
+   0x00 + 2 x the device), CTC channel 0 a timer of 28 MHz / 256 / 256
+   with its interrupt on (control word 0xA5, constant 0, register 0xC5),
+   and the table's entry for channel 0 (0x9006, the device 3) pointing at
+   a routine of its own at 0x9180, which counts at 0x9202 (16 bits) and
+   sets the border's colour from the count's three low bits. The
+   frame's interrupt (the ULA, device 11) still reaches 0x9191. A CTC
+   interrupt also ends the main loop's HALT, so the controls are read more
+   often with it.
  - a counter of frames at 0x9200 (in the "RAM" domain, bank 2 at 0x8000,
    at 0x9200 - 0x8000 + 0x8000 = 0x9200); its interrupt routine is at
    0x9191, where the processor waits between frames.
@@ -155,6 +166,14 @@ def assemble(features):
         nextreg(0x41, 0x1C)         # is green (RRRGGGBB)
         nextreg(0x43, 0x00)
         nextreg(0x6B, 0xA0)         # on, 40x32, no attribute bytes
+    if "ctc" in features:
+        # the table's entry for the CTC's channel 0 (device 3, vector 0x06)
+        emit(0x21); word(0x9180)    # ld hl,0x9180
+        emit(0x22); word(0x9006)    # ld (0x9006),hl
+        nextreg(0xC0, 0x01)         # hardware IM2 mode, vectors from 0x00
+        nextreg(0xC5, 0x01)         # CTC channel 0's interrupt on
+        out(0x183B, 0xA5)           # channel 0: interrupt, timer, /256, constant follows
+        out(0x183B, 0x00)           # constant 0: 256
     emit(0xAF)                      # xor a
     emit(0x32); word(0x9200)        # ld (0x9200),a
     labels["loop"] = here()
@@ -219,6 +238,8 @@ def assemble(features):
 
 def main():
     features = {"sprite", "copper", "dma", "sound", "tilemap", "ay2", "ay3", "dacs"}
+    if "--with" in sys.argv:
+        features |= set(sys.argv[sys.argv.index("--with") + 1].split(","))
     if "--without" in sys.argv:
         for f in sys.argv[sys.argv.index("--without") + 1].split(","):
             features.discard(f)
@@ -230,6 +251,21 @@ def main():
     for i in range(0x1000, 0x1101):
         bank2[i] = 0x91
     bank2[0x1191:0x1194] = bytes((0xFB, 0xED, 0x4D))
+    if "ctc" in features:
+        # the CTC's channel 0 has its own routine (the program points the
+        # table's entry for it here, after filling the table)
+        bank2[0x1180:0x1191] = bytes((
+            0xF5,                   # push af
+            0xE5,                   # push hl
+            0x2A, 0x02, 0x92,       # ld hl,(0x9202)
+            0x23,                   # inc hl
+            0x22, 0x02, 0x92,       # ld (0x9202),hl
+            0x7D,                   # ld a,l
+            0xE6, 0x07,             # and 7
+            0xD3, 0xFE,             # out (0xFE),a: the border
+            0xE1,                   # pop hl
+            0xF1,                   # pop af
+            0xFB))                  # ei, and on into 0x9191's ei, reti
     # the colours the DMA copies (0x9300): paper colours 1 to 7, again and again
     for i in range(32):
         bank2[0x1300 + i] = ((i % 7) + 1) << 3
