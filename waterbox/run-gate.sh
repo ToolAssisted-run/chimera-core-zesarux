@@ -18,8 +18,12 @@
 # another folder instead. None of them is copied into this repository; the
 # 48K ROM alone is in the package.
 #
-# The program the tests load is made by this script (tests/make-nex.py): no
-# game is involved, and no test needs one.
+# The program the tests load is made by this script (tests/make-nex.py).
+# The tests of games read them from where the owner put them, and each says
+# SKIP when its variable is not set: ZESARUX_SN_CARD (the System/Next 24.11
+# card for emulators), ZESARUX_MONSTER_MAX (Monster Max's .nex) and
+# ZESARUX_OWNER_TZX (a folder of three Spectrum tapes). None of them is in
+# this repository.
 #
 # Needs the native build (meson setup build/meson-native ... && ninja) and the
 # sandboxed core (waterbox/setup-guest.sh && ninja -C build/meson-guest).
@@ -72,6 +76,7 @@ nextzxos="--firmware $fw/tbblue_loader.rom --sd $fw/tbblue.mmc"
 chimera_root="${CHIMERA_ROOT:-}"
 chimera_engine="$chimera_root/build/dll/chimera-run"
 package="${ZESARUX_PACKAGE:-$root/build/pkg/zesarux.chimeraCore}"
+same_picture="$here/tests/same-picture.py"
 # the fast start needs nothing handed over: its ROM is built in
 fast="--set boot=fast"
 prog="$work/test.nex"
@@ -557,6 +562,176 @@ else
 	fi
 fi
 
+# Monster Max (Rare and Titus, 1994; the Next version 1.0), a commercial
+# game, when ZESARUX_MONSTER_MAX names its .nex: it is the owner's, for
+# tests on this machine only, never copied into this repository. The test
+# copies it into its own scratch folder.
+#  - The fast start: SPACE past the Titus page and the licence page, X
+#    (START) at the title, X for English; the first room by frame 2100; P,
+#    Q and O walk, the joystick's Fire jumps, the joystick goes right; to
+#    frame 2500. The sandbox prints the native build's lines every 250
+#    frames, a state saved and loaded before every frame changes nothing, a
+#    state saved at frame 2000 and loaded by another process ends where the
+#    unbroken run does, and the game played is not the game left alone.
+#  - With ZESARUX_SN_CARD too: the System/Next 24.11 card started with
+#    "card", the game put on it, opened from the Browser (the 11th line of
+#    its top folder) and played the same way, 700 frames later; it ends on
+#    the fast start's picture; native and sandbox the same, not left alone.
+#  - With CHIMERA_ROOT: a movie of the fast start's buttons recorded in
+#    chimera-run, played back by another process, and again with the
+#    engine's save and load before every frame: the picture at its last
+#    frame is this repository's runner's.
+mm_src="${ZESARUX_MONSTER_MAX:-}"
+if [ -z "$mm_src" ] || [ ! -f "$mm_src" ]; then
+	report "game:monster-max" SKIP "ZESARUX_MONSTER_MAX is not set to Monster Max for the Next (monster-max-next-v1.0.nex), a commercial game that is not in this repository"
+else
+	mm_dir="$work/mm"
+	mkdir -p "$mm_dir"
+	cp "$mm_src" "$mm_dir/monstermax.nex"
+	mm="$mm_dir/monstermax.nex"
+	key_x=$(hex $((1 << 32)))
+	key_q=$(hex $((1 << 10))); key_o=$(hex $((1 << 18))); key_p=$(hex $((1 << 19)))
+	joy_right=$(hex $((1 << 45)))
+	mm_start() { # <frames later than the fast start>
+		echo "--press $((400 + $1)):5:$key_space --press $((700 + $1)):5:$key_space --press $((1500 + $1)):5:$key_x --press $((1800 + $1)):5:$key_x"
+	}
+	mm_play() {
+		echo "--press $((2100 + $1)):60:$key_p --press $((2170 + $1)):60:$key_q --press $((2240 + $1)):60:$key_o --press $((2310 + $1)):6:$joy_fire --press $((2340 + $1)):80:$joy_right"
+	}
+	mmf="$fast --program $mm --frames 2500 --every 250"
+	# shellcheck disable=SC2046,SC2086
+	nat mm-n $mmf $(mm_start 0) $(mm_play 0)
+	# shellcheck disable=SC2046,SC2086
+	box mm-s $mmf $(mm_start 0) $(mm_play 0)
+	# shellcheck disable=SC2046,SC2086
+	box mm-r $mmf $(mm_start 0) $(mm_play 0) --rerecord
+	# shellcheck disable=SC2046,SC2086
+	box mm-idle $mmf $(mm_start 0)
+	# shellcheck disable=SC2046,SC2086
+	box mm-save $mmf $(mm_start 0) $(mm_play 0) --save-state "$work/mm.state" --at 2000
+	# shellcheck disable=SC2046,SC2086
+	box mm-load $mmf $(mm_start 0) $(mm_play 0) --state "$work/mm.state"
+	why=""
+	same mm-n mm-s || why="$why native and sandbox differ [$(last "$work/mm-s.out" | cut -c1-60)] $(tail -1 "$work/mm-s.err" | cut -c1-80);"
+	same mm-s mm-r || why="$why a state every frame changed the run [$(last "$work/mm-r.out" | cut -c1-60)];"
+	[ -n "$(last "$work/mm-load.out")" ] && [ "$(last "$work/mm-load.out")" = "$(last "$work/mm-s.out")" ] || why="$why a state loaded by another process ends elsewhere [$(last "$work/mm-load.out" | cut -c1-60)];"
+	[ -n "$(vh mm-idle)" ] && [ "$(vh mm-s)" != "$(vh mm-idle)" ] || why="$why the game played and the game left alone end alike;"
+	said="the fast start: the native build's lines, a state every frame and a state in another process change nothing, not the game left alone"
+	if [ -n "$sn_card" ] && [ -f "$sn_card" ]; then
+		# from the card: the Browser's top folder, the game the 11th line
+		mmc="--set boot=card --sd $sn_card --program $mm --frames 3200 --every 400 --press 150:5:$key_space --press 400:5:$key_enter"
+		i=0; while [ $i -lt 10 ]; do mmc="$mmc --press $((500 + i * 10)):4:$key_down"; i=$((i + 1)); done
+		mmc="$mmc --press 620:5:$key_enter"
+		# shellcheck disable=SC2046,SC2086
+		nat mmc-n $mmc $(mm_start 700) $(mm_play 700)
+		# shellcheck disable=SC2046,SC2086
+		box mmc-s $mmc $(mm_start 700) $(mm_play 700)
+		# shellcheck disable=SC2046,SC2086
+		box mmc-idle $mmc $(mm_start 700)
+		same mmc-n mmc-s || why="$why from the card, native and sandbox differ [$(last "$work/mmc-s.out" | cut -c1-60)] $(tail -1 "$work/mmc-s.err" | cut -c1-80);"
+		[ -n "$(vh mmc-idle)" ] && [ "$(vh mmc-s)" != "$(vh mmc-idle)" ] || why="$why from the card, the game played and the game left alone end alike;"
+		[ "$(vh mmc-s)" = "$(vh mm-s)" ] || why="$why from the card, the game does not end on the fast start's picture;"
+		said="$said; from System/Next 24.11's card through the Browser, the same, ending on the fast start's picture"
+	else
+		said="$said; not from the card (ZESARUX_SN_CARD is not set)"
+	fi
+	if [ -n "$chimera_root" ] && [ -x "$chimera_engine" ] && [ -f "$package" ]; then
+		# the same buttons as a movie: the engine counts rows from 0
+		mm_rows="399:5:39 699:5:39 1499:5:32 1799:5:32 2099:60:19 2169:60:10 2239:60:18 2309:6:46 2339:80:45"
+		# shellcheck disable=SC2086
+		python3 "$here/tests/make-movie.py" 2500 $mm_rows > "$mm_dir/keys.movie"
+		env -u DISPLAY "$chimera_engine" --new-project "$mm_dir/rec.chimeraProject" "$package" --file "program=$mm" \
+			--settings '{"boot":"fast"}' --movie "$mm_dir/keys.movie" > "$mm_dir/rec.log" 2>&1
+		env -u DISPLAY "$chimera_engine" --project "$mm_dir/rec.chimeraProject" "$package" --files "$mm_dir" \
+			--record "$mm_dir/rec.movie" > "$work/mm-rec.out" 2>&1
+		env -u DISPLAY "$chimera_engine" --new-project "$mm_dir/play.chimeraProject" "$package" --file "program=$mm" \
+			--settings '{"boot":"fast"}' --movie "$mm_dir/rec.movie" > "$mm_dir/play.log" 2>&1
+		env -u DISPLAY "$chimera_engine" --project "$mm_dir/play.chimeraProject" "$package" --files "$mm_dir" \
+			--screenshot "2499=$work/mm-play.tga" > "$work/mm-play.out" 2>&1
+		mm_played=$?
+		env -u DISPLAY "$chimera_engine" --project "$mm_dir/play.chimeraProject" "$package" --files "$mm_dir" \
+			--rerecord --screenshot "2499=$work/mm-rr.tga" > "$work/mm-rr.out" 2>&1
+		mm_rr=$?
+		# shellcheck disable=SC2046,SC2086
+		box mm-pic $fast --program "$mm" --frames 2500 --ppm "$work/mm.ppm" $(mm_start 0) $(mm_play 0)
+		cmp -s "$mm_dir/keys.movie" "$mm_dir/rec.movie" || why="$why the movie recorded in chimera-run is not the movie played;"
+		[ "$mm_played" = 0 ] && python3 "$same_picture" "$work/mm-play.tga" "$work/mm.ppm" > /dev/null 2>&1 ||
+			why="$why the movie played back by another process (exit $mm_played) does not end on the runner's picture;"
+		[ "$mm_rr" = 0 ] && python3 "$same_picture" "$work/mm-rr.tga" "$work/mm.ppm" > /dev/null 2>&1 ||
+			why="$why the movie with a state every frame in chimera-run (exit $mm_rr) does not end on the runner's picture;"
+		said="$said; a movie recorded in chimera-run and played back by another process (and with a state every frame) ends on the runner's picture"
+	fi
+	if [ -z "$why" ]; then
+		report "game:monster-max" PASS "Monster Max from switching on to its first room, walked and jumped in to frame 2500: $said"
+	else
+		report "game:monster-max" FAIL "$why"
+	fi
+fi
+
+# Three ZX Spectrum tapes, when ZESARUX_OWNER_TZX names the owner's folder
+# of them (Manic Miner, Jet Set Willy 2 and Golden Baton, .tzx files with a
+# name that starts so): commercial games, never copied into this
+# repository; the test copies each into its own scratch folder. Each is
+# loaded in the fast start, the Next with the 48K Spectrum's ROM, by
+# ZEsarUX's own tape loading, and played a little:
+#  - Manic Miner: ENTER at its title, P walks right, SPACE jumps;
+#  - Jet Set Willy 2: ENTER, its code card's colours (keys 1, 2, 4 and 6
+#    are blue, red, green and yellow; this run asks for location M3 on
+#    page 4, which is blue, yellow, blue, green), ENTER held at the title,
+#    P walks to the tap in The Bathroom;
+#  - Golden Baton: N (no saved game), LOOK and N typed.
+# The sandbox prints the native build's lines, a state every frame changes
+# nothing, and the game played is not the game left alone.
+tzx_dir="${ZESARUX_OWNER_TZX:-}"
+if [ -z "$tzx_dir" ] || [ ! -d "$tzx_dir" ]; then
+	report "game:tapes" SKIP "ZESARUX_OWNER_TZX is not set to the owner's folder of Spectrum tapes (Manic Miner, Jet Set Willy 2, Golden Baton), which are not in this repository"
+else
+	mkdir -p "$work/tzx"
+	k() { hex $((1 << $1)); }
+	why=""; found=0
+	for game in manic jsw2 baton; do
+		case $game in
+			manic) pattern="Manic Miner*.tzx"; frames=1950
+				started="--press 1500:5:$(k 29)"
+				played="--press 1700:100:$(k 19) --press 1820:5:$(k 39)" ;;
+			jsw2) pattern="Jet Set Willy 2*.tzx"; frames=2700
+				started="--press 1500:5:$(k 29) --press 1800:15:$(k 0) --press 1850:15:$(k 5) --press 1900:15:$(k 0) --press 1950:15:$(k 3) --press 2000:15:$(k 29) --press 2300:60:$(k 29)"
+				played="--press 2460:120:$(k 19) --press 2590:5:$(k 39)" ;;
+			baton) pattern="*Golden Baton*.tzx"; frames=2700
+				started="--press 1500:10:$(k 36)"
+				played=""; f=1900
+				for key in 28 18 18 27 29; do played="$played --press $f:5:$(k $key)"; f=$((f + 15)); done
+				played="$played --press 2200:5:$(k 36) --press 2215:5:$(k 29)" ;;
+		esac
+		src="$(find "$tzx_dir" -maxdepth 1 -name "$pattern" | head -1)"
+		if [ -z "$src" ]; then
+			why="$why no $pattern in the folder;"
+			continue
+		fi
+		found=$((found + 1))
+		cp "$src" "$work/tzx/$game.tzx"
+		t="$fast --program $work/tzx/$game.tzx --frames $frames --every 250"
+		# shellcheck disable=SC2086
+		nat tz-$game-n $t $started $played
+		# shellcheck disable=SC2086
+		box tz-$game-s $t $started $played
+		# shellcheck disable=SC2086
+		box tz-$game-r $t $started $played --rerecord
+		# shellcheck disable=SC2086
+		box tz-$game-idle $t $started
+		same tz-$game-n tz-$game-s || why="$why $game: native and sandbox differ [$(last "$work/tz-$game-s.out" | cut -c1-60)] $(tail -1 "$work/tz-$game-s.err" | cut -c1-80);"
+		same tz-$game-s tz-$game-r || why="$why $game: a state every frame changed the run;"
+		[ -n "$(vh tz-$game-idle)" ] && [ "$(vh tz-$game-s)" != "$(vh tz-$game-idle)" ] || why="$why $game: the game played and the game left alone end alike;"
+	done
+	if [ -z "$why" ]; then
+		report "game:tapes" PASS "Manic Miner, Jet Set Willy 2 and Golden Baton loaded from their tapes in the fast start and played a little: the sandbox prints the native build's lines, a state every frame changes nothing, not the game left alone"
+	elif [ "$found" = 0 ]; then
+		report "game:tapes" SKIP "none of the three tapes is in $tzx_dir:$why"
+	else
+		report "game:tapes" FAIL "$why"
+	fi
+fi
+
 # A 128K snapshot in the fast start. ZEsarUX loads a .z80 into the Next
 # (--snap-no-change-machine: by default it turned into a 128K, and the
 # core's memory exports then pointed past the machine's memory) one bank at
@@ -614,7 +789,6 @@ fi
 #    named;
 #  - the start the core suggests for a project, with and without a card.
 engine="$chimera_engine"
-same_picture="$here/tests/same-picture.py"
 if [ -z "$chimera_root" ] || [ ! -x "$engine" ] || [ ! -f "$package" ]; then
 	why="set CHIMERA_ROOT to a Chimera checkout with build/dll/chimera-run, and make the package (waterbox/build-package.sh -o build/pkg)"
 	report "frontend:picture" SKIP "$why"

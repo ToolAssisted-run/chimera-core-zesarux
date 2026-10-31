@@ -81,8 +81,13 @@ QT_LIB_DIR=<qt>/6.12.0/gcc_64/lib bash waterbox/tests/run-frontend.sh --chimera-
   names the System/Next 24.11 card for emulators (from
   specnext.com/latestdistro; not in this repository) for game:sn-card,
   which says SKIP without it, as game:sn-snapshot (Dark Star from that
-  card) does. 24 tests.
-- `run-frontend.sh` loads the package in Chimera's window, headless.
+  card) does. `ZESARUX_MONSTER_MAX=<monster-max-next-v1.0.nex>` names
+  Monster Max for game:monster-max, and `ZESARUX_OWNER_TZX=<folder>` a
+  folder with the Manic Miner, Jet Set Willy 2 and Golden Baton tapes for
+  game:tapes: commercial games, not in this repository, each test says
+  SKIP without its variable. 26 tests.
+- `run-frontend.sh` loads the package in Chimera's window, headless (4
+  tests; window:monster-max says SKIP without ZESARUX_MONSTER_MAX).
 - `test-packages` is Chimera's own check of a package.
 
 The Next's boot ROM (`tbblue_loader.rom`), the 48K ROM (`48.rom`) and the

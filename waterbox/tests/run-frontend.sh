@@ -9,7 +9,10 @@
 #    "fast" and the test program in the project, the memory at that frame is
 #    another, and is what the native build has with that setting (with no
 #    firmware handed over: the fast start's 48K ROM is built into the core);
-#  - the keys the package ships become Chimera's keys.
+#  - the keys the package ships become Chimera's keys;
+#  - with ZESARUX_MONSTER_MAX naming Monster Max's .nex (a commercial game,
+#    not in this repository), a movie of it played by the window leaves
+#    the native build's memory (SKIP without it).
 #
 # Usage: waterbox/tests/run-frontend.sh --chimera-root <chimera checkout> [--frames N]
 # Needs: Chimera built with its window and chimera-run, the package
@@ -67,7 +70,8 @@ export ALSOFT_DRIVERS=null CHIMERA_CORES_DIR="$(dirname "$package")" CHIMERA_QT_
 
 ok=0
 failed=0
-report() { printf '%-22s %-6s %s\n' "$1" "$2" "$3"; case "$2" in PASS) ok=$((ok + 1)) ;; *) failed=$((failed + 1)) ;; esac; }
+skipped=0
+report() { printf '%-22s %-6s %s\n' "$1" "$2" "$3"; case "$2" in PASS) ok=$((ok + 1)) ;; SKIP) skipped=$((skipped + 1)) ;; *) failed=$((failed + 1)) ;; esac; }
 
 # A game runs only in a project (Chimera, 2026-10-26): each run opens one,
 # made with chimera-run --new-project, with the settings and firmware given.
@@ -145,6 +149,42 @@ else
 	report "window:keys" FAIL "Chimera did not finish the run: $(tail -2 "$work/keys.log" | tr '\n' ' ' | cut -c1-200)"
 fi
 
+# A game played in the window: Monster Max (the owner's .nex, named by
+# ZESARUX_MONSTER_MAX; a commercial game, not in this repository, copied
+# into this run's folder) in a project that starts fast, with a movie that
+# passes its title pages and walks and jumps in its first room. The window
+# plays the project's movie: the memory at frame 2500 is the native
+# build's with the same buttons, and not the native build's with the game
+# left alone at its first room.
+mm_src="${ZESARUX_MONSTER_MAX:-}"
+if [ -z "$mm_src" ] || [ ! -f "$mm_src" ]; then
+	report "window:monster-max" SKIP "ZESARUX_MONSTER_MAX is not set to Monster Max for the Next (monster-max-next-v1.0.nex), which is not in this repository"
+else
+	mm_dir="$work/project.mm"
+	mkdir -p "$mm_dir"
+	cp "$mm_src" "$mm_dir/monstermax.nex"
+	start_rows="399:5:39 699:5:39 1499:5:32 1799:5:32"
+	play_rows="2099:60:19 2169:60:10 2239:60:18 2309:6:46 2339:80:45"
+	# shellcheck disable=SC2086
+	python3 "$here/make-movie.py" 2500 $start_rows $play_rows > "$mm_dir/keys.movie"
+	# shellcheck disable=SC2046,SC2086
+	"$rn" "$work/native-dir.mm" --set boot=fast --program "$mm_dir/monstermax.nex" --frames 2500 --dump-ram "$work/native.mm.ram.bin" \
+		$(python3 "$here/make-movie.py" 2500 $start_rows $play_rows --as-presses) > "$work/native.mm.txt" 2>&1
+	# shellcheck disable=SC2046,SC2086
+	"$rn" "$work/native-dir.mm-idle" --set boot=fast --program "$mm_dir/monstermax.nex" --frames 2500 --dump-ram "$work/native.mm-idle.ram.bin" \
+		$(python3 "$here/make-movie.py" 2500 $start_rows --as-presses) > "$work/native.mm-idle.txt" 2>&1
+	if ! "$crun" --new-project "$mm_dir/mm.chimeraProject" "$package" --file "program=$mm_dir/monstermax.nex" \
+		--movie "$mm_dir/keys.movie" --settings '{"boot": "fast"}' > "$mm_dir/make.log" 2>&1; then
+		report "window:monster-max" FAIL "no project made: $(tail -1 "$mm_dir/make.log")"
+	elif ! run_frontend mm "$mm_dir/mm.chimeraProject" "" "" 2500; then
+		report "window:monster-max" FAIL "Chimera did not finish the run: $(tail -2 "$work/mm.log" | tr '\n' ' ' | cut -c1-200)"
+	elif cmp -s "$work/native.mm.ram.bin" "$work/mm.ram.bin" && ! cmp -s "$work/mm.ram.bin" "$work/native.mm-idle.ram.bin"; then
+		report "window:monster-max" PASS "Monster Max played by a movie in the window, to frame 2500: the memory is the native build's with the same buttons, and not the game left alone ($(grep '^lag=' "$work/mm.meta.txt") frames without input)"
+	else
+		report "window:monster-max" FAIL "same as native with the buttons $(cmp -s "$work/native.mm.ram.bin" "$work/mm.ram.bin" && echo yes || echo no); differs from the game left alone $(cmp -s "$work/mm.ram.bin" "$work/native.mm-idle.ram.bin" && echo no || echo yes)"
+	fi
+fi
+
 echo
-echo "$ok ok, $failed failed"
+echo "$ok ok, $failed failed, $skipped skipped"
 [ "$failed" -eq 0 ]

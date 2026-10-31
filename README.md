@@ -15,8 +15,12 @@ joystick, both resets and savestates work, and the sandboxed core gives the
 same results as a plain native build. Free games from the SD card ZEsarUX
 comes with (Warhawk, Nextoid, The Lords of Midnight, the Night-Knight demo)
 and from the System/Next 24.11 card for emulators (Revival Survival,
-Warhawk, NextBASIC Invaders) have been played; the tests also use a small
-program they make themselves.
+Warhawk, NextBASIC Invaders) have been played, and of the owner's
+commercial games Monster Max (a Next game) and three Spectrum tapes (Manic
+Miner, Jet Set Willy 2, Golden Baton, loaded by ZEsarUX's own tape
+loading); the tests also use a small program they make themselves. A
+.tzx does not load through NextZXOS's own TZX loader, which needs the
+Next's Raspberry Pi, not emulated.
 
 ## What you bring
 

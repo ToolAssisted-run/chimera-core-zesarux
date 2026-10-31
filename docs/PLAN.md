@@ -220,6 +220,16 @@ The owner accepted the second round's recommendations:
   and register 0x8E with bit 3 clear. The gaps found in the fourth round
   (the Multiface's NMI, the 128K snapshot's 0x7ffd) are kept the same way.
 
+## The owner's decisions on the fourth round (user-decided, 2026-10-31)
+
+- **TX-1696 stays documented as not working, for now.** Its interrupts
+  and music run since the fourth round, its picture stands still from
+  frame about 1740 ("Fourth round"); nothing more is done on it now.
+- **The CTC control word's bit 7 and the channel's bit in Next register
+  0xC5 are one interrupt-enable bit.** The fourth round built it so as a
+  guess the Next's documentation does not settle; it is now the owner's
+  decision, and stays as built ("The Next's CTC and hardware IM2 mode").
+
 ## The 48K ROM is built in (2026-10-31)
 
 - `waterbox/gen-roms.py` writes ZEsarUX's own `src/48.rom` (at the pinned
@@ -592,8 +602,9 @@ step after each instruction and the vector (0003), and RETI (0007,
 - 0xC4 to 0xC6 enable the devices' interrupts (0xC4's line and ULA bits
   are register 0x22's, both ways); 0xC8 to 0xCA say which devices made one
   (written with 1s to clear; a pending one stays set).
-- A guess the documentation does not settle: the CTC control word's bit 7
-  (its interrupt) and the channel's bit in 0xC5 are treated as one bit.
+- The CTC control word's bit 7 (its interrupt) and the channel's bit in
+  0xC5 are treated as one bit. The documentation does not settle it; the
+  owner decided it so (user-decided, 2026-10-31).
 
 Not done: the UARTs' interrupts, a DMA transfer being interrupted (0xCC
 to 0xCE), the CTC's trigger edge bit and its vector word, and channels 4
@@ -603,6 +614,116 @@ The test script's next:ctc runs the test program with a CTC part
 (`make-nex.py --with ctc`): channel 0 at 28 MHz / 256 / 256, its own
 interrupt routine reached through vector 0x06; it counted 1706 interrupts
 in 200 frames (the 48K timing's 69888 T-states a frame give 1706.25).
+
+## Fifth round: Monster Max and three Spectrum tapes (2026-10-31)
+
+The owner provided, on this machine outside the repository, Monster Max
+for the Next (`monster-max-next-v1.0.nex`, 721408 bytes, a "NextV1.2"
+file; Rare's 1994 Game Boy game, licensed to Titus) and three ZX Spectrum
+tapes: Manic Miner (Software Projects), Jet Set Willy 2 and Golden Baton
+(Mysterious Adventures 1, Channel 8 Software). They are commercial games:
+the tests copy them into their own folders, and nothing of them is in
+this repository or the package.
+
+### Monster Max
+
+- **The fast start** (no card, the .nex loaded by ZEsarUX): the Titus page
+  by frame 300, SPACE gives the licence page, SPACE again the title
+  ("UP(Q) DOWN(A) LEFT(O) RIGHT(P) SELECT(S) START(X)"), X the language
+  page, X (English) the first room, the PLAYPEN, by frame 2100. Played: P,
+  Q and O walk, SPACE or the joystick's Fire jumps, the joystick walks
+  right. The picture is the Game Boy's 160x144 screen in the middle of
+  the Next's.
+- **From the card**: the System/Next 24.11 card started with "card", the
+  .nex put on it by the core; the Browser lists it as the 11th line of
+  its top folder (after MACHINES), ENTER runs it with NextZXOS's own
+  loader, and the Titus page is up by frame 800. The same buttons 700
+  frames later end on the fast start's picture, hash for hash. Not tried
+  from ZEsarUX's own 64 MiB card.
+- Native and sandbox the same lines (every 250 frames in the fast start,
+  every 400 from the card), a state saved and loaded before every frame
+  changes nothing, a state saved at frame 2000 (4.4 MB) and loaded by
+  another process ends where the unbroken run does, and the game played
+  is not the game left alone.
+- **In chimera-run**: a project that starts fast with the game and a movie
+  of those buttons; the movie recorded by chimera-run is the movie played,
+  and played back by another process, and again with the engine's save
+  and load before every frame, its picture at frame 2500 is this
+  repository's runner's.
+- **In Chimera's Qt window** (headless): the same project, its movie
+  played by the window to frame 2500: the Next's 1.75 MiB of memory is the
+  native build's with the same buttons, and not the native build's with
+  the game left alone in its first room. The window counted 931 frames
+  without input in 2500.
+- In the test script as game:monster-max (ZESARUX_MONSTER_MAX names the
+  .nex; it says SKIP without it), and in the window test as
+  window:monster-max (the same variable).
+
+### The three tapes
+
+- **ZEsarUX's own tape loading, in the fast start** (the Next with the 48K
+  Spectrum's ROM: the Next in its 48K personality). A .tzx in the program
+  slot is loaded by ZEsarUX's tape loader, which reads it at once instead
+  of at the tape's speed: Manic Miner's title by frame 500, Golden
+  Baton's first question by frame 500, Jet Set Willy 2's first page at
+  frame 250. Each played a little:
+  - Manic Miner: ENTER at the title, the Central Cavern; Willy walked
+    right with P and jumped with SPACE.
+  - Jet Set Willy 2: "PRESS ENTER TO CONTINUE", then its code card ("Enter
+    code at location M3 on page 4"). There is no code card here, so the
+    code was found by trying all 256 from a state (in the sandbox, about
+    5 minutes): blue, yellow, blue, green. The game takes the colours
+    from keys 1, 2, 4 and 6 (blue, red, green, yellow); 3 and 5 do
+    nothing, and a key is taken only when held for a while (15 frames;
+    ENTER at the title wanted 60). The location asked depends on the
+    moment, so another run asks for another (in NextZXOS's 48K mode it
+    was N7 on page 7: yellow, blue, red, yellow). After it, the title and
+    The Bathroom; Willy walked right to the tap ("Items : 001"). Two of
+    his lives were gone by then; why was not looked into.
+  - Golden Baton: "Resume play on a Game ?", N, the forest picture and
+    "WHAT NOW ?"; LOOK gave "I see nothing special", N gave "O.k." and the
+    next place's picture.
+  In the test script as game:tapes (ZESARUX_OWNER_TZX names the folder;
+  it says SKIP without it): each native and sandbox the same lines every
+  250 frames, the same with a state every frame, not the game left alone.
+- **NextZXOS's own tape loading**, on the 24.11 card with "card": the
+  Browser hands a .tzx to NextZXOS's TZX loader, which asks for a mode
+  (128K, USR0, 48K, 48K CODE, Pentagon, Next/+3) and says "TZX loading
+  requires a Pi Zero installed": chosen 48K, it stops at "Error
+  communicating with Pi...". The Next's Raspberry Pi Zero (its
+  accelerator board, which plays a .tzx for it) is not emulated by
+  ZEsarUX. So a .tzx does not load through NextZXOS here; ZEsarUX's own
+  tape loading (the fast start) is the way.
+- All three tapes hold only standard blocks, so each was also turned into
+  a .tap (the same bytes, a few lines of Python in a scratch folder; not
+  committed) and put on the card: NextZXOS's TAP loader, which needs no
+  Pi, loads them. Manic Miner in its 48K mode and its 128K mode, played
+  as above; Golden Baton in both, LOOK and N typed; Jet Set Willy 2 in
+  48K mode, its code found again and The Bathroom's tap taken. Native and
+  sandbox the same lines for Manic Miner in 128K mode, Golden Baton in 48K
+  mode and Jet Set Willy 2 in 48K mode (the others were seen in the
+  sandbox only). Not in the test script: it would need the .tap copies,
+  which the owner did not give.
+- A .tzx in the program slot with NextZXOS is put on the card like any
+  program; the core does not also put it in ZEsarUX's tape player, so
+  NextZXOS's 48K or 128K BASIC cannot LOAD "" it from the tape. Not done.
+
+### Tests of this round
+
+Against Chimera main cb46d2b7 (~/chimera-scratch-bump), with the core of
+the fourth round (unchanged this round): run-gate.sh with the 24.11 card,
+Monster Max and the tapes, 26 passed, 0 failed, 0 skipped (new:
+game:monster-max, game:tapes); run-frontend.sh (Qt window, headless) 4
+of 4 (new: window:monster-max); Chimera's test-packages on a folder with
+only this package, all passed; check-core-texts.py 25 keys, every one
+named; check-names.py 0; check-proper-nouns.py 0. No text was added to
+the language tables. Without their variables the three new tests say
+SKIP and why. Seen to fail: game:monster-max with the game left alone made
+the game played (on purpose, taken out): "the game played and the game
+left alone end alike"; game:tapes with the sandbox run one frame short (on
+purpose, taken out): "native and sandbox differ" for each tape;
+window:monster-max with the native run one frame short (on purpose, taken
+out): "same as native with the buttons no".
 
 ## What the user brings
 
@@ -795,11 +916,17 @@ real Next.
   from the 24.11 card, Revival Survival in the test script, Warhawk (2024)
   and NextBASIC Invaders by hand, and in the fourth round Dark Star in
   the test script, Angry Bloaters, Santa's Pressie and Halls of the
-  Things by hand. No commercial game. TX-1696 runs with a still picture
-  ("Fourth round"); the 24.11 card's other games and demos not tried.
+  Things by hand. Commercial games (fifth round): Monster Max in the test
+  script and the window test, Manic Miner, Jet Set Willy 2 and Golden
+  Baton in the test script. TX-1696 runs with a still picture ("Fourth
+  round"; it stays so, the owner's decision); the 24.11 card's other
+  games and demos not tried.
+- A .tzx through NextZXOS's own TZX loader: it needs the Next's
+  Raspberry Pi, which ZEsarUX does not emulate ("Fifth round"). A tape in
+  the project with NextZXOS is not put in ZEsarUX's tape player either.
 - Not tried: the sound of a real game listened to (the tests compare
-  sound by its hash); .snx, .tap and the other program formats in the
-  program slot (with "card" the test program is put on the 24.11 card and
+  sound by its hash); .snx and the other program formats in the program
+  slot (.tzx and .tap were tried in the fifth round) (with "card" the test program is put on the 24.11 card and
   listed by its Browser, natively and in the sandbox the same, the card
   file unchanged; it was not run from there).
 - The card is held whole in the machine's memory (about 1.1 GB with the
@@ -817,45 +944,45 @@ real Next.
 - No Windows run: the frontend gate's scenario on Windows is still to be
   run before the core is called done; whether a machine of 1.4 GiB
   declared memory costs Windows commit charge up front was not measured.
-- No movie recorded by hand in Chimera's window.
+- No movie recorded by hand in Chimera's window: Monster Max's movie was
+  written by a script and played by the window and by chimera-run.
 
-## Where this stands (2026-10-31, fourth round)
+## Where this stands (2026-10-31, fifth round)
 
 Built and tested locally, against Chimera main cb46d2b7; not published,
-no remote. The owner's answers to the third round are written down ("The
-owner's decisions on the third round"): the card stays whole in memory,
-and nothing is reported to ZEsarUX's author for now.
+no remote. The core itself did not change this round: the round added
+tests and what was found. The owner's answers to the fourth round are
+written down ("The owner's decisions on the fourth round"): TX-1696 stays
+documented as not working, and the CTC's bit 7 and register 0xC5's bit
+are one interrupt-enable bit, as built.
 
-New this round ("Fourth round" and "The Next's CTC and hardware IM2
-mode"): the Next's Multiface NMI (Dark Star, a .z80 from the 24.11 card,
-now loads through NextZXOS's snapshot loader and plays); .z80 and .sna
-snapshots stay on the Next in the fast start (a crash of the native
-runner before), with a 128K snapshot's own 0x7ffd, and a program that
-would turn ZEsarUX into another machine is refused; the Next's CTC and
-hardware IM2 mode (four channels, vectors, priorities, RETI). Angry
-Bloaters, Santa's Pressie and Halls of the Things play (Halls was never
-stuck: its "map" is the game). TX-1696 now runs its interrupts and
-streams its music, but its picture still stands still; why is not known.
+New this round ("Fifth round"): Monster Max, a commercial Next game,
+from switching on to play, in the fast start and from the 24.11 card
+through the Browser (the same picture at the end), native = sandbox,
+states (every frame, and in another process), a movie through chimera-run
+played back by another process, and in the Qt window; in the test script
+as game:monster-max and in the window test as window:monster-max, each
+SKIP without ZESARUX_MONSTER_MAX. The three Spectrum tapes load and play
+in the fast start (the Next with the 48K ROM) by ZEsarUX's own tape
+loading, native = sandbox, a state every frame changes nothing
+(game:tapes, SKIP without ZESARUX_OWNER_TZX). Through NextZXOS a .tzx does
+not load: its TZX loader needs the Next's Raspberry Pi, not emulated; the
+same tapes made into .tap files load through NextZXOS's TAP loader in its
+48K and 128K modes and play (by hand, not in the test script).
 
-Tests of this round: run-gate.sh with the 24.11 card 24 passed, 0
-failed, 0 skipped (new: game:sn-snapshot, snapshot:128k, next:ctc, each
-seen to fail with its fix taken out on purpose); run-frontend.sh (Qt
-window, headless) 3 of 3; Chimera's test-packages on a folder with only
-this package, all passed; check-core-texts.py 25 keys, every one named;
-check-names.py 0; check-proper-nouns.py 0. By hand, from the 24.11 card:
-Angry Bloaters, Santa's Pressie, Halls of the Things, native and sandbox
-the same lines every 500 frames, the same with a state every frame, not
-the run left alone; TX-1696 to frame 3000 native and sandbox the same,
-the same with a state every frame.
+Tests of this round: run-gate.sh 26 passed, 0 failed, 0 skipped;
+run-frontend.sh 4 of 4; test-packages all passed; check-core-texts.py 25
+keys; check-names.py 0; check-proper-nouns.py 0 ("Tests of this round",
+under "Fifth round").
 
 Next, in order:
 1. The owner's review, then publishing (the owner's).
-2. TX-1696's still picture: what its title loop waits for (it reads no
-   key and its sprites do not move); compare with CSpect on the same
-   card if the owner wants it pursued.
-3. Commercial Next games from the owner (none on this machine); a movie
-   recorded by hand in Chimera's window and played back, with the 24.11
-   card.
+2. Whether a tape in a NextZXOS project should also go into ZEsarUX's
+   tape player, so that LOAD "" in NextZXOS's 48K or 128K BASIC reads it
+   (the Next with a real tape); and whether the tests may keep .tap copies
+   of the owner's tapes for game:tapes through NextZXOS. Both the owner's.
+3. More commercial games from the owner; a movie recorded by hand in
+   Chimera's window.
 4. CI (the workflow is written, never run: no remote), and the Windows run
    of the frontend tests.
 
@@ -891,3 +1018,9 @@ Traps met:
   it after the fill.
 - The Layer 2 picture covers the bottom half of the test program's
   screen: a test that paints colours there shows nothing.
+- Jet Set Willy 2 takes a key only when it is held for a while (its
+  colours 15 frames, ENTER at the title 60); a press of a few frames is
+  lost without a sign.
+- Jet Set Willy 2's code card location depends on the moment: a test
+  that moves its presses must find the code again (from a state, trying
+  all 256 in the sandbox takes about 5 minutes).

@@ -75,6 +75,10 @@ for emulators (1 GiB, from specnext.com/latestdistro) for the test
 game:sn-card, which says SKIP without it. Never copy that card, its ROMs
 or its games into this repository, and never write into the folder it is
 read from; a test copies it into its own temporary folder when it must.
+`ZESARUX_MONSTER_MAX=<.nex>` (Monster Max, for game:monster-max and
+window:monster-max) and `ZESARUX_OWNER_TZX=<folder>` (three Spectrum
+tapes, for game:tapes) name the owner's commercial games the same way:
+copied into a test's own folder, never into this repository.
 
 ## Rules
 
