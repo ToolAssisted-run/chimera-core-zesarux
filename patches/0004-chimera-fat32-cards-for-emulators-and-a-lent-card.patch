@@ -1,0 +1,52 @@
+diff --git a/src/third_party/diskio.c b/src/third_party/diskio.c
+index b337199d..0dd8b9d0 100644
+--- a/src/third_party/diskio.c
++++ b/src/third_party/diskio.c
+@@ -38,6 +38,10 @@ FILE *ptr_fatfs_disk_zero_file;
+ 
+ //Puntero que apunta a la memoria donde hemos leido nuestro archivo 
+ BYTE *fatfs_disk_zero_memory=NULL;
++#ifdef CHIMERA_CORE
++BYTE *chimera_fatfs_borrowed_card=NULL;
++long long int chimera_fatfs_borrowed_size=0;
++#endif
+ 
+ //Tamanyo del archivo
+ long long int fatfs_disk_zero_tamanyo=0;
+@@ -120,6 +124,17 @@ DSTATUS disk_initialize (
+ 
+ 		// translate the reslut code here
+ 
++#ifdef CHIMERA_CORE
++        /* The machine's own card, borrowed instead of a second copy of the
++         * file read into memory: what FatFs writes lands in the card the
++         * machine has. The borrower takes it back (fatfs_disk_zero_memory
++         * set to NULL) before anything frees it. */
++        if (chimera_fatfs_borrowed_card!=NULL) {
++            fatfs_disk_zero_memory=chimera_fatfs_borrowed_card;
++            fatfs_disk_zero_tamanyo=chimera_fatfs_borrowed_size;
++            return 0;
++        }
++#endif
+         //Abrimos el archivo
+ 
+         ptr_fatfs_disk_zero_file=fopen(fatfs_disk_zero_path,"rb");
+diff --git a/src/third_party/ff.c b/src/third_party/ff.c
+index 066afaf8..a01457c0 100644
+--- a/src/third_party/ff.c
++++ b/src/third_party/ff.c
+@@ -3545,6 +3545,14 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
+ 		if (nclst <= MAX_FAT32) fmt = FS_FAT32;
+ 		if (nclst <= MAX_FAT16) fmt = FS_FAT16;
+ 		if (nclst <= MAX_FAT12) fmt = FS_FAT12;
++#ifdef CHIMERA_CORE
++		/* A volume whose boot sector is laid out as FAT32 (no 16-bit FAT
++		 * size, no fixed root folder) is FAT32 whatever its number of
++		 * clusters, as NextZXOS and Linux read it: the System/Next cards
++		 * made for emulators have 32766 clusters of 32 KiB, which the
++		 * cluster-count rule takes for FAT16 and then refuses. */
++		if (nclst <= MAX_FAT32 && ld_word(fs->win + BPB_FATSz16) == 0 && fs->n_rootdir == 0) fmt = FS_FAT32;
++#endif
+ 		if (fmt == 0) return FR_NO_FILESYSTEM;
+ 
+ 		/* Boundaries and Limits */

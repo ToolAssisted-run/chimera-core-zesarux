@@ -148,7 +148,7 @@ int main(int argc, char **argv)
 	/* sbrk, sealed, invisible, plain, mmap: as waterbox.config says */
 	mb_memory_layout_template layout = {
 		.sbrk_size = 64u << 20, .sealed_size = 4u << 20, .invis_size = 8u << 20,
-		.plain_size = 4u << 20, .mmap_size = 256u << 20,
+		.plain_size = 4u << 20, .mmap_size = 1280u << 20,
 	};
 	freader fr = { f };
 	mb_return r;

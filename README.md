@@ -12,10 +12,11 @@ New, local and not published. NextZXOS starts from an SD card image to its
 menu and runs a program from its Browser; a program can also be loaded
 straight into the machine without NextZXOS. Picture, sound, keys, the
 joystick, both resets and savestates work, and the sandboxed core gives the
-same results as a plain native build. Four free games from the SD card
-ZEsarUX comes with have been run (Warhawk, Nextoid, The Lords of Midnight
-and the Night-Knight demo); the tests also use a small program they make
-themselves.
+same results as a plain native build. Free games from the SD card ZEsarUX
+comes with (Warhawk, Nextoid, The Lords of Midnight, the Night-Knight demo)
+and from the System/Next 24.11 card for emulators (Revival Survival,
+Warhawk, NextBASIC Invaders) have been played; the tests also use a small
+program they make themselves.
 
 ## What you bring
 
@@ -23,6 +24,12 @@ themselves.
   (`tbblue_loader.rom`, on Chimera's Firmware page) and an SD card image
   with the Next's system on it, in the project. ZEsarUX comes with both
   (`tbblue_loader.rom`, `tbblue.mmc`).
+- To start it with the System/Next distribution's card for emulators
+  (specnext.com/latestdistro, 1 GiB, NextZXOS 2.09): only the card, with
+  Start set to `card`. The Next's own firmware cannot read that card, so
+  the core does the firmware's work. A card may be up to 1 GiB; the whole
+  card is held in the machine's memory (about 1.1 GB while it runs), but
+  savestates carry only what the machine wrote to it.
 - To start it fast, without NextZXOS: nothing. The 48K Spectrum's ROM it
   runs on is built into the core.
 
@@ -38,9 +45,9 @@ Hard Reset. A joystick of four directions and two fire buttons, on the
 arrow keys, Tab and the backslash; the Next's programs choose what kind of
 joystick it is.
 
-- **Start**: `nextzxos` or `fast`. The New Project window suggests
-  `nextzxos` for a project with an SD card and `fast` for one with only a
-  program.
+- **Start**: `nextzxos`, `card` or `fast`. The New Project window
+  suggests `card` for a card the firmware cannot read, `nextzxos` for
+  another card, and `fast` for a project with only a program.
 - **Hold NextZXOS at 7 MHz**: ZEsarUX's way of sparing a slow computer; off
   by default, as on a Next.
 

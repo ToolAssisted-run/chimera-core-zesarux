@@ -14,6 +14,8 @@ series='
 0001-chimera-switched-on-by-a-call|src/start.c
 0002-chimera-the-machine-is-the-clock|src/timer.c
 0003-chimera-hooks-for-sound-input-and-frames|src/audio/audio.c src/operaciones.c src/cores/core_spectrum.c
+0004-chimera-fat32-cards-for-emulators-and-a-lent-card|src/third_party/ff.c src/third_party/diskio.c
+0005-chimera-next-registers-nextzxos-2.09-needs|src/machines/tbblue.c src/storage/diviface.c
 '
 
 rm -f "$root"/patches/*.patch

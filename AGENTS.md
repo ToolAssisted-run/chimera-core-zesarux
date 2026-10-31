@@ -68,6 +68,12 @@ elsewhere), on this machine and on CI (user-decided, 2026-10-31). None of
 them is in this repository; the 48K ROM alone is in the package, built into
 the core.
 
+`ZESARUX_SN_CARD=<cspect-next-1gb.img>` names the System/Next 24.11 card
+for emulators (1 GiB, from specnext.com/latestdistro) for the test
+game:sn-card, which says SKIP without it. Never copy that card, its ROMs
+or its games into this repository, and never write into the folder it is
+read from; a test copies it into its own temporary folder when it must.
+
 ## Rules
 
 - **Never edit `patches/` by hand.** Edit the tree under `extern/zesarux`,

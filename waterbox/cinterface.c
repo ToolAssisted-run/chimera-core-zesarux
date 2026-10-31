@@ -75,6 +75,7 @@ static int g_inputRead;
 static uint8_t g_setButtons[BTN_COUNT];
 static uint8_t g_held[BTN_COUNT];
 static uint64_t g_frames;
+static int g_cardBoot; /* Start "card": the core does the firmware's work */
 
 void chimera_input_read(void) { g_inputRead = 1; }
 
@@ -106,48 +107,351 @@ static void slot_file(const char *slot, char *out, int size)
 
 ECL_EXPORT const char *GetLoadError(void) { return g_loadError; }
 
-/* The program is copied into the root folder of the SD card the machine has
- * in its memory, by the FAT reader ZEsarUX uses for the same (its
- * --copy-file-to-mmc, util_copy_files_to_mmc_doit), which reads the card's
- * file into a buffer of its own; the buffer then becomes the machine's card
- * instead of being written back to the file. The project's file is never
- * written. A file of that name already on the card is replaced. */
+/* The SD card the machine has in its memory, lent to the FAT reader
+ * ZEsarUX uses for its own --copy-file-to-mmc (FatFs, drive 0). Patch 0004
+ * lets the card be lent instead of FatFs reading a second copy of the file
+ * into memory, so what FatFs writes lands in the machine's card; and it
+ * reads a card whose boot sector says FAT32 as FAT32, as NextZXOS does
+ * (the System/Next cards for emulators have too few clusters for FatFs's
+ * own rule). The project's file is never written. */
 extern char fatfs_disk_zero_path[];
 extern BYTE *fatfs_disk_zero_memory;
 extern long long int fatfs_disk_zero_tamanyo;
+extern BYTE *chimera_fatfs_borrowed_card;
+extern long long int chimera_fatfs_borrowed_size;
 extern FATFS FatFs_util_copy_files_to_mmc;
 extern int menu_mmc_image_montada;
 extern z80_bit menu_current_drive_mmc_image;
 extern z80_byte *mmc_memory_pointer[];
 extern long long int mmc_size[];
 extern z80_bit mmc_file_inserted_hdf[];
-static int copy_to_sd(const char *program)
+static int card_lend(void)
 {
 	if (!mmc_memory_pointer[0] || mmc_file_inserted_hdf[0].v) {
 		snprintf(chimera_last_error, sizeof chimera_last_error, "error.sd_not_raw");
 		return 0;
 	}
 	snprintf(fatfs_disk_zero_path, PATH_MAX, "%s", mmc_file_name[0]);
+	chimera_fatfs_borrowed_card = mmc_memory_pointer[0];
+	chimera_fatfs_borrowed_size = mmc_size[0];
 	if (f_mount(&FatFs_util_copy_files_to_mmc, "", 1) != FR_OK) {
+		chimera_fatfs_borrowed_card = NULL;
+		fatfs_disk_zero_memory = NULL;
 		snprintf(chimera_last_error, sizeof chimera_last_error, "error.sd_not_fat");
 		return 0;
 	}
+	return 1;
+}
+static void card_return(void)
+{
+	f_mount(0, "", 0);
+	chimera_fatfs_borrowed_card = NULL;
+	fatfs_disk_zero_memory = NULL; /* the machine's, not FatFs's to free */
+}
+
+/* The program is copied into the root folder of the card (util_copy_file,
+ * ZEsarUX's own). A file of that name already on the card is replaced. */
+static int copy_to_sd(const char *program)
+{
+	if (!card_lend()) return 0;
 	menu_mmc_image_montada = 1;
 	static char source[512], destination[600];
 	snprintf(source, sizeof source, "%s", program);
 	snprintf(destination, sizeof destination, "0://%s", program);
 	chimera_last_error[0] = '\0';
 	util_copy_file(source, destination);
-	const int copied = !chimera_last_error[0] && fatfs_disk_zero_tamanyo == mmc_size[0];
-	if (copied) memcpy(mmc_memory_pointer[0], fatfs_disk_zero_memory, (size_t)mmc_size[0]);
+	const int copied = !chimera_last_error[0];
 	menu_mmc_image_montada = 0;
 	menu_current_drive_mmc_image.v = 0;
-	f_mount(0, "", 0);
-	free(fatfs_disk_zero_memory);
-	fatfs_disk_zero_memory = NULL;
-	if (!copied && !chimera_last_error[0])
-		snprintf(chimera_last_error, sizeof chimera_last_error, "error.sd_size");
+	card_return();
 	return copied;
+}
+
+/* ---- Start "card": NextZXOS from the card, the firmware's work done here ----
+ * The Next's firmware (TBBLUE.FW on the card, run by the boot ROM) reads
+ * /machines/next/config.ini and menu.ini (or menu.def), loads the keymap
+ * and the ROMs the chosen menu line names into the Next's memory, sets the
+ * Next's peripheral registers, sets the machine type and soft-resets into
+ * the ROM. This does the same, from the card in the machine's memory, in
+ * the order the firmware does it (its source: the card's
+ * /src/firmware/app/src/boot.c and config.c, firmware 1.44), as CSpect
+ * starts these cards. The firmware itself cannot: it reads its card with
+ * FatFs R0.12b, which takes a FAT32 volume of fewer than 65525 clusters
+ * for FAT16 and refuses it ("Error opening 'menu.ini/.def'!"). */
+static int card_read(const char *name, uint8_t *out, unsigned int size, unsigned int *got)
+{
+	static char path[128];
+	snprintf(path, sizeof path, "0:/machines/next/%s", name);
+	FIL f;
+	if (f_open(&f, path, FA_READ) != FR_OK) return 0;
+	UINT n = 0;
+	const FRESULT r = f_read(&f, out, size, &n);
+	f_close(&f);
+	*got = n;
+	return r == FR_OK;
+}
+
+/* the firmware's settings, its names and defaults (config.c) */
+enum { S_SCANDOUBLER, S_5060, S_TIMEX, S_PSGMODE, S_INTSND, S_STEREO, S_TURBOSOUND,
+	S_DIVMMC, S_MF, S_JOY1, S_JOY2, S_PS2, S_DMA, S_SCANLINES, S_TURBOKEY, S_DEFAULT,
+	S_TIMING, S_ISS23, S_DIVPORTS, S_DAC, S_AY48, S_UARTI2C, S_KMOUSE, S_ULAPLUS,
+	S_HDMISOUND, S_BEEPMODE, S_BTNSWAP, S_MOUSEDPI, S_ESPRESET, S_COUNT };
+static const char *const kFwNames[S_COUNT] = { "scandoubler", "50_60hz", "timex", "psgmode",
+	"intsnd", "stereomode", "turbosound", "divmmc", "mf", "joystick1", "joystick2", "ps2", "dma",
+	"scanlines", "turbokey", "default", "timing", "keyb_issue", "divports", "dac", "ay48",
+	"uart_i2c", "kmouse", "ulaplus", "hdmisound", "beepmode", "buttonswap", "mousedpi", "espreset" };
+static const uint8_t kFwDefaults[S_COUNT] = { 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 3, 1, 0, 0, 1, 0, 8,
+	0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0 };
+
+/* the next comma-separated field of a menu line, spaces kept */
+static const char *field_next(const char *p, char *out, int size)
+{
+	int n = 0;
+	while (*p && *p != ',' && *p != '\r' && *p != '\n') {
+		if (n < size - 1) out[n++] = *p;
+		p++;
+	}
+	out[n] = '\0';
+	return *p == ',' ? p + 1 : p;
+}
+
+static void nextreg(z80_byte reg, z80_byte value) { tbblue_set_value_port_position(reg, value); }
+
+static int card_boot(void)
+{
+	static uint8_t buf[0x10000];
+	unsigned int got = 0;
+	if (!card_lend()) return 0;
+	int ok = 0;
+	uint8_t st[S_COUNT];
+	memcpy(st, kFwDefaults, sizeof st);
+
+	/* the firmware starts at 28 MHz, in config mode */
+	tbblue_registers[3] = 0;
+	nextreg(7, 3);
+	nextreg(6, 0xa0);
+
+	/* config.ini: name=value lines, each value no more than the firmware
+	 * allows is not checked here; the card for emulators has none */
+	if (card_read("config.ini", buf, sizeof buf - 1, &got)) {
+		buf[got] = 0;
+		for (char *line = (char *)buf; line && *line; ) {
+			char *end = strchr(line, '\n');
+			if (end) *end = 0;
+			for (int i = 0; i < S_COUNT; i++) {
+				const size_t len = strlen(kFwNames[i]);
+				if (!strncmp(line, kFwNames[i], len) && line[len] == '=') {
+					st[i] = (uint8_t)atoi(line + len + 1);
+					break;
+				}
+			}
+			line = end ? end + 1 : NULL;
+		}
+	}
+
+	/* the menu: menu.ini, else menu.def; the line config.ini's "default"
+	 * names (the first when it names none) */
+	char title[64] = "", mode_s[8] = "", timing_s[8] = "", rom[64] = "", divrom[64] = "", mfrom[64] = "";
+	got = 0;
+	if (!card_read("menu.ini", buf, sizeof buf - 1, &got) && !card_read("menu.def", buf, sizeof buf - 1, &got)) {
+		snprintf(chimera_last_error, sizeof chimera_last_error, "error.card_no_menu");
+		goto out;
+	}
+	buf[got] = 0;
+	{
+		int count = 0, found = 0;
+		for (const char *line = (const char *)buf; *line; ) {
+			if (!strncmp(line, "menu=", 5)) {
+				char t[64], m[8], v[8], r[64], d[64], f[64];
+				const char *p = line + 5;
+				p = field_next(p, t, sizeof t);
+				p = field_next(p, m, sizeof m);
+				p = field_next(p, v, sizeof v);
+				p = field_next(p, r, sizeof r);
+				p = field_next(p, d, sizeof d);
+				p = field_next(p, f, sizeof f);
+				if (r[0]) {
+					if (count <= st[S_DEFAULT] || !found) {
+						snprintf(title, sizeof title, "%s", t);
+						snprintf(mode_s, sizeof mode_s, "%s", m);
+						snprintf(timing_s, sizeof timing_s, "%s", v);
+						snprintf(rom, sizeof rom, "%s", r);
+						snprintf(divrom, sizeof divrom, "%s", d);
+						snprintf(mfrom, sizeof mfrom, "%s", f);
+						found = 1;
+					}
+					count++;
+				}
+			}
+			const char *nl = strchr(line, '\n');
+			line = nl ? nl + 1 : line + strlen(line);
+		}
+		if (!found) {
+			snprintf(chimera_last_error, sizeof chimera_last_error, "error.card_no_menu");
+			goto out;
+		}
+	}
+	const int mode = atoi(mode_s);
+	(void)timing_s;
+	(void)title;
+
+	/* a ROM a menu line names turns its device on; <none> turns it off */
+	if (mfrom[0]) {
+		if (!strncmp(mfrom, "<none>", 6)) { st[S_MF] = 0; mfrom[0] = 0; }
+		else st[S_MF] = 1;
+	}
+	if (divrom[0]) {
+		if (!strncmp(divrom, "<none>", 6)) { st[S_DIVMMC] = 0; divrom[0] = 0; }
+		else st[S_DIVMMC] = 1;
+	}
+
+	/* the keymap, into the Next's keymap registers */
+	if (card_read("keymap.bin", buf, 1024, &got) && got == 1024) {
+		nextreg(0x28, 0);
+		nextreg(0x29, 0);
+		for (int i = 0; i < 1024; i += 2) {
+			nextreg(0x2a, buf[i]);
+			nextreg(0x2b, buf[i + 1]);
+		}
+	}
+	/* the keys the two joysticks' extra buttons are (boot.c keyjoy_default) */
+	static const z80_byte keyjoy[11] = { 0x28, 0x29, 0x08, 0x10, 0x38, 0x3a, 0x30, 0x09, 0x2c, 0x01, 0x02 };
+	for (int j = 0; j < 2; j++) {
+		nextreg(0x28, 0x80);
+		nextreg(0x29, (z80_byte)(j << 4));
+		for (int k = 0; k < 11; k++) nextreg(0x2b, keyjoy[k]);
+	}
+
+	/* the ROMs, into the Next's memory: divMMC's at 0x10000, the
+	 * Multiface's at 0x14000, the Spectrum's (1, 2 or 4 pages of 16 KiB by
+	 * the machine) from 0 */
+	z80_byte mftype = 0;
+	const char *mf = NULL;
+	if (st[S_MF]) {
+		switch (mode) {
+		case 0: mftype = 3; mf = "mf1.rom"; break;
+		case 2: mftype = 0; mf = "mf3.rom"; break;
+		default: mftype = 1; mf = "mf128.rom"; break;
+		}
+	}
+	if (mfrom[0]) {
+		mf = mfrom;
+		if (!strncmp(mf, "mf128v1.rom", 11) || !strncmp(mf, "mf128v12.rom", 12)) mftype = 2;
+	}
+	const char *div = st[S_DIVMMC] ? "esxmmc.bin" : NULL;
+	if (divrom[0]) div = divrom;
+	if (div) {
+		if (!card_read(div, memoria_spectrum + 0x10000, 8192, &got) || got != 8192) {
+			snprintf(chimera_last_error, sizeof chimera_last_error, "error.card_no_rom" TEXT_ARG "%s", div);
+			goto out;
+		}
+	}
+	if (mf) {
+		if (!card_read(mf, memoria_spectrum + 0x14000, 8192, &got) || got != 8192) {
+			snprintf(chimera_last_error, sizeof chimera_last_error, "error.card_no_rom" TEXT_ARG "%s", mf);
+			goto out;
+		}
+	}
+	const unsigned int rom_size = (mode == 0 ? 1 : mode == 2 ? 4 : 2) * 16384u;
+	if (!card_read(rom, memoria_spectrum, rom_size, &got) || got != rom_size) {
+		snprintf(chimera_last_error, sizeof chimera_last_error, "error.card_no_rom" TEXT_ARG "%s", rom);
+		goto out;
+	}
+
+	/* the peripheral registers (boot.c init_registers) */
+	z80_byte v = (z80_byte)(((st[S_JOY1] & 3) << 6) | ((st[S_JOY2] & 3) << 4));
+	if (st[S_JOY1] & 4) v |= 0x08;
+	if (st[S_5060]) v |= 0x04;
+	if (st[S_JOY2] & 4) v |= 0x02;
+	if (st[S_SCANDOUBLER]) v |= 0x01;
+	nextreg(5, v);
+	v = (z80_byte)(st[S_PSGMODE] & 3);
+	if (st[S_TURBOKEY]) v |= 0x80;
+	if (st[S_BEEPMODE]) v |= 0x40;
+	if (st[S_DIVMMC]) v |= 0x10;
+	if (st[S_MF]) v |= 0x08;
+	if (st[S_PS2]) v |= 0x04;
+	nextreg(6, v);
+	v = 0;
+	if (st[S_STEREO]) v |= 0x20;
+	if (st[S_INTSND]) v |= 0x10;
+	if (st[S_DAC]) v |= 0x08;
+	if (st[S_TIMEX]) v |= 0x04;
+	if (st[S_TURBOSOUND]) v |= 0x02;
+	if (st[S_ISS23]) v |= 0x01;
+	nextreg(8, v);
+	v = (z80_byte)(st[S_SCANLINES] & 3);
+	if (!st[S_HDMISOUND]) v |= 0x04;
+	nextreg(9, v);
+	v = (z80_byte)(st[S_MOUSEDPI] & 3);
+	if (st[S_BTNSWAP]) v |= 0x08;
+	if (st[S_DIVMMC]) v |= 0x10;
+	v |= (z80_byte)(mftype << 6);
+	nextreg(10, v);
+	z80_byte en[4];
+	en[3] = (z80_byte)((st[S_ULAPLUS] ? 0x01 : 0) | (st[S_DMA] ? 0x02 : 0));
+	en[2] = st[S_DAC] ? 0xff : 0x01;
+	en[1] = (z80_byte)((st[S_DIVPORTS] ? 0x09 : 0) | (st[S_MF] ? 0x02 : 0) | (st[S_UARTI2C] ? 0x14 : 0) | (st[S_KMOUSE] ? 0x20 : 0));
+	switch (mode) {
+	case 0: en[0] = 0xc0; if (!st[S_AY48]) en[2] &= 0xfe; break;
+	case 1: en[0] = 0xc2; break;
+	case 2: en[0] = 0xda; break;
+	default: en[0] = 0xc6; en[2] &= 0xfb; break;
+	}
+	for (int i = 0; i < 4; i++) nextreg((z80_byte)(0x82 + i), en[i]);
+
+	/* the machine type, then a soft reset into the ROM */
+	nextreg(3, (z80_byte)(0x80 | ((mode + 1) << 4) | (mode + 1)));
+	nextreg(2, st[S_ESPRESET] ? 0x81 : 0x01);
+	ok = 1;
+out:
+	card_return();
+	return ok;
+}
+
+/* The biggest SD card image the machine can hold: ZEsarUX keeps the whole
+ * card in the machine's memory, and the memory the package declares
+ * (waterbox.config, memoryLayoutMiB: 1280 MiB of mmap) has room for a card
+ * of 1 GiB beside ZEsarUX's own tables. */
+#define CARD_MAX_BYTES (1024LL << 20)
+
+/* the size of a mounted file, or -1 */
+static long long file_size(const char *name)
+{
+	FILE *f = fopen(name, "rb");
+	if (!f) return -1;
+	long long n = -1;
+	if (fseek(f, 0, SEEK_END) == 0) n = (long long)ftell(f);
+	fclose(f);
+	return n;
+}
+
+/* Whether the Next's firmware cannot read this card: the first partition's
+ * boot sector is laid out as FAT32 but the volume has too few clusters for
+ * FAT32 by the rule the firmware's FatFs goes by (65525 or more), as on the
+ * System/Next cards made for emulators. Such a card starts with "card". */
+static int firmware_cannot_read(const char *name)
+{
+	FILE *f = fopen(name, "rb");
+	if (!f) return 0;
+	unsigned char b[512];
+	int answer = 0;
+	if (fread(b, 1, 512, f) == 512 && b[510] == 0x55 && b[511] == 0xAA) {
+		const unsigned long start = b[454] | (b[455] << 8) | ((unsigned long)b[456] << 16) | ((unsigned long)b[457] << 24);
+		if (fseek(f, (long)(start * 512), SEEK_SET) == 0 && fread(b, 1, 512, f) == 512) {
+			const unsigned bps = b[11] | (b[12] << 8), spc = b[13], rsv = b[14] | (b[15] << 8), nfats = b[16];
+			const unsigned rootent = b[17] | (b[18] << 8), fat16 = b[22] | (b[23] << 8);
+			unsigned long total = b[19] | (b[20] << 8);
+			if (!total) total = b[32] | (b[33] << 8) | ((unsigned long)b[34] << 16) | ((unsigned long)b[35] << 24);
+			const unsigned long fat32 = b[36] | (b[37] << 8) | ((unsigned long)b[38] << 16) | ((unsigned long)b[39] << 24);
+			if (bps == 512 && spc && fat16 == 0 && rootent == 0 && total > rsv + nfats * fat32) {
+				const unsigned long clusters = (total - rsv - nfats * fat32) / spc;
+				answer = clusters <= 0xFFF5;
+			}
+		}
+	}
+	fclose(f);
+	return answer;
 }
 
 /* What the New Project window is told before the machine is built (called
@@ -160,7 +464,9 @@ ECL_EXPORT const char *SuggestSettings(void)
 	char sd[512], program[512];
 	slot_file("sd", sd, sizeof sd);
 	slot_file("program", program, sizeof program);
-	if (sd[0])
+	if (sd[0] && firmware_cannot_read(sd))
+		snprintf(answer, sizeof answer, "{\"values\":{\"boot\":\"card\"},\"note\":\"suggest.card\"}");
+	else if (sd[0])
 		snprintf(answer, sizeof answer, "{\"values\":{\"boot\":\"nextzxos\"},\"note\":\"suggest.nextzxos\"}");
 	else if (program[0])
 		snprintf(answer, sizeof answer, "{\"values\":{\"boot\":\"fast\"},\"note\":\"suggest.fast\"}");
@@ -176,7 +482,8 @@ ECL_EXPORT int Init(void)
 	static char boot[16], sd[512], program[512];
 	setting("boot", "nextzxos", boot, sizeof boot);
 	const int fast = !strcmp(boot, "fast");
-	if (!fast && strcmp(boot, "nextzxos")) {
+	g_cardBoot = !strcmp(boot, "card");
+	if (!fast && !g_cardBoot && strcmp(boot, "nextzxos")) {
 		snprintf(g_loadError, sizeof g_loadError, "error.bad_boot" TEXT_ARG "%s", boot);
 		return 0;
 	}
@@ -184,6 +491,11 @@ ECL_EXPORT int Init(void)
 	slot_file("program", program, sizeof program);
 	if (!fast && !sd[0]) {
 		snprintf(g_loadError, sizeof g_loadError, "error.no_sd");
+		return 0;
+	}
+	if (!fast && file_size(sd) > CARD_MAX_BYTES) {
+		snprintf(g_loadError, sizeof g_loadError, "error.sd_too_big" TEXT_ARG "%lld" TEXT_ARG "%lld",
+			file_size(sd) >> 20, CARD_MAX_BYTES >> 20);
 		return 0;
 	}
 	/* The machine's calendar clock starts where the project says: the
@@ -246,9 +558,11 @@ ECL_EXPORT int Init(void)
 	 * holds it at 7 MHz inside the ROM by default, to spare the host; a
 	 * Next does not, and the setting says which. */
 	argv[argc++] = (char *)(on("limit_rom_turbo", 0) ? "--denyturbotbbluerom" : "--allowturbotbbluerom");
-	if (fast) {
+	/* "card" starts as "fast" does, with no boot ROM, and with the card;
+	 * card_boot then does the firmware's work before the first frame */
+	if (fast || g_cardBoot)
 		argv[argc++] = (char *)"--tbblue-fast-boot-mode";
-	} else {
+	if (!fast) {
 		argv[argc++] = (char *)"--mmc-file";
 		argv[argc++] = sd;
 		argv[argc++] = (char *)"--enable-mmc";
@@ -271,6 +585,15 @@ ECL_EXPORT int Init(void)
 		/* ZEsarUX starts the machine even when a file could not be used */
 		snprintf(g_loadError, sizeof g_loadError, "error.not_started" TEXT_ARG "%s", chimera_last_error);
 		return 0;
+	}
+	if (g_cardBoot) {
+		chimera_last_error[0] = '\0';
+		if (!card_boot()) {
+			snprintf(g_loadError, sizeof g_loadError, "error.card_not_started" TEXT_ARG "%s",
+				chimera_last_error[0] ? chimera_last_error : "error.no_reason");
+			return 0;
+		}
+		tbblue_fast_boot_mode.v = 0;
 	}
 	if (program[0] && !fast && !copy_to_sd(program)) {
 		snprintf(g_loadError, sizeof g_loadError, "error.not_on_sd" TEXT_ARG "%s",
@@ -295,7 +618,18 @@ ECL_EXPORT void FrameAdvance(uint64_t packed)
 	for (int i = 0; i < BTN_COUNT; i++)
 		now[i] = g_setButtons[i] | (uint8_t)((packed >> i) & 1);
 
-	if (now[BTN_HARD_RESET] && !g_held[BTN_HARD_RESET]) hard_reset_cpu();
+	if (now[BTN_HARD_RESET] && !g_held[BTN_HARD_RESET]) {
+		if (g_cardBoot) {
+			/* no boot ROM to start again: the machine is reset as the
+			 * fast start resets it, and the firmware's work done again */
+			tbblue_fast_boot_mode.v = 1;
+			hard_reset_cpu();
+			tbblue_fast_boot_mode.v = 0;
+			card_boot();
+		} else {
+			hard_reset_cpu();
+		}
+	}
 	else if (now[BTN_RESET] && !g_held[BTN_RESET]) reset_cpu();
 	/* levels, not events: the keyboard and the joystick are what is held
 	 * in this frame */

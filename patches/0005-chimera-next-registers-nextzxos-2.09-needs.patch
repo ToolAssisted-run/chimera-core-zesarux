@@ -1,0 +1,126 @@
+diff --git a/src/machines/tbblue.c b/src/machines/tbblue.c
+index 3b41ad32..327ead4c 100644
+--- a/src/machines/tbblue.c
++++ b/src/machines/tbblue.c
+@@ -3708,7 +3708,15 @@ z80_byte tbblue_get_diviface_enabled(void)
+             bit 5 = Enable Lightpen  (1 = enabled)
+             bit 4 = Enable DivMMC (1 = enabled) -> divmmc automatic paging. divmmc memory is supported using manual
+         */
++#ifdef CHIMERA_CORE
++    /* Newer cores of the Next (3.01 and on) switch the divMMC's automatic
++     * paging with register 0x0A bit 4; register 6 bit 4 is then the DRIVE
++     * button's NMI. NextZXOS 2.09 clears register 6 bit 4 at start and
++     * counts on 0x0A, so either bit turns the paging on here. */
++    return (tbblue_registers[6]&16) | (tbblue_registers[10]&16);
++#else
+     return tbblue_registers[6]&16;
++#endif
+ }
+ 
+ void tbblue_set_emulator_setting_divmmc(void)
+@@ -3956,6 +3964,10 @@ Bit	Function
+ 
+     tbblue_registers[0xB8]=0x83;
+     tbblue_registers[0xBB]=0xCD;
++#ifdef CHIMERA_CORE
++    tbblue_registers[0xB9]=0x01;
++    tbblue_registers[0xBA]=0x00;
++#endif
+ 
+     tbblue_clip_windows[TBBLUE_CLIP_WINDOW_LAYER2][0]=0;
+     tbblue_clip_windows[TBBLUE_CLIP_WINDOW_LAYER2][1]=255;
+@@ -4682,8 +4694,24 @@ Writes immediately change the current mmu mapping as if by port write
+     //printf ("Puerto 32765: %d puerto 8189: %d\n",valor_final_puerto_32765,valor_final_puerto_8189);
+ 
+ 
++#ifdef CHIMERA_CORE
++    /* bit 3 = 0: "no change to mmu6 / mmu7 / RAM bank". The port writes
++     * below set MMU6 and MMU7 from the RAM bank as a write to 0x7ffd
++     * does, so they are put back. NextZXOS 2.09's esxDOS calls write
++     * 0x8E with bit 3 clear while a loader has a bank of its own in
++     * 0xC000-0xFFFF, and the loaded data must land there. */
++    z80_byte chimera_mmu6=tbblue_registers[80+6];
++    z80_byte chimera_mmu7=tbblue_registers[80+7];
++#endif
+     tbblue_out_port_32765(valor_final_puerto_32765);
+     tbblue_out_port_8189(valor_final_puerto_8189);
++#ifdef CHIMERA_CORE
++    if (!(value & 8)) {
++        tbblue_registers[80+6]=chimera_mmu6;
++        tbblue_registers[80+7]=chimera_mmu7;
++        tbblue_set_memory_pages();
++    }
++#endif
+ 
+     //TODO puerto 0xdffd
+ 
+@@ -4828,6 +4856,9 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+     z80_byte last_register_6=tbblue_registers[6];
+     z80_byte last_register_7=tbblue_registers[7];
+     z80_byte last_register_8=tbblue_registers[8];
++#ifdef CHIMERA_CORE
++    z80_byte last_register_10=tbblue_registers[10];
++#endif
+     z80_byte last_register_17=tbblue_registers[17];
+     z80_byte last_register_21=tbblue_registers[21];
+     z80_byte last_register_66=tbblue_registers[66];
+@@ -5076,6 +5107,14 @@ void tbblue_set_value_port_position(z80_byte index_position,z80_byte value)
+         break;
+ 
+ 
++#ifdef CHIMERA_CORE
++        case 10:
++            /* 0x0A bit 4: the divMMC's automatic paging (see
++             * tbblue_get_diviface_enabled) */
++            if ( (last_register_10&16) != (value&16)) tbblue_set_emulator_setting_divmmc();
++        break;
++#endif
++
+         case 7:
+         /*
+         (R/W)	07 => Turbo mode
+diff --git a/src/storage/diviface.c b/src/storage/diviface.c
+index 13f447b4..7e63ffa1 100644
+--- a/src/storage/diviface.c
++++ b/src/storage/diviface.c
+@@ -110,6 +110,22 @@ int get_diviface_total_ram(void)
+ 
+ 
+ 
++#ifdef CHIMERA_CORE
++#include "mem128.h"
++/* ROM3 of the machine the Next is set to is what 0x0000-0x3FFF shows */
++static int chimera_tbblue_rom3_paged(void)
++{
++    if (tbblue_registers[0x50]!=255 || tbblue_registers[0x51]!=255) return 0;
++    switch (tbblue_registers[3]&7) {
++        case 1: return 1;
++        case 3:
++            if (puerto_8189&1) return 0;
++            return ( ((puerto_8189>>1)&2) | ((puerto_32765>>4)&1) )==3;
++        default: return (puerto_32765>>4)&1;
++    }
++}
++#endif
++
+ void diviface_tbblue_map_unmap(void)
+ {
+     /*
+@@ -139,6 +155,17 @@ void diviface_tbblue_map_unmap(void)
+ 
+     z80_byte tbblue_divmmc_entry_points_one=tbblue_registers[0xBB];
+     z80_byte tbblue_divmmc_entry_points_zero=tbblue_registers[0xB8];
++#ifdef CHIMERA_CORE
++    /* 0xB9 (Divmmc Entry Points Valid 0): an entry point of 0xB8 whose bit
++     * here is 0 maps only when ROM3 (the 48K BASIC ROM) is paged in; and
++     * the entry points of 0xBB marked ROM3 (0x3DXX, 0x056A, 0x04D7, 0x0562,
++     * 0x04C6) likewise. NextZXOS 2.09 sets 0xB9 to 0 and calls its own
++     * RST 8 with ROM0 paged in, which must not reach the divMMC. */
++    if (!chimera_tbblue_rom3_paged()) {
++        tbblue_divmmc_entry_points_zero &= tbblue_registers[0xB9];
++        tbblue_divmmc_entry_points_one &= (255-128-32-16-8-4);
++    }
++#endif
+ 
+     //Traps que paginan memoria y saltan despues de leer instruccion
+     switch (reg_pc) {

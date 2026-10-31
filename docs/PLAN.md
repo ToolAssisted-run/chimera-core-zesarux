@@ -58,9 +58,12 @@ the repository, which moves every day.
   they are on this machine). The tests use no game: the program they load is
   made by the test script (waterbox/tests/make-nex.py).
 - **How big is it?** The Next has 2 MiB of memory; the SD card image is
-  held whole in the core's memory (64 MiB for the card ZEsarUX comes with).
-  The layout is sbrk 64, sealed 4, invisible 8, plain 4, mmap 256 MiB. A
-  state taken at NextZXOS's menu measured 4.2 MB.
+  held whole in the core's memory (64 MiB for the card ZEsarUX comes with,
+  1 GiB for the System/Next card for emulators). The layout is sbrk 64,
+  sealed 4, invisible 8, plain 4, mmap 1280 MiB (256 until the third
+  round). A state taken at NextZXOS's menu measured 4.2 MB (4.7 MB with
+  the third round's core); one at Warhawk's title from the 1 GiB card,
+  5.8 MB.
 
 ## Other machines ZEsarUX would bring
 
@@ -94,14 +97,21 @@ program, so neither is used:
 - `meson.build` lists the sources: the 175 files the Makefile compiled for
   those options, less the null drivers (the core's own replace them), less
   `main_unix.c` (the core is started by a call), less PlayTZX.
-- The patches are four small hooks, all under `#ifdef CHIMERA_CORE`:
+- The patches are five, all under `#ifdef CHIMERA_CORE`:
   - 0001 `start.c`: `zesarux_main` returns once the machine is set up
     instead of entering its loop;
   - 0002 `timer.c`: the 1/50 s tick is "the machine has run its frame", and
     the end of a frame never sleeps;
   - 0003 `audio.c`, `operaciones.c`, `cores/core_spectrum.c`: each sound
     sample to the core as it is made, a note when the program reads the
-    keyboard or the Kempston joystick, and a note at the end of each frame.
+    keyboard or the Kempston joystick, and a note at the end of each frame;
+  - 0004 `third_party/ff.c`, `third_party/diskio.c` (FatFs, the FAT
+    reader ZEsarUX bundles): a volume laid out as FAT32 is read as FAT32
+    whatever its number of clusters, and the core can lend FatFs the card
+    the machine holds instead of FatFs reading a second copy of the file
+    ("The System/Next 24.11 card");
+  - 0005 `machines/tbblue.c`, `storage/diviface.c`: three things of the
+    Next's newer cores that NextZXOS 2.09 needs (same section).
 
 ## How the core is put together
 
@@ -180,6 +190,16 @@ The owner accepted every recommendation of the first round:
   wanted ("Other machines ZEsarUX would bring").
 - **Publishing waits for the owner's review.**
 
+## The owner's decisions on the second round (user-decided, 2026-10-31)
+
+The owner accepted the second round's recommendations:
+
+- **"Browser" stays untranslated, as a name**, in every language: it is
+  the name NextZXOS's own menu gives its file browser. Applied: the second
+  round had already written it so in the 26 language tables, and
+  `waterbox/tests/check-names.py` (texts:names) holds it. The texts added
+  in the third round keep it too.
+
 ## The 48K ROM is built in (2026-10-31)
 
 - `waterbox/gen-roms.py` writes ZEsarUX's own `src/48.rom` (at the pinned
@@ -245,14 +265,18 @@ accents, as this file is ASCII.)
 
 ## Decisions (2026-10-31)
 
-- **Two ways to start** (setting "Start"): `nextzxos` (the default, as a
-  Next starts: boot ROM, firmware and NextZXOS from the card) and `fast`
+- **Three ways to start** (setting "Start"): `nextzxos` (the default, as a
+  Next starts: boot ROM, firmware and NextZXOS from the card), `card`
+  (NextZXOS from the card with the firmware's work done by the core, for
+  cards the firmware cannot read; third round, "The System/Next 24.11
+  card") and `fast`
   (ZEsarUX's "fast boot": the Next's hardware with the 48K ROM, no card,
   the program loaded straight into memory). Fast needs only the 48K ROM; a
   program that wants NextZXOS's services or files from the card does not
   run that way.
-- **The core suggests the start** (`SuggestSettings`): `nextzxos` when the
-  project has an SD card, `fast` when it has only a program, so that a
+- **The core suggests the start** (`SuggestSettings`): `card` when the
+  project's SD card is one the firmware cannot read, `nextzxos` for any
+  other card, `fast` when it has only a program, so that a
   person who brings only a .nex is not refused for want of a card. The New
   Project window shows the suggestion with a note saying why.
 - **"Hold NextZXOS at 7 MHz"** (off by default). ZEsarUX by default holds
@@ -275,21 +299,180 @@ accents, as this file is ASCII.)
   the firmware's video mode test, which cycles the modes; a frame stayed
   312 sound samples throughout it.
 
+## The System/Next 24.11 card (2026-10-31, third round)
+
+The owner provided System/Next 24.11 for emulators, the official
+distribution from specnext.com/latestdistro (free to download), on this
+machine outside the repository: `cspect-next-1gb.img` (a 1 GiB SD card
+image: NextZXOS 2.09, firmware 1.44.db, the Next's games and demos) and
+`enNextZX.rom` and `enNxtmmc.rom`. The two ROMs are the same bytes as the
+card's own `/machines/next/enNextZX.rom` and `enNxtmmc.rom` (SHA-1
+compared); they are there for CSpect, which is started with them.
+
+### What ZEsarUX needs from it
+
+Neither of the two ways ZEsarUX has. With ZEsarUX's own boot ROM
+(`tbblue_loader.rom`) the card's firmware (`TBBLUE.FW`, 1.44.db) loads and
+runs, reads the card's partition table and boot sector, and stops at
+"Error opening 'menu.ini/.def'!" without reading another sector (traced:
+sectors 0 and 63, then nothing). The card's file system is FAT32 laid out
+with 32766 clusters of 32 KiB, and the firmware's FAT reader (FatFs
+R0.12b, its source is on the card in `/src/firmware`) calls a volume of
+fewer than 65525 clusters FAT16, and a FAT16 volume with no fixed root
+folder no file system. A real Next would stop the same way: the card is
+made for emulators, which start NextZXOS from the two ROMs without the
+firmware, as CSpect does. NextZXOS's own file system code reads it.
+
+So the core has a third way to start, **"card"**: no boot ROM and no
+firmware; the core does the firmware's work itself, from the card in the
+machine's memory, in the order the firmware does it (`boot.c` and
+`config.c` of firmware 1.44, on the card): it reads
+`/machines/next/config.ini` if there is one, `menu.ini` or else
+`menu.def`, takes the menu line `config.ini` names (the first when it names
+none: "ZX Spectrum Next (standard)", mode 2, `enNextZX.rom`,
+`enNxtmmc.rom`, `enNextMF.rom`), loads `keymap.bin` into the keymap
+registers, the divMMC ROM to 0x10000, the Multiface ROM to 0x14000 and the
+64 KiB of NextZXOS's ROMs to 0 of the Next's memory, sets the peripheral
+registers (5, 6, 8, 9, 0x0A, 0x82 to 0x85) from the firmware's defaults,
+the machine type (register 3), and soft-resets into the ROM. ZEsarUX is
+started in its fast boot mode for this (no boot ROM to load) and is told
+afterwards it is a Next like any other. Hard Reset does the same again.
+The user brings only the card: no firmware. A card whose boot sector is
+laid out as FAT32 with too few clusters is one the firmware cannot read,
+and for it the core suggests "card" (`SuggestSettings`); for any other
+card it suggests "nextzxos" as before.
+
+The card's ROMs are read with FatFs, the FAT reader ZEsarUX bundles for
+its `--copy-file-to-mmc` (the core already uses it to put a program on the
+card). FatFs R0.14a has the same cluster rule as the firmware's, so patch
+0004 makes it read a volume laid out as FAT32 (no 16-bit FAT size, no
+fixed root folder) as FAT32, as NextZXOS and Linux do. The same patch
+lets the core lend FatFs the card the machine holds: before, FatFs read a
+second whole copy of the file and the core copied it back over the
+machine's card, which for 1 GiB would have needed 2 GiB at once.
+
+NextZXOS 2.09 then needed three things ZEsarUX 13.0 does not have
+(patch 0005, each found by tracing the processor where it went wrong):
+
+- **The divMMC's automatic paging by register 0x0A bit 4.** NextZXOS 2.09
+  clears register 6 bit 4 at start (on the newer cores that bit is the
+  DRIVE button's NMI) and counts on 0x0A bit 4; ZEsarUX paged the divMMC
+  by register 6 only, so 2.09 rebooted every eight frames. Either bit now
+  turns the paging on, and a change to 0x0A applies it.
+- **Register 0xB9, "entry points valid only when ROM3 is paged".**
+  NextZXOS 2.09 sets 0xB9 to 0 and calls its own RST 8 with ROM0 paged in;
+  ZEsarUX paged the divMMC in at 0x0008 regardless, and ran esxDOS code
+  where none was loaded. Now an entry point of 0xB8 whose 0xB9 bit is 0,
+  and those of 0xBB that the Next's documentation marks ROM3 (0x3DXX,
+  0x04C6, 0x0562, 0x04D7, 0x056A), page the divMMC in only with ROM3 (the
+  48K BASIC ROM) paged in. 0xB9 is 0x01 and 0xBA 0x00 after a reset, as
+  on a Next.
+- **Register 0x8E with bit 3 clear leaves MMU6 and MMU7 alone.** ZEsarUX
+  applied it as a write to port 0x7FFD, which also maps the 128K RAM bank
+  at 0xC000. NextZXOS 2.09's esxDOS calls write 0x8E with bit 3 clear in
+  the middle of a load into a bank the loader mapped there, so every bank
+  of a .nex but 5 and 2 landed in bank 0 (measured: Warhawk's banks found
+  at 0x40000 one after another), and the games jumped into empty memory.
+
+Tried and not kept: a soft reset by register 2 doing the whole of
+ZEsarUX's reset (as the Reset button does) changed nothing once 0x8E was
+right, and was taken out; answering as an SDHC card (block addressing)
+made NextZXOS 2.09 say "Drive C: not found", so the card stays a
+byte-addressed one, as ZEsarUX has it.
+
+### How the card is carried (decision, 2026-10-31)
+
+The card stays whole in the machine's memory, as ZEsarUX keeps it, read
+while the core starts, before the sandbox seals the machine. The sealed
+image is the baseline every state is measured against, and a state holds
+only the pages that changed since: what NextZXOS wrote to the card, not
+the card. Measured with the 24.11 card: a state at Warhawk's title (frame
+2000) is 5.8 MB; a state at the old card's menu was 4.2 MB, and is 4.7 MB
+with this round's core. A state is not bloated, and nothing needs Chimera
+to learn anything new.
+
+What it costs, measured on this machine: the memory the package declares
+grows to 1280 MiB of mmap (`memoryLayoutMiB`, was 256), room for a card
+of up to 1 GiB beside ZEsarUX's own tables; a bigger card is refused with
+a reason (`error.sd_too_big`, tested with a 2 GiB file of zeros). A
+running machine with the 1 GiB card uses 1.08 GB of memory (PSS; the
+process's RSS says 2.1 GB because the sandbox maps the machine's memory
+twice, once for the guest and once for the host). Starting takes 1.5 s
+(reading the card). The speed is that of the old card: about 190 frames a
+second at NextZXOS's menu and in Warhawk. A state saved and loaded before
+every frame costs about 11 ms a frame (500 frames in 5.8 s).
+
+The other way, not done: read the card's sectors from the file as the
+machine asks for them, and keep in the machine only the sectors it writes.
+Chimera mounts a project's files by path without reading them
+(`wbx_mount_file_path`), and the open file and its position are in
+states, so this needs nothing new from Chimera either; it would save the
+1 GB of memory a running machine holds. It needs ZEsarUX's card emulation
+(`mmc.c`) and the FAT copy reworked, and was left for the owner to weigh
+against the memory.
+
+### What on the card is free to use
+
+The card's `LICENSE.MD` (the System/Next distribution licence, SpecNext
+Ltd): the distribution may be used, copied and distributed free of charge
+in its entirety, and used on hardware other than the Next (emulators); it
+may not be sold. Its parts carry their own terms, which come first: the
+Amstrad ROMs may be distributed only as Amstrad allows (emulators are
+allowed); software with source under `/src` is under the MIT licence
+unless a licence in `/docs/licenses` says otherwise (the firmware's
+source is GPL 3); software without a licence is "further distribution
+denied" on its own; documents and media without one are CC BY-NC-SA. The
+games (Warhawk, Revival Survival, Halls of the Things, Santa's Pressie and
+the rest) are "distributed under license" by their authors with no grant
+to pass them on alone. So: the card may be used for tests on this machine
+and by anyone who downloads it; nothing of it is copied into this
+repository or the package, a test reads it from where the owner put it
+(`ZESARUX_SN_CARD`), and only the whole distribution, unchanged, may be
+passed on.
+
+### Games from the card (2026-10-31)
+
+All started from switching on with "card", through NextZXOS 2.09's
+Browser, native and sandbox the same lines every 500 frames, the same with
+a state saved and loaded before every frame, and not the run left alone:
+
+- **Revival Survival** (`GAMES/Next/Revival Survival`, a .nex), in the
+  test script as game:sn-card: its title by frame 2500, SPACE, 1
+  (Arcade) and SPACE through the story start a round; moved with the
+  joystick and its keys and fired, the score is 2150 at frame 5200.
+- **Warhawk** (`GAMES/Next/Warhawk`, the 2024 build on this card), by
+  hand: title by frame 2000, SPACE starts it, P and SPACE to frame 4000,
+  the ship moved right and the score is 52.
+- **NextBASIC Invaders** (`GAMES/Next/NextBASIC Invaders`, a NextBASIC
+  program), by hand: its menu by frame 2500, K (keys) and 5 (difficulty)
+  start it, P and SPACE to frame 3500, the score is 50.
+
+Tried and not played: Halls of the Things loads and starts (its map,
+"Terror Incognita..?") but the key that leaves the map was not found;
+Angry Bloaters and Santa's Pressie were tried only before the fixes;
+TX-1696 (a demo that loads many files and streams its music from the
+card) shows a broken picture at frame 3500; DARKSTAR.Z80 (a 128K
+snapshot) shows a black screen at frame 4000. None of these is said to
+work.
+
 ## What the user brings
 
 - `tbblue_loader.rom` (8 KiB, SHA-1 8B2E927D0523BC27BFFCC34C39527AB0D2362E0C):
   the TBBlue boot loader, by Victor Trucco and Fabio Belavenuto, which the
   FPGA runs first and which reads TBBLUE.FW from the card. ZEsarUX ships it
   in its repository; no licence for it is in ZEsarUX's repository, and its
-  source is part of the Next's FPGA project. Not packaged.
-- An SD card image (`.mmc` or `.img`): ZEsarUX ships `tbblue.mmc`, 64 MiB,
+  source is part of the Next's FPGA project. Not packaged. Needed only to
+  start with "nextzxos".
+- An SD card image (`.mmc` or `.img`, at most 1 GiB): ZEsarUX ships `tbblue.mmc`, 64 MiB,
   "System/Next 1.3.2, NextZXOS 2.06H, core 3.01.05, firmware 1.29b" (its
   README.MD). The card's LICENSE.MD (SpecNext Ltd's System/Next
   distribution licence) permits copying and distributing exact copies of
   the distribution in its entirety, free of charge, and its use on other
   hardware; parts carry their own licences, the Amstrad ROMs among them.
   Whether ZEsarUX's 64 MiB card is "the distribution in its entirety" is not
-  plain. Not packaged.
+  plain. Not packaged. Or the System/Next distribution's card for
+  emulators (24.11: `cspect-next-1gb.img`, 1 GiB, NextZXOS 2.09), started
+  with "card" and nothing else ("The System/Next 24.11 card").
 - Not brought: `48.rom` (16 KiB, SHA-1
   5EA7C2B824672E914525D1D5C419D71B84A426A2), for the fast start:
   Amstrad's ROM, which Amstrad allows to be distributed. Built into the
@@ -298,7 +481,30 @@ accents, as this file is ASCII.)
 
 ## What was measured (2026-10-31)
 
-On this machine (Linux, GCC 14). First against Chimera at 3f8ea7e2, then
+Third round (against Chimera main cb46d2b7 in ~/chimera-scratch-bump):
+
+- `ZESARUX_SN_CARD=<the 24.11 card> CHIMERA_ROOT=<chimera>
+  waterbox/run-gate.sh`: 21 passed, 0 failed, 0 skipped. The 20 tests of
+  the second round all pass with patches 0004 and 0005 and the bigger
+  memory layout (the old card, the fast start, the window), and the new
+  game:sn-card (Revival Survival from the 24.11 card, "Games from the
+  card"; with CHIMERA_ROOT it also asks chimera-run what the core
+  suggests for a project with that card: "card"). settings:refused now
+  also refuses a card of 2 GiB for its size. Without ZESARUX_SN_CARD,
+  game:sn-card says SKIP and why.
+- `run-frontend.sh` (Qt window, headless): 3 of 3. Chimera's
+  `test-packages` on a folder with only this package: all passed.
+  `tools/check-core-texts.py`: 24 keys, every one named, every name a key.
+  `check-names.py`: 0. Chimera's `check-proper-nouns.py`: 0.
+- Hard Reset with "card" (frame 500, at the welcome page) brings the
+  welcome page back by frame 900, natively and in the sandbox with a state
+  every frame the same lines.
+- Seen to fail: game:sn-card with the run left alone made the run played
+  (on purpose, taken out): "the game played and the game left alone end
+  alike"; settings:refused expecting another size in the refusal (on
+  purpose, taken out): "a card of 2 GiB is not refused for its size".
+
+Earlier rounds, on this machine (Linux, GCC 14). First against Chimera at 3f8ea7e2, then
 (second round, the same day) against Chimera main cb46d2b7, both in
 ~/chimera-scratch-bump, with the miniBox of that checkout. The numbers
 below are the second round's unless they say otherwise.
@@ -435,54 +641,71 @@ real Next.
 
 ## What is not done
 
-- Four games have been tried, all from the card ZEsarUX comes with:
-  Warhawk and Nextoid in the test script, The Lords of Midnight and the
-  Night-Knight demo by hand to frame 3000. No commercial game. The card's
-  other games (Angry Bloaters, Halls of the Things, Revival Survival,
-  Santa's Pressie and the BASIC ones) not tried.
+- Games tried: from the card ZEsarUX comes with, Warhawk and Nextoid in
+  the test script, The Lords of Midnight and the Night-Knight demo by hand;
+  from the 24.11 card, Revival Survival in the test script, Warhawk (2024)
+  and NextBASIC Invaders by hand. No commercial game. Halls of the
+  Things, TX-1696 and DARKSTAR.Z80 were started and not played ("Games
+  from the card"); the 24.11 card's other games and demos not tried.
 - Not tried: the sound of a real game listened to (the tests compare
-  sound by its hash); programs that load more files from the card; a card
-  bigger than 64 MiB; .snx, .tap and the other program formats in the
-  program slot.
+  sound by its hash); .snx, .tap and the other program formats in the
+  program slot (with "card" the test program is put on the 24.11 card and
+  listed by its Browser, natively and in the sandbox the same, the card
+  file unchanged; it was not run from there).
+- The card is held whole in the machine's memory (about 1.1 GB with the
+  24.11 card); reading it sector by sector from the file instead is the
+  owner's to weigh ("How the card is carried").
+- A card bigger than 1 GiB (the CSpect 2 GiB card, a real Next's card) is
+  refused.
 - The 60 Hz mode: not looked into.
 - The Kempston mouse (the Next's PS/2 mouse) has no input here.
 - The Next's extended keyboard registers (Next registers 0xB0 and 0xB1)
   are not emulated by ZEsarUX.
 - No CI run: the repository has no remote. .github/workflows/chimera.yml is
-  written from the Fuse core's and has never run.
-- No Windows run (not this round's): the frontend gate's scenario on
-  Windows is still to be run before the core is called done.
+  written from the Fuse core's and has never run; it has no 24.11 card,
+  so game:sn-card would say SKIP there.
+- No Windows run: the frontend gate's scenario on Windows is still to be
+  run before the core is called done; whether a machine of 1.4 GiB
+  declared memory costs Windows commit charge up front was not measured.
 - No movie recorded by hand in Chimera's window.
 
-## Where this stands (2026-10-31, second round)
+## Where this stands (2026-10-31, third round)
 
 Built and tested locally, against Chimera main cb46d2b7; not published,
-no remote. The owner's answers to the first round are in ("The owner's
-decisions"); the one that changed the core, packaging the 48K ROM, is
-done: the fast start needs nothing from the user. Every name in the 26
-language tables is now written as it is, and the test script checks it.
+no remote. The owner's answer to the second round (the Browser stays a
+name) is written down and was already applied.
 
-What works: NextZXOS boots from an SD card image to its menu and runs a
-program from its Browser; Warhawk and Nextoid, Next games from that card,
-run from boot to play in the test script, and The Lords of Midnight and
-the Night-Knight demo were run by hand; the fast start runs a .nex
-directly, on the built-in 48K ROM; picture (Layer 2, sprites, copper,
-tilemap), sound (beeper, three AY chips, DACs), keys, joystick, resets,
-DMA, savestates (same process and another process), the project's clock,
-the package in chimera-run and in Chimera's Qt window. Native and sandbox
-agree on every test.
+New this round: the System/Next 24.11 card for emulators boots, with a
+third way to start, "card", in which the core does the firmware's work
+(the card's own firmware cannot read its file system); NextZXOS 2.09
+needed three fixes to ZEsarUX's Next (patch 0005) and FatFs a fix to its
+FAT32 rule (patch 0004). The card is carried in the machine's memory and
+not in states (a state at Warhawk's title is 5.8 MB); a running machine
+holds about 1.1 GB. Three games from that card were played from switching
+on, native and sandbox alike, with states: Revival Survival in the test
+script (game:sn-card, SKIP without ZESARUX_SN_CARD), Warhawk (2024) and
+NextBASIC Invaders by hand.
 
-Tests of this round: run-gate.sh 20 passed, 0 failed, 0 skipped;
-run-frontend.sh (Qt window, headless) 3 of 3; Chimera's test-packages on
-a folder with only this package, all passed; check-core-texts.py 20 keys,
-every one named; check-names.py 0; Chimera's check-proper-nouns.py on
-waterbox/ 0.
+What works, as before: NextZXOS 2.06 from ZEsarUX's own card with the
+boot ROM; the fast start on the built-in 48K ROM; picture, sound, keys,
+joystick, resets, DMA, savestates, the project's clock, the package in
+chimera-run and in Chimera's Qt window. Native and sandbox agree on every
+test.
+
+Tests of this round: run-gate.sh with the 24.11 card 21 passed, 0
+failed, 0 skipped; run-frontend.sh (Qt window, headless) 3 of 3;
+Chimera's test-packages on a folder with only this package, all passed;
+check-core-texts.py 24 keys, every one named; check-names.py 0;
+Chimera's check-proper-nouns.py on waterbox/ 0.
 
 Next, in order:
 1. The owner's review, then publishing (the owner's).
-2. Commercial Next games from the owner (none on this machine); a movie
-   recorded by hand in Chimera's window and played back.
-3. CI (the workflow is written, never run: no remote), and the Windows run
+2. The owner's call on carrying the card sector by sector (saves about
+   1 GB of memory a machine; needs ZEsarUX's card emulation reworked).
+3. Commercial Next games from the owner (none on this machine); a movie
+   recorded by hand in Chimera's window and played back, with the 24.11
+   card.
+4. CI (the workflow is written, never run: no remote), and the Windows run
    of the frontend tests.
 
 Traps met:
@@ -500,3 +723,12 @@ Traps met:
 - Nextoid's menu says "Press S", in a font where S looks like 5.
 - Colour 0x1C of the tilemap's palette showed black in ZEsarUX until the
   test program set it; the test program now sets it to green.
+- A file of ZEsarUX's bundled FatFs (`ff.c`, `diskio.c`) has Windows line
+  endings: a script that rewrites it must keep them, or the patch becomes
+  the whole file.
+- The Browser's list is "mixed" (folders and files sorted together, case
+  ignored); count lines from its picture, not from a directory listing.
+- A NextZXOS that reboots every few frames, or a game that jumps into
+  empty memory, was each time a register of the Next's newer cores that
+  ZEsarUX does not have; a trace of the last few thousand instructions
+  before the processor reached address 0 (or a run of NOPs) found each.

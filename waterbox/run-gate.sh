@@ -67,6 +67,11 @@ if [ ! -f "$fw/tbblue_loader.rom" ] || [ ! -f "$fw/tbblue.mmc" ] || [ ! -f "$fw/
 	exit 2
 fi
 nextzxos="--firmware $fw/tbblue_loader.rom --sd $fw/tbblue.mmc"
+# Chimera's headless runner and this repository's package, when CHIMERA_ROOT
+# names a Chimera checkout (the frontend tests below, and game:sn-card)
+chimera_root="${CHIMERA_ROOT:-}"
+chimera_engine="$chimera_root/build/dll/chimera-run"
+package="${ZESARUX_PACKAGE:-$root/build/pkg/zesarux.chimeraCore}"
 # the fast start needs nothing handed over: its ROM is built in
 fast="--set boot=fast"
 prog="$work/test.nex"
@@ -401,17 +406,95 @@ else
 	report "game:nextoid" FAIL "$why"
 fi
 
+# The System/Next 24.11 card for emulators (specnext.com/latestdistro, a
+# 1 GiB image, NextZXOS 2.09), when ZESARUX_SN_CARD names it: it is not in
+# this repository and is not copied into it; the test reads it where it is,
+# or a copy in its own scratch folder. The Next's firmware cannot read this
+# card (docs/PLAN.md, "The System/Next 24.11 card"), so the Next starts
+# with "card": the core does the firmware's work from the card. From
+# switching on: SPACE leaves the welcome pages, ENTER opens the Browser,
+# GAMES, Next, Revival Survival, RevivalSurvival.nex; its title by frame
+# 2500; SPACE, 1 (Arcade) and SPACE through the story start a round; the
+# joystick (and its keys) moves the player right and up and fires, and the
+# score is 2150 at frame 5200. The sandbox prints the native build's lines
+# every 500 frames, a state saved and loaded before every frame changes
+# nothing, and the run is not the run left alone after the round started.
+# With the card in a project, the core suggests "card".
+sn_card="${ZESARUX_SN_CARD:-}"
+if [ -z "$sn_card" ] || [ ! -f "$sn_card" ]; then
+	report "game:sn-card" SKIP "ZESARUX_SN_CARD is not set to the System/Next 24.11 card for emulators (cspect-next-1gb.img), which is not in this repository"
+else
+	sn="--set boot=card --sd $sn_card"
+	key_1=$(hex 1)
+	rs=""
+	addr() { rs="$rs --press $2:${3:-4}:$1"; }
+	addr "$key_space" 150 5
+	addr "$key_enter" 400 5
+	i=0; while [ $i -lt 6 ]; do addr "$key_down" $((500 + i * 10)); i=$((i + 1)); done
+	addr "$key_enter" 600 5
+	i=0; while [ $i -lt 4 ]; do addr "$key_down" $((650 + i * 10)); i=$((i + 1)); done
+	addr "$key_enter" 720 5
+	i=0; while [ $i -lt 12 ]; do addr "$key_down" $((800 + i * 10)); i=$((i + 1)); done
+	addr "$key_enter" 940 5
+	i=0; while [ $i -lt 2 ]; do addr "$key_down" $((1020 + i * 10)); i=$((i + 1)); done
+	addr "$key_enter" 1060 5
+	addr "$key_space" 3000 10
+	addr "$key_1" 3300 10
+	addr "$key_space" 3700 10
+	addr "$key_space" 3900 10
+	addr "$key_space" 4100 10
+	started="$rs"
+	right=$(hex $(((1 << 45) | (1 << 19)))); up=$(hex $(((1 << 42) | (1 << 10)))); fire=$(hex $(((1 << 46) | (1 << 39))))
+	addr "$right" 4500 120
+	addr "$up" 4650 100
+	addr "$fire" 4800 10
+	addr "$right" 4850 150
+	# shellcheck disable=SC2086
+	nat sn-n $sn --frames 5200 --every 500 $rs
+	# shellcheck disable=SC2086
+	box sn-s $sn --frames 5200 --every 500 $rs
+	# shellcheck disable=SC2086
+	box sn-r $sn --frames 5200 --every 500 $rs --rerecord
+	# shellcheck disable=SC2086
+	box sn-idle $sn --frames 5200 --every 500 $started
+	why=""
+	same sn-n sn-s || why="$why native and sandbox differ [$(last "$work/sn-s.out" | cut -c1-60)] $(tail -1 "$work/sn-s.err" | cut -c1-80);"
+	same sn-s sn-r || why="$why a state every frame changed the run [$(last "$work/sn-r.out" | cut -c1-60)];"
+	[ -n "$(vh sn-idle)" ] && [ "$(vh sn-s)" != "$(vh sn-idle)" ] || why="$why the game played and the game left alone end alike;"
+	if [ -n "$chimera_root" ] && [ -x "$chimera_engine" ] && [ -f "$package" ]; then
+		mkdir -p "$work/sn"
+		cp "$sn_card" "$work/sn/"
+		sn_copy="$work/sn/$(basename "$sn_card")"
+		python3 "$here/tests/make-movie.py" 10 > "$work/sn/none.movie"
+		env -u DISPLAY "$chimera_engine" --new-project "$work/sn/sn.chimeraProject" "$package" --file "sd=$sn_copy" --movie "$work/sn/none.movie" > "$work/sn/new.log" 2>&1
+		env -u DISPLAY "$chimera_engine" --project "$work/sn/sn.chimeraProject" "$package" --suggest > "$work/sn-suggest.out" 2>&1
+		grep -q '^{"values":{"boot":"card"}' "$work/sn-suggest.out" || why="$why the core does not suggest \"card\" for this card [$(tail -1 "$work/sn-suggest.out" | cut -c1-60)];"
+		rm -f "$sn_copy"
+	fi
+	if [ -z "$why" ]; then
+		report "game:sn-card" PASS "System/Next 24.11's card started with \"card\": Revival Survival from its Browser, started and played to frame 5200; the sandbox prints the native build's lines, a state every frame changes nothing, it is not the run left alone$( [ -n "$chimera_root" ] && echo "; the core suggests \"card\" for it")"
+	else
+		report "game:sn-card" FAIL "$why"
+	fi
+fi
+
 # What cannot be run is refused with a reason: a way of starting there is
-# not, NextZXOS with no SD card, NextZXOS with no boot ROM.
+# not, NextZXOS with no SD card, NextZXOS with no boot ROM, and a card
+# bigger than the 1 GiB the machine's memory has room for (2 GiB of zeros,
+# made here, taking no room on the disk).
 box x-boot $nextzxos --set boot=floppy --frames 5
 box x-nosd --firmware "$fw/tbblue_loader.rom" --frames 5
 box x-norom --sd "$fw/tbblue.mmc" --frames 5
+truncate -s 2G "$work/big.img"
+box x-big --set boot=card --sd "$work/big.img" --frames 5
+rm -f "$work/big.img"
 why=""
+grep -q "^Init: error.sd_too_big.2048.1024" "$work/x-big.err" || why="$why a card of 2 GiB is not refused for its size [$(grep Init "$work/x-big.err" | cut -c1-60)];"
 grep -q "^Init: error.bad_boot.floppy" "$work/x-boot.err" || why="$why an unknown start is not refused [$(grep Init "$work/x-boot.err" | cut -c1-60)];"
 grep -q "^Init: error.no_sd" "$work/x-nosd.err" || why="$why no SD card is not refused [$(grep Init "$work/x-nosd.err" | cut -c1-60)];"
 grep -q "^Init: .*tbblue_loader.rom" "$work/x-norom.err" || why="$why a missing boot ROM is not named [$(grep Init "$work/x-norom.err" | cut -c1-60)];"
 if [ -z "$why" ]; then
-	report "settings:refused" PASS "an unknown start, NextZXOS with no SD card and NextZXOS with no boot ROM are each refused with a reason: $(sed -n 's/^Init: //p' "$work/x-norom.err" | tr -d '\037' | cut -c1-70)"
+	report "settings:refused" PASS "an unknown start, NextZXOS with no SD card, NextZXOS with no boot ROM and a card of 2 GiB are each refused with a reason: $(sed -n 's/^Init: //p' "$work/x-norom.err" | tr -d '\037' | cut -c1-70)"
 else
 	report "settings:refused" FAIL "$why"
 fi
@@ -427,9 +510,7 @@ fi
 #  - NextZXOS with no boot ROM handed over does not start, and the ROM is
 #    named;
 #  - the start the core suggests for a project, with and without a card.
-chimera_root="${CHIMERA_ROOT:-}"
-engine="$chimera_root/build/dll/chimera-run"
-package="${ZESARUX_PACKAGE:-$root/build/pkg/zesarux.chimeraCore}"
+engine="$chimera_engine"
 same_picture="$here/tests/same-picture.py"
 if [ -z "$chimera_root" ] || [ ! -x "$engine" ] || [ ! -f "$package" ]; then
 	why="set CHIMERA_ROOT to a Chimera checkout with build/dll/chimera-run, and make the package (waterbox/build-package.sh -o build/pkg)"
