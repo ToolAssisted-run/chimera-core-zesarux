@@ -8,7 +8,12 @@ for in chimera issue 407.
 
 ## Status
 
-New, local and not published. NextZXOS starts from an SD card image to its
+Published: each push to `main` that passes the tests publishes a `dev`
+release, and a dated nightly is made once a day when `main` moved. Chimera's
+Core Manager lists it. The first published build is "Development build
+0ce0d15d (made 2026-10-31 18:58 CET)". Chimera issue 407.
+
+NextZXOS starts from an SD card image to its
 menu and runs a program from its Browser; a program can also be loaded
 straight into the machine without NextZXOS. Picture, sound, keys, the
 joystick, both resets and savestates work, and the sandboxed core gives the
