@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "« %1 » n'est pas une façon de démarrer le Next que ce cœur connaît.",
+		"error.card_for_emulators": "La carte SD du projet est une carte faite pour les émulateurs, dont le firmware du Next lui-même ne sait pas lire le système de fichiers : « nextzxos » ne peut donc pas démarrer depuis elle. Réglez Démarrage sur « card » : le Next démarre alors avec NextZXOS directement depuis la carte.",
 		"error.card_no_menu": "la carte n'a pas de machines/next/menu.ini ni de menu.def avec une machine.",
 		"error.card_no_rom": "il manque %1 dans le dossier machines/next de la carte, que son menu nomme.",
 		"error.card_not_started": "NextZXOS n'a pas pu démarrer depuis la carte SD : %1",

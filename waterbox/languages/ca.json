@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "«%1» no és una manera d'engegar el Next que tingui aquest nucli.",
+		"error.card_for_emulators": "La targeta SD del projecte és una de les fetes per a emuladors, el sistema de fitxers de les quals el firmware del Next no pot llegir, així que «nextzxos» no pot arrencar des d'ella. Poseu Arrencada a «card»: aleshores el Next arrenca amb NextZXOS directament des de la targeta.",
 		"error.card_no_menu": "la targeta no té cap machines/next/menu.ini ni menu.def amb una màquina.",
 		"error.card_no_rom": "a la carpeta machines/next de la targeta no hi ha %1, que el seu menú indica.",
 		"error.card_not_started": "No s'ha pogut arrencar NextZXOS des de la targeta SD: %1",

@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "\"%1\" não é uma forma de iniciar o Next que este núcleo tenha.",
+		"error.card_for_emulators": "O cartão SD do projeto é um cartão feito para emuladores, cujo sistema de arquivos o próprio firmware do Next não consegue ler, então \"nextzxos\" não consegue iniciar a partir dele. Defina Início como \"card\": o Next então inicia com o NextZXOS diretamente do cartão.",
 		"error.card_no_menu": "o cartão não tem machines/next/menu.ini nem menu.def com uma máquina.",
 		"error.card_no_rom": "falta %1 na pasta machines/next do cartão, que o menu dele indica.",
 		"error.card_not_started": "Não foi possível iniciar o NextZXOS a partir do cartão SD: %1",

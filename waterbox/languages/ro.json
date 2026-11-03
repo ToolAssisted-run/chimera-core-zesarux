@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "„%1” nu este un mod de a porni calculatorul Next pe care acest nucleu îl are.",
+		"error.card_for_emulators": "Cardul SD al proiectului este unul făcut pentru emulatoare, al cărui sistem de fișiere nu îl poate citi firmware-ul propriu al calculatorului Next, așa că „nextzxos” nu poate porni de pe el. Setați Pornire la „card”: atunci calculatorul Next pornește cu NextZXOS direct de pe card.",
 		"error.card_no_menu": "cardul nu are machines/next/menu.ini sau menu.def cu o mașină în el.",
 		"error.card_no_rom": "în dosarul machines/next al cardului lipsește %1, pe care îl numește meniul lui.",
 		"error.card_not_started": "NextZXOS nu a putut fi pornit de pe cardul SD: %1",

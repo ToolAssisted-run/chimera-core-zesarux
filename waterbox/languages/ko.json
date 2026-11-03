@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "'%1'은(는) 이 코어가 가진 Next 시작 방법이 아닙니다.",
+		"error.card_for_emulators": "프로젝트의 SD 카드는 에뮬레이터용으로 만든 카드로, Next 자체의 펌웨어가 그 파일 시스템을 읽지 못하므로 \"nextzxos\"로는 이 카드에서 시작할 수 없습니다. '시작'을 \"card\"로 설정하세요. 그러면 Next는 카드에서 바로 NextZXOS로 시작합니다.",
 		"error.card_no_menu": "카드에 기계가 적힌 machines/next/menu.ini나 menu.def가 없습니다.",
 		"error.card_no_rom": "카드의 machines/next 폴더에 메뉴가 가리키는 %1이(가) 없습니다.",
 		"error.card_not_started": "SD 카드에서 NextZXOS를 시작하지 못했습니다: %1",

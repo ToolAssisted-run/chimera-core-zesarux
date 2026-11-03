@@ -498,6 +498,13 @@ ECL_EXPORT int Init(void)
 			file_size(sd) >> 20, CARD_MAX_BYTES >> 20);
 		return 0;
 	}
+	/* A card made for emulators started as a Next starts: the firmware
+	 * would stop on its configuration screen ("Error opening
+	 * 'menu.ini/.def'!"), which does not say what to do (issue 1). */
+	if (!fast && !g_cardBoot && firmware_cannot_read(sd)) {
+		snprintf(g_loadError, sizeof g_loadError, "error.card_for_emulators");
+		return 0;
+	}
 	/* The machine's calendar clock starts where the project says: the
 	 * sandbox's clock is that second, and stands still (miniBox
 	 * MACHINE-SPEC, clock_gettime). ZEsarUX's own clock is that second plus

@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "'%1' bukan cara menyalakan Next yang dimiliki core ini.",
+		"error.card_for_emulators": "Kartu SD proyek ini dibuat untuk emulator, dan sistem berkasnya tidak bisa dibaca firmware milik Next sendiri, jadi \"nextzxos\" tidak bisa menyala dari kartu itu. Atur Mulai ke \"card\": Next lalu menyala dengan NextZXOS langsung dari kartu.",
 		"error.card_no_menu": "kartu tidak memiliki machines/next/menu.ini atau menu.def yang berisi sebuah mesin.",
 		"error.card_no_rom": "folder machines/next di kartu tidak berisi %1, yang disebut menunya.",
 		"error.card_not_started": "NextZXOS tidak bisa dinyalakan dari kartu SD: %1",

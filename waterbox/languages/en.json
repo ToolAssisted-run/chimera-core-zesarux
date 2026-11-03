@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "'%1' is not a way of starting the Next that this core has.",
+		"error.card_for_emulators": "The project's SD card is one made for emulators, whose file system the Next's own firmware cannot read, so \"nextzxos\" cannot start from it. Set Start to \"card\": the Next then starts with NextZXOS from the card directly.",
 		"error.card_no_menu": "the card has no machines/next/menu.ini or menu.def with a machine on it.",
 		"error.card_no_rom": "the card has no %1 in its machines/next folder, which its menu names.",
 		"error.card_not_started": "NextZXOS could not be started from the SD card: %1",

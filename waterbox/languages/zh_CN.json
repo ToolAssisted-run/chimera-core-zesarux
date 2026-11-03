@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "“%1”不是本核心提供的 Next 启动方式。",
+		"error.card_for_emulators": "项目中的 SD 卡是为模拟器制作的卡，Next 自身的固件无法读取它的文件系统，因此“nextzxos”无法从这张卡启动。请把“启动”设为“card”：这样 Next 会直接从卡上启动 NextZXOS。",
 		"error.card_no_menu": "卡上没有写有机器的 machines/next/menu.ini 或 menu.def。",
 		"error.card_no_rom": "卡上的 machines/next 文件夹中没有其菜单指定的 %1。",
 		"error.card_not_started": "无法从 SD 卡启动 NextZXOS：%1",

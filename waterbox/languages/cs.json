@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "„%1“ není způsob spuštění počítače Next, který tento core zná.",
+		"error.card_for_emulators": "SD karta projektu je karta vytvořená pro emulátory, jejíž souborový systém vlastní firmware počítače Next neumí přečíst, takže z ní „nextzxos“ nemůže nastartovat. Nastavte Start na „card“: počítač Next pak startuje se systémem NextZXOS přímo z karty.",
 		"error.card_no_menu": "karta nemá machines/next/menu.ini ani menu.def s nějakým strojem.",
 		"error.card_no_rom": "ve složce machines/next na kartě chybí %1, které uvádí její menu.",
 		"error.card_not_started": "Systém NextZXOS se nepodařilo spustit ze SD karty: %1",

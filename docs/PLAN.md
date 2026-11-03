@@ -725,6 +725,38 @@ purpose, taken out): "native and sandbox differ" for each tape;
 window:monster-max with the native run one frame short (on purpose, taken
 out): "same as native with the buttons no".
 
+## The card for emulators with "nextzxos" is refused (user-decided, 2026-11-03, issue 1)
+
+Issue 1: a person gave the System/Next 24.11 card for emulators
+(`cspect-next-1gb.img`), a `.nex` program and `tbblue_loader.rom`, left
+Start at "nextzxos" (the default), and the machine stopped on the Next's
+configuration screen: "Error opening 'menu.ini/.def'!". Reproduced here with
+the same card and the published core (ef18e52): that is the firmware failing
+to read the card, as "The System/Next 24.11 card" above records. Start
+"card" starts NextZXOS from it (its welcome pages by frame 1500), and
+"fast" runs the program straight away. The core already suggests "card"
+for this card (`SuggestSettings`), but the person's project did not have it.
+
+The owner chose (2026-11-03) that the core refuses such a card with
+"nextzxos" and says what to set, rather than letting the firmware stop on a
+screen that does not say. Init now checks the card the same way the
+suggestion does (`firmware_cannot_read`: a FAT32 boot sector with fewer
+than 65525 clusters) and refuses with `error.card_for_emulators`: "The
+project's SD card is one made for emulators, whose file system the Next's
+own firmware cannot read, so "nextzxos" cannot start from it. Set Start to
+"card": the Next then starts with NextZXOS from the card directly." The new
+text is in all 26 language tables.
+
+Tests: `settings:refused` makes such a card (64 KiB: a partition table and
+a FAT32 boot sector with 94 clusters) and checks the refusal, so CI checks
+it without the 1 GiB card. Seen to fail with the core before the change:
+that card ran 5 frames with "nextzxos", unrefused. `game:sn-card`, with
+the real card, checks that Chimera shows the reason
+(`chimera-run --project` exits with it). Against Chimera 08ee9de1
+(~/chimera-scratch-bump): run-gate.sh with the 24.11 card, Monster Max and
+the tapes, 26 passed, 0 failed, 0 skipped; run-frontend.sh 4 of 4;
+test-packages on the package, all passed.
+
 ## What the user brings
 
 - `tbblue_loader.rom` (8 KiB, SHA-1 8B2E927D0523BC27BFFCC34C39527AB0D2362E0C):

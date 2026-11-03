@@ -453,7 +453,8 @@ fi
 # score is 2150 at frame 5200. The sandbox prints the native build's lines
 # every 500 frames, a state saved and loaded before every frame changes
 # nothing, and the run is not the run left alone after the round started.
-# With the card in a project, the core suggests "card".
+# With the card in a project, the core suggests "card"; started with
+# "nextzxos", the core refuses it and Chimera shows the reason (issue 1).
 sn_card="${ZESARUX_SN_CARD:-}"
 if [ -z "$sn_card" ] || [ ! -f "$sn_card" ]; then
 	report "game:sn-card" SKIP "ZESARUX_SN_CARD is not set to the System/Next 24.11 card for emulators (cspect-next-1gb.img), which is not in this repository"
@@ -503,10 +504,17 @@ else
 		env -u DISPLAY "$chimera_engine" --new-project "$work/sn/sn.chimeraProject" "$package" --file "sd=$sn_copy" --movie "$work/sn/none.movie" > "$work/sn/new.log" 2>&1
 		env -u DISPLAY "$chimera_engine" --project "$work/sn/sn.chimeraProject" "$package" --suggest > "$work/sn-suggest.out" 2>&1
 		grep -q '^{"values":{"boot":"card"}' "$work/sn-suggest.out" || why="$why the core does not suggest \"card\" for this card [$(tail -1 "$work/sn-suggest.out" | cut -c1-60)];"
+		# the same card with "nextzxos" (issue 1): Chimera shows the
+		# core's reason, which says to set Start to "card"
+		env -u DISPLAY "$chimera_engine" --new-project "$work/sn/nx.chimeraProject" "$package" --file "sd=$sn_copy" --movie "$work/sn/none.movie" \
+			--settings '{"boot":"nextzxos"}' > "$work/sn/nx-new.log" 2>&1
+		env -u DISPLAY "$chimera_engine" --project "$work/sn/nx.chimeraProject" "$package" --firmware "tbblue_loader.rom=$fw/tbblue_loader.rom" \
+			--frames 5 > "$work/sn-nextzxos.out" 2>&1 && why="$why the card started with \"nextzxos\" ran;"
+		grep -q 'Set Start to "card"' "$work/sn-nextzxos.out" || why="$why the card with \"nextzxos\" is not refused with the core's reason [$(grep -m1 chimera-run "$work/sn-nextzxos.out" | cut -c1-80)];"
 		rm -f "$sn_copy"
 	fi
 	if [ -z "$why" ]; then
-		report "game:sn-card" PASS "System/Next 24.11's card started with \"card\": Revival Survival from its Browser, started and played to frame 5200; the sandbox prints the native build's lines, a state every frame changes nothing, it is not the run left alone$( [ -n "$chimera_root" ] && echo "; the core suggests \"card\" for it")"
+		report "game:sn-card" PASS "System/Next 24.11's card started with \"card\": Revival Survival from its Browser, started and played to frame 5200; the sandbox prints the native build's lines, a state every frame changes nothing, it is not the run left alone$( [ -n "$chimera_root" ] && echo "; the core suggests \"card\" for it, and with \"nextzxos\" Chimera shows why not and what to set")"
 	else
 		report "game:sn-card" FAIL "$why"
 	fi
@@ -757,22 +765,45 @@ else
 fi
 
 # What cannot be run is refused with a reason: a way of starting there is
-# not, NextZXOS with no SD card, NextZXOS with no boot ROM, and a card
+# not, NextZXOS with no SD card, NextZXOS with no boot ROM, a card
 # bigger than the 1 GiB the machine's memory has room for (2 GiB of zeros,
-# made here, taking no room on the disk).
+# made here, taking no room on the disk), and a card made for emulators
+# started with "nextzxos" (issue 1: the firmware stopped on "Error opening
+# 'menu.ini/.def'!"). That card is made here too: 64 KiB holding a
+# partition table and a boot sector laid out as FAT32 with 94 clusters, far
+# fewer than the 65525 the firmware's FAT reader wants for FAT32, as on the
+# System/Next cards for emulators.
 box x-boot $nextzxos --set boot=floppy --frames 5
 box x-nosd --firmware "$fw/tbblue_loader.rom" --frames 5
 box x-norom --sd "$fw/tbblue.mmc" --frames 5
 truncate -s 2G "$work/big.img"
 box x-big --set boot=card --sd "$work/big.img" --frames 5
 rm -f "$work/big.img"
+python3 - "$work/emu.img" <<'EOF'
+import sys
+b = bytearray(64 * 1024)
+b[454] = 1                                     # the partition starts at sector 1
+b[510:512] = b"\x55\xaa"
+s = 512                                        # its boot sector
+b[s + 11:s + 13] = (512).to_bytes(2, "little")   # bytes in a sector
+b[s + 13] = 1                                  # sectors in a cluster
+b[s + 14:s + 16] = (32).to_bytes(2, "little")    # reserved sectors
+b[s + 16] = 2                                  # FATs
+b[s + 32:s + 36] = (128).to_bytes(4, "little")   # sectors in all
+b[s + 36:s + 40] = (1).to_bytes(4, "little")     # sectors in a FAT, in FAT32's field
+b[s + 510:s + 512] = b"\x55\xaa"
+open(sys.argv[1], "wb").write(b)
+EOF
+box x-emucard --firmware "$fw/tbblue_loader.rom" --sd "$work/emu.img" --frames 5
+rm -f "$work/emu.img"
 why=""
 grep -q "^Init: error.sd_too_big.2048.1024" "$work/x-big.err" || why="$why a card of 2 GiB is not refused for its size [$(grep Init "$work/x-big.err" | cut -c1-60)];"
 grep -q "^Init: error.bad_boot.floppy" "$work/x-boot.err" || why="$why an unknown start is not refused [$(grep Init "$work/x-boot.err" | cut -c1-60)];"
 grep -q "^Init: error.no_sd" "$work/x-nosd.err" || why="$why no SD card is not refused [$(grep Init "$work/x-nosd.err" | cut -c1-60)];"
 grep -q "^Init: .*tbblue_loader.rom" "$work/x-norom.err" || why="$why a missing boot ROM is not named [$(grep Init "$work/x-norom.err" | cut -c1-60)];"
+grep -q "^Init: error.card_for_emulators" "$work/x-emucard.err" || why="$why a card for emulators is not refused with \"nextzxos\" [$(grep Init "$work/x-emucard.err" | cut -c1-60)];"
 if [ -z "$why" ]; then
-	report "settings:refused" PASS "an unknown start, NextZXOS with no SD card, NextZXOS with no boot ROM and a card of 2 GiB are each refused with a reason: $(sed -n 's/^Init: //p' "$work/x-norom.err" | tr -d '\037' | cut -c1-70)"
+	report "settings:refused" PASS "an unknown start, NextZXOS with no SD card, NextZXOS with no boot ROM, a card of 2 GiB and a card for emulators with \"nextzxos\" are each refused with a reason: $(sed -n 's/^Init: //p' "$work/x-norom.err" | tr -d '\037' | cut -c1-70)"
 else
 	report "settings:refused" FAIL "$why"
 fi

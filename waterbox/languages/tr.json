@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "\"%1\" bu çekirdeğin bildiği bir Next başlatma yolu değil.",
+		"error.card_for_emulators": "Projenin SD kartı emülatörler için yapılmış bir karttır ve dosya sistemini Next bilgisayarının kendi ürün yazılımı okuyamaz; bu yüzden \"nextzxos\" bu karttan başlayamaz. Başlatma ayarını \"card\" yapın: Next o zaman NextZXOS sistemiyle doğrudan karttan başlar.",
 		"error.card_no_menu": "kartta içinde bir makine olan machines/next/menu.ini ya da menu.def yok.",
 		"error.card_no_rom": "kartın machines/next klasöründe, menüsünün adını verdiği %1 yok.",
 		"error.card_not_started": "NextZXOS sistemi SD karttan başlatılamadı: %1",

@@ -1,6 +1,7 @@
 {
 	"texts": {
 		"error.bad_boot": "\"%1\" ei ole tämän ytimen tuntema tapa käynnistää Next.",
+		"error.card_for_emulators": "Projektin SD-kortti on tehty emulaattoreille, eikä Next-tietokoneen oma laiteohjelmisto pysty lukemaan sen tiedostojärjestelmää, joten \"nextzxos\" ei voi käynnistyä siltä. Aseta Käynnistys arvoon \"card\": silloin Next käynnistyy NextZXOS-järjestelmällä suoraan kortilta.",
 		"error.card_no_menu": "kortilla ei ole tiedostoa machines/next/menu.ini tai menu.def, jossa olisi kone.",
 		"error.card_no_rom": "kortin kansiosta machines/next puuttuu %1, jonka sen valikko nimeää.",
 		"error.card_not_started": "NextZXOS-järjestelmää ei voitu käynnistää SD-kortilta: %1",
