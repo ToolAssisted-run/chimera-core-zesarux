@@ -110,3 +110,13 @@ submodule while building and checks its SHA-1. The test program is made by
   ZEsarUX makes that the sandbox lacks; answer it in
   `waterbox/guest-syscalls.c`, or wrap it in both builds in
   `waterbox/chimera_compat.c` when the answer is the machine's business.
+
+## Two CPUs
+
+CI builds and tests the core twice, once for each CPU, on a runner of that
+CPU (x86_64 on ubuntu-24.04, aarch64 on ubuntu-24.04-arm): a package is
+machine code for one CPU, and the guest is built for the CPU it is built on.
+A nightly carries both packages, `<id>-<version>-x86_64.chimeraCore` and
+`<id>-<version>-aarch64.chimeraCore`. On aarch64 the linked `core.wbx` goes
+through miniBox's `wbx-tp-rewrite.py`, which points its thread-pointer reads
+at the machine's slot.
